@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-sample-plugin",
-	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"name": "shards-taskui",
+	"version": "0.0.1",
+	"description": "Shards TaskUI helps users visually manage tasks by extending the popular tasks plugin.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
