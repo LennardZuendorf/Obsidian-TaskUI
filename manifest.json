@@ -3,7 +3,7 @@
 	"name": "Shards TaskUI",
 	"version": "0.0.1",
 	"minAppVersion": "0.0.1",
-	"description": "Shards TaskUI helps users visually manage tasks by extending the popular tasks plugin.",
+	"description": "Shards TaskUI enables visual management of tasks based on the popular tasks plugin for obsidian.",
 	"author": "Lennard Zündorf",
 	"authorUrl": "https://zuendorf.me",
 	"isDesktopOnly": true
