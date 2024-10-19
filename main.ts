@@ -1,6 +1,7 @@
 // Description: Main Plugin File for the Obsidian Plugin
 import { Plugin, WorkspaceLeaf } from "obsidian";
 import { MainView, VIEW_TYPE_MAIN } from "src/MainView";
+import logger from "./src/utils/logger";
 
 export default class ShardsTaskUIPlugin extends Plugin {
 	async onload() {
@@ -27,13 +28,14 @@ export default class ShardsTaskUIPlugin extends Plugin {
 		if (leaves.length > 0) {
 			leaf = leaves[0];
 			await workspace.revealLeaf(leaf);
-			console.log("Main Tab View Activated");
+			logger.info("Shards: Switched to existing main tab leaf.");
 		} else {
 			leaf = workspace.getLeaf(false);
 
 			if (leaf) {
 				await leaf.setViewState({ type: VIEW_TYPE_MAIN, active: true });
 			}
+			logger.info("Shards: Created new main tab leaf.");
 		}
 	}
 }
