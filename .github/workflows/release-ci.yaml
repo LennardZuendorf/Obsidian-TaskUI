@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run format
+        run: npm run format
+
+      - name: Run build
+        run: npm run build
+
+      - name: Run version bump
+        run: npm version patch --no-git-tag-version
+
+      - name: Update manifest.json version
+        run: |
+          NEW_VERSION=$(jq -r '.version' package.json)
+          jq --arg new_version "$NEW_VERSION" '.version = $new_version' manifest.json > manifest.tmp.json
+          mv manifest.tmp.json manifest.json
+
+      - name: Copy manifest.json
+        run: npx cpy manifest.json build/shards-taskui
+
+      - name: Get commit messages
+        id: get_commits
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const commits = await github.repos.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.ref,
+              per_page: 100
+            });
+            return commits.data.map(commit => `- ${commit.commit.message}`).join('\n');
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.update_version.outputs.new_version }}
+          release_name: v${{ steps.update_version.outputs.new_version }}
+          body: ${{ steps.get_commits.outputs.result }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/shards-taskui
+          asset_name: shards-taskui
+          asset_content_type: application/zip
