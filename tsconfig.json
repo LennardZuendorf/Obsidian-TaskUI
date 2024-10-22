@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
+	  "baseUrl": ".",
 	  "paths": {
-		  "@/*": ["./src/"]
+		  "@/*": ["./src/ui*"]
 	  },
-    "baseUrl": ".",
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
