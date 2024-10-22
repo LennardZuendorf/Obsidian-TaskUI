@@ -12,7 +12,7 @@
 		"format": "prettier ./src --write",
 		"version": "node ./build/version-bump.mjs",
 		"dev": "npm run dev:css & npm run dev:js && npx rimraf main.css",
-		"build": "npm run lint && npm run format && node esbuild.config.mjs --production && npm run build:css && npx cpy manifest.json build/shards-taskui && npx rimraf build/shards-taskui/main.css",
+		"build": "npm run lint && npm run format && node esbuild.config.mjs --production && npm run build:css && npx cpy manifest.json build/shards-taskui && rm build/shards-taskui/main.css",
 		"release": "npm run build && npm run version"
 	},
 	"keywords": [],
