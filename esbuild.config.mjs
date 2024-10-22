@@ -39,6 +39,7 @@ const context = await esbuild.context({
     outdir: prod?'./build/shards-taskui/' : '.',
     allowOverwrite: true,
 	minify: prod,
+	bundle: true,
 });
 
 if (prod) {
