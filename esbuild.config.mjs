@@ -1,6 +1,9 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
+import stylePlugin from 'esbuild-style-plugin'
+import tailwindcss from 'tailwindcss'
+import autoprefixer from 'autoprefixer'
 
 const banner =
 `/*
@@ -15,7 +18,7 @@ const context = await esbuild.context({
 	banner: {
 		js: banner,
 	},
-	entryPoints: ["./src/main.ts"],
+	entryPoints: ["./src/main.ts","./src/styles.css"],
 	external: [
 		"obsidian",
 		"electron",
@@ -32,6 +35,13 @@ const context = await esbuild.context({
 		"@lezer/lr",
 		...builtins],
 	format: "cjs",
+	plugins: [
+		stylePlugin({
+			postcss: {
+				plugins: [tailwindcss, autoprefixer],
+			},
+		}),
+	],
 	target: "es2018",
 	logLevel: "info",
 	sourcemap: prod ? false : "inline",
