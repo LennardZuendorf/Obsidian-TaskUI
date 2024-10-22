@@ -3,6 +3,7 @@ import { ItemView, WorkspaceLeaf, Plugin } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { AppContext } from "./context";
 import "./styles.css";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@//base/Tabs";
 
 export const VIEW_TYPE_MAIN = "react-view";
 
@@ -13,7 +14,22 @@ interface AppProps {
 const TaskUIApp: React.FC<AppProps> = ({ plugin }) => {
 	return (
 		<div>
-			<h1 className="underline">Main Task List</h1>
+			<Tabs defaultValue="home" className="w-full align-middle">
+				<TabsList className="grid w-full grid-cols-4">
+					<TabsTrigger value="list">List</TabsTrigger>
+					<TabsTrigger value="board">Board</TabsTrigger>
+					<TabsTrigger value="calendar">Calendar</TabsTrigger>
+				</TabsList>
+				<TabsContent value={"list"}>
+					<h1 className="underline">Main Task List</h1>
+				</TabsContent>
+				<TabsContent value={"board"}>
+					<h1 className="underline">Main Task List</h1>
+				</TabsContent>
+				<TabsContent value={"calendar"}>
+					<h1 className="underline">Main Task List</h1>
+				</TabsContent>
+			</Tabs>
 		</div>
 	);
 };
