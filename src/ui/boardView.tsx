@@ -5,7 +5,7 @@ import {
 	inProgressTasksAtom,
 	doneTasksAtom,
 } from "../data/taskAtoms";
-import { KanbanColumn } from "./components/kanbanColumn";
+import { TaskColumn } from "./components/taskColumn";
 
 export default function KanbanBoard() {
 	return (
@@ -15,19 +15,19 @@ export default function KanbanBoard() {
 					<h1 className="text-2xl font-bold mb-4">Kanban Board</h1>
 				</div>
 				<div className="grid grid-cols-3 space-x-4">
-					<KanbanColumn
+					<TaskColumn
 						title="To Do"
 						atom={todoTasksAtom}
 						id={"todo"}
 						className="flex-1"
 					/>
-					<KanbanColumn
+					<TaskColumn
 						title="In Progress"
 						atom={inProgressTasksAtom}
 						id={"in-progress"}
 						className="flex-1"
 					/>
-					<KanbanColumn
+					<TaskColumn
 						title="Archive"
 						atom={doneTasksAtom}
 						id={"archive"}

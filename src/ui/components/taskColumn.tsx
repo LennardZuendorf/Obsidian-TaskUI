@@ -5,7 +5,7 @@ import { todoTasksAtom } from "../../data/taskAtoms";
 import { cn } from "../../utils/styleUtils";
 import { BackgroundContainer } from "@//components/backgroundContainer";
 
-export const KanbanColumn = React.memo(
+export const TaskColumn = React.memo(
 	(props: {
 		id: string;
 		title: string;
@@ -48,11 +48,7 @@ export const KanbanColumn = React.memo(
 				</div>
 				<div className="flex flex-col items-start p-6 pt-0 space-y-1">
 					{tasks.map((task) => (
-						<TaskCard
-							key={task.id}
-							taskId={task.id}
-							groupAtom={props.atom}
-						/>
+						<TaskCard key={task.id} taskId={task.id} />
 					))}
 				</div>
 			</BackgroundContainer>
