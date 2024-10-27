@@ -1,6 +1,6 @@
 // Description: Main Plugin File for the Obsidian Plugin
 import { Plugin, WorkspaceLeaf, Notice } from "obsidian";
-import { MainView, VIEW_TYPE_MAIN } from "./mainView";
+import { MainView, VIEW_TYPE_MAIN } from "./MainView";
 import { logger } from "./utils/logger";
 import { checkPlugins } from "./utils/checkPlugins";
 
