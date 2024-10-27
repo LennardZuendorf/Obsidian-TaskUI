@@ -1,9 +1,9 @@
 import { useAtom } from "jotai";
 import React from "react";
-import { TaskCard } from "./taskCard";
+import { TaskCard } from "./TaskCard";
 import { todoTasksAtom } from "../../data/taskAtoms";
 import { cn } from "../../utils/styleUtils";
-import { BackgroundContainer } from "@//components/backgroundContainer";
+import { BackgroundContainer } from "@//components/BackgroundContainer";
 
 export const TaskColumn = React.memo(
 	(props: {

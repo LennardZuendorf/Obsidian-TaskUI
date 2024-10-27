@@ -5,7 +5,7 @@ import {
 	inProgressTasksAtom,
 	doneTasksAtom,
 } from "../data/taskAtoms";
-import { TaskColumn } from "./components/taskColumn";
+import { TaskColumn } from "./components/TaskColumn";
 
 export default function KanbanBoard() {
 	return (

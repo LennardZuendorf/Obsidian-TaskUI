@@ -6,7 +6,7 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from "@//base/card";
+} from "@//base/Card";
 import React, { useMemo } from "react";
 import {
 	CalendarIcon,
@@ -20,7 +20,7 @@ import {
 	CheckCircle2,
 	XCircle,
 } from "lucide-react";
-import { Button } from "@//base/button";
+import { Button } from "@//base/Button";
 import { cn } from "../../utils/styleUtils";
 import {
 	DropdownMenu,
@@ -29,7 +29,7 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@//base/dropdown";
+} from "@//base/Dropdown";
 import type { taskType } from "../../types/taskType";
 export const TaskCard = ({ taskId }: { taskId: string }) => {
 	// 1. Create a derived atom for a single task by taskId
