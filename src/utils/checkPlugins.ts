@@ -1,6 +1,6 @@
 import { logger } from "./logger";
 
-export function checkPlugins(requiredPluginIds: string[]): string[] {
+export function checkPlugins(requiredPluginIds: string[]) {
 	const missingOrNotEnabledPlugins: string[] = [];
 
 	requiredPluginIds.forEach((pluginId) => {
