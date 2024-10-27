@@ -1,8 +1,8 @@
 // Description: Main Plugin File for the Obsidian Plugin
 import { Plugin, WorkspaceLeaf, Notice } from "obsidian";
-import { MainView, VIEW_TYPE_MAIN } from "./MainView";
+import { MainView, VIEW_TYPE_MAIN } from "./mainView";
 import { logger } from "./utils/logger";
-import { checkPlugins } from "./utils/checkPlugin";
+import { checkPlugins } from "./utils/checkPlugins";
 
 export default class ShardsTaskUIPlugin extends Plugin {
 	async onload() {
