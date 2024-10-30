@@ -5,6 +5,15 @@ import { todoTasksAtom } from "../../data/taskAtoms";
 import { cn } from "../../utils/styleUtils";
 import { BackgroundContainer } from "@//components/BackgroundContainer";
 
+/**
+ * TaskColumn component to display a column of tasks.
+ * This component is used to display a column of tasks with a title and task cards.
+ * It uses an atom to get the tasks for the column. This means it's reactive and will update when the tasks in its atom are updated.
+ * @param props.id The id of the column.
+ * @param props.title The title of the column.
+ * @param props.atom The atom to get the tasks for the column.
+ * @param props.className The class name for the component.
+ */
 export const TaskColumn = React.memo(
 	(props: {
 		id: string;
@@ -12,8 +21,10 @@ export const TaskColumn = React.memo(
 		atom: typeof todoTasksAtom;
 		className: string;
 	}) => {
+		// Get the tasks for the column from the atom. This will update the component when the tasks are updated and iterate over the tasks to create TaskCard components.
 		const [tasks] = useAtom(props.atom);
 
+		// Render the TaskColumn component with the title and task cards.
 		return (
 			<BackgroundContainer className={cn(props.className, "h-dvh")}>
 				<div className="flex flex-col space-y-1.5 p-6">

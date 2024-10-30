@@ -1,6 +1,10 @@
 import React from "react";
 import { cn } from "../../utils/styleUtils";
 
+/**
+ * Background container component to display a background container.
+ * This component is used to display a background container with a shadow and rounded corners.
+ */
 export const BackgroundContainer = ({
 	children,
 	className,

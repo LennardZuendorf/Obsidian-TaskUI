@@ -1,40 +1,49 @@
-// src/data/taskAtoms.ts
 import { atom } from "jotai";
 import type { taskType } from "../types/taskType";
 import { exampleTask } from "../types/taskType";
 
-// atom to store a single task
-export const taskAtom = atom<taskType>(exampleTask);
+//This file is used to store atoms for tasks and task data. It is used to manage the state of tasks in the application in a bottom-up approach.
 
-// atom to store all tasks
+/**
+ * The main atom to store all tasks, initialized with an example task. This atom is used to manage the state of all tasks in the application.
+ */
 export const allTasksAtom = atom<taskType[]>([exampleTask]);
 
-// atoms to store tasks based on source
+/**
+ * Derived atom to filter tasks by source. This atom is used to filter tasks by source and basis for a listener to update the source.
+ */
 export const mdTaskAtom = atom((get) => {
 	const allTasks: taskType[] = get(allTasksAtom);
 	return allTasks.filter((item) => item.source === "obsidian");
 });
+// This is the spot for future atoms bound to external sources like Shards App or other task sources.
 
-export const shardsTaskAtom = atom((get) => {
-	const allTasks: taskType[] = get(allTasksAtom);
-	return allTasks.filter((item) => item.source === "shards-app");
-});
-
-// Predefined atoms filtered by status
+/**
+ * Derived atom to filter tasks by priority. This atom is used to filter tasks by status (to do)  and basis for UI updates.
+ */
 export const todoTasksAtom = atom((get) =>
 	get(allTasksAtom).filter((todo) => todo.status === "todo"),
 );
 
+/**
+ * Derived atom to filter tasks by priority. This atom is used to filter tasks by status (in progress) and basis for UI updates.
+ */
 export const inProgressTasksAtom = atom((get) =>
 	get(allTasksAtom).filter((todo) => todo.status === "in-progress"),
 );
 
+/**
+ * Derived atom to filter tasks by priority. This atom is used to filter tasks by status (done/cancelled) and basis for UI updates.
+ */
 export const doneTasksAtom = atom((get) =>
 	get(allTasksAtom).filter(
 		(todo) => todo.status === "done" || todo.status === "cancelled",
 	),
 );
 
+/**
+ * This atom is used as a test atom to store anime data. It is used to demonstrate the use of atoms in the application.
+ */
 export const animeAtom = atom([
 	{
 		title: "Ghost in the Shell",
@@ -48,6 +57,9 @@ export const animeAtom = atom([
 	},
 ]);
 
+/**
+ * Basic debug labels for atoms in development mode.
+ */
 if (process.env.NODE_ENV !== "production") {
 	animeAtom.debugLabel = "anime";
 	allTasksAtom.debugLabel = "tasks";
