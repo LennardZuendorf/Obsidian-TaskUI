@@ -2,7 +2,7 @@
 import { Plugin, WorkspaceLeaf, Notice } from "obsidian";
 import { MainView, VIEW_TYPE_MAIN } from "./MainView";
 import { logger } from "./utils/logger";
-import { checkPlugins } from "./utils/checkPlugins";
+import { pluginChecker } from "./utils/pluginChecker";
 
 export default class ShardsTaskUIPlugin extends Plugin {
 	async onload() {
@@ -26,7 +26,7 @@ export default class ShardsTaskUIPlugin extends Plugin {
 
 		logger.info("Shards: Activating Main Tab View");
 		const { allPluginsEnabled, missingPlugins } =
-			checkPlugins(requiredPluginIds);
+			pluginChecker(requiredPluginIds);
 
 		if (allPluginsEnabled) {
 			let leaf: WorkspaceLeaf | null = null;
