@@ -31,8 +31,16 @@ import {
 	DropdownMenuTrigger,
 } from "@//base/Dropdown";
 import type { taskType } from "../../types/taskType";
+import { taskStatus } from "../../types/taskType";
+
+/**
+ * TaskCard component to display a single task card.
+ * This component is used to display a single task card with task details and actions.
+ * It uses a derived atom to get a single task by taskId. This means it's reactive and will update when the task is updated.
+ */
 export const TaskCard = ({ taskId }: { taskId: string }) => {
-	// 1. Create a derived atom for a single task by taskId
+	// Create a derived atom to get the single task by taskId.
+	// Means updates to this atom will update the task and all the other components using an atom that encapsulates this specific task.
 	const taskAtom = useMemo(
 		() =>
 			atom(
@@ -52,22 +60,24 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 		[taskId],
 	);
 
-	// 2. Use the derived atom to get the single task and the setter
+	// Set the task and updateTask function from the atom
 	const [task, updateTask] = useAtom(taskAtom);
 
-	// 3. Conditional rendering in case the task doesn't exist
+	// Conditional rendering for null task
 	if (!task) return null;
 
 	return (
 		<Card
 			className={cn(
 				"w-full p-1 space-y-1 relative",
-				task.status === "done" || task.status === "cancelled"
+				task.status === taskStatus.DONE ||
+					task.status === taskStatus.CANCELLED
 					? "text-muted-foreground line-through"
 					: "",
 			)}
 			aria-label={
-				task.status === "done" || task.status === "cancelled"
+				task.status === taskStatus.DONE ||
+				task.status === taskStatus.CANCELLED
 					? "This Task is Completed"
 					: ""
 			}
@@ -89,23 +99,25 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
 							className={cn(
-								task.status === "todo" &&
+								task.status === taskStatus.TODO &&
 									"text-muted-foreground",
 							)}
-							disabled={task.status === "todo"}
-							onClick={() => updateTask({ status: "todo" })}
+							disabled={task.status === taskStatus.TODO}
+							onClick={() =>
+								updateTask({ status: taskStatus.TODO })
+							}
 						>
 							<Circle className="mr-2 h-4 w-4" />
 							To Do
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							className={cn(
-								task.status === "in-progress" &&
+								task.status === taskStatus.IN_PROGRESS &&
 									"text-muted-foreground",
 							)}
-							disabled={task.status === "in-progress"}
+							disabled={task.status === taskStatus.IN_PROGRESS}
 							onClick={() =>
-								updateTask({ status: "in-progress" })
+								updateTask({ status: taskStatus.IN_PROGRESS })
 							}
 						>
 							<PlayCircle className="mr-2 h-4 w-4" />
@@ -113,29 +125,33 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							className={cn(
-								task.status === "done" &&
+								task.status === taskStatus.DONE &&
 									"text-muted-foreground",
 							)}
-							disabled={task.status === "done"}
-							onClick={() => updateTask({ status: "done" })}
+							disabled={task.status === taskStatus.DONE}
+							onClick={() =>
+								updateTask({ status: taskStatus.DONE })
+							}
 						>
 							<CheckCircle2 className="mr-2 h-4 w-4" />
 							Done
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							className={cn(
-								task.status === "cancelled" &&
+								task.status === taskStatus.CANCELLED &&
 									"text-muted-foreground",
 							)}
-							disabled={task.status === "cancelled"}
-							onClick={() => updateTask({ status: "cancelled" })}
+							disabled={task.status === taskStatus.CANCELLED}
+							onClick={() =>
+								updateTask({ status: taskStatus.CANCELLED })
+							}
 						>
 							<XCircle className="mr-2 h-4 w-4" />
 							Cancelled
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
-				{task.status != "done" && (
+				{task.status != taskStatus.DONE && (
 					<Button
 						variant="ghost"
 						size="icon"

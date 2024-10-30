@@ -1,6 +1,5 @@
 import { atom } from "jotai";
-import type { taskType } from "../types/taskType";
-import { exampleTask } from "../types/taskType";
+import { exampleTask, taskStatus, taskType } from "../types/taskType";
 
 //This file is used to store atoms for tasks and task data. It is used to manage the state of tasks in the application in a bottom-up approach.
 
@@ -22,14 +21,14 @@ export const mdTaskAtom = atom((get) => {
  * Derived atom to filter tasks by priority. This atom is used to filter tasks by status (to do)  and basis for UI updates.
  */
 export const todoTasksAtom = atom((get) =>
-	get(allTasksAtom).filter((todo) => todo.status === "todo"),
+	get(allTasksAtom).filter((todo) => todo.status == taskStatus.TODO),
 );
 
 /**
  * Derived atom to filter tasks by priority. This atom is used to filter tasks by status (in progress) and basis for UI updates.
  */
 export const inProgressTasksAtom = atom((get) =>
-	get(allTasksAtom).filter((todo) => todo.status === "in-progress"),
+	get(allTasksAtom).filter((todo) => todo.status == taskStatus.IN_PROGRESS),
 );
 
 /**
@@ -37,7 +36,9 @@ export const inProgressTasksAtom = atom((get) =>
  */
 export const doneTasksAtom = atom((get) =>
 	get(allTasksAtom).filter(
-		(todo) => todo.status === "done" || todo.status === "cancelled",
+		(todo) =>
+			todo.status == taskStatus.DONE ||
+			todo.status == taskStatus.CANCELLED,
 	),
 );
 

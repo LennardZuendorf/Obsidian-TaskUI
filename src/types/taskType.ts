@@ -1,15 +1,37 @@
-// Enum for task sources
-export type taskSource = "obsidian" | "shards-app";
-export type taskPriority =
-	| "lowest"
-	| "low"
-	| "normal"
-	| "medium"
-	| "high"
-	| "highest";
-export type taskStatus = "todo" | "in-progress" | "done" | "cancelled";
+/**
+ * Enum for task source, which can be either "obsidian" or "shards-app".
+ */
 
-// Task type definition
+export enum taskSource {
+	OBSIDIAN = "obsidian",
+	SHARDS_APP = "shards-app",
+}
+
+/**
+ * Enum for task priority levels. The priority levels are as follows:
+ */
+export enum taskPriority {
+	LOWEST = "lowest",
+	LOW = "low",
+	NORMAL = "normal",
+	MEDIUM = "medium",
+	HIGH = "high",
+	HIGHEST = "highest",
+}
+
+/**
+ * Enum for task status. The status can be one of the following:
+ */
+export enum taskStatus {
+	TODO = "todo",
+	IN_PROGRESS = "in-progress",
+	DONE = "done",
+	CANCELLED = "cancelled",
+}
+
+/**
+ * main taskType interface for tasks, used to define the structure of a task object.
+ */
 export type taskType = {
 	id: string; // Unique identifier for the task
 	description: string; // Text input for task description
@@ -31,23 +53,46 @@ export type taskType = {
 	tags?: string[]; // Array of tags associated with the task
 };
 
-// Example task with enum for source
+/**
+ * Example task object for reference.
+ */
 export const exampleTask: taskType = {
 	id: "1",
 	description: "Take out the trash",
-	priority: "normal",
+	priority: taskPriority.NORMAL,
 	recurs: null,
 	dueDate: new Date("2024-10-25"),
 	scheduledDate: null,
 	startDate: null,
 	blocks: [],
-	status: "todo",
+	status: taskStatus.TODO,
 	createdDate: new Date("2024-10-21"),
 	doneDate: null,
 	path: "/tasks/home/chores",
 	symbol: "🗑️",
-	source: "obsidian", // Using enum for source
+	source: taskSource.OBSIDIAN, // Using enum for source
 	line: 12,
 	subtasks: [],
 	rawDescription: "Take out the trash",
+};
+
+/**
+ * taskTransferObject interface for task operations, used to define the structure of a task transfer object used calls against the providers.
+ * This object contains a single taskType object.
+ * For error handling, the status field is used to indicate success or failure. If the status is false, an error occurred.
+ */
+export type taskTransferObject = {
+	status: boolean;
+	task?: taskType;
+	lineString?: string;
+};
+
+/**
+ * tasksTransferObject interface for tasks operations, used to define the structure of a tasks transfer object used calls against the providers.
+ * This object contains an array of taskType objects.
+ * For error handling, the status field is used to indicate success or failure. If the status is false, an error occurred.
+ */
+export type tasksTransferObject = {
+	status: boolean;
+	tasks?: taskType[];
 };
