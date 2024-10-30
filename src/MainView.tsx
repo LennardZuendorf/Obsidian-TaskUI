@@ -15,13 +15,24 @@ import TaskList from "@//ListView";
 import { logger } from "./utils/logger";
 import { DevTools } from "jotai-devtools";
 
+/**
+ * The view type for the main view of the Task UI Plugin. Needs to be defined for obsidian to recognize the view.
+ */
 export const VIEW_TYPE_MAIN = "react-view";
 
+/**
+ * Main React Component for the Task UI Plugin, which is the entry point for the plugin.
+ * This component fetches all tasks from the Dataview API and displays them in a list or board view.
+ * @returns The main React component for the Task UI Plugin.
+ */
 const TaskUIApp: React.FC = () => {
+	// Requires the mdTaskService to fetch tasks from the vault via the DataView API.
 	const dvTaskService = new mdTaskService();
 
+	// Fetches the allTasksAtom from the taskAtoms file. This atom stores all tasks.
 	const [, setAllTasks] = useAtom(allTasksAtom);
 
+	// Fetches all tasks from the DataView API and saves them into the allTasksAtom. This is done once on component mount.
 	useEffect(() => {
 		const fetchTasks = async () => {
 			const tasksTO = await dvTaskService.getTasks();
@@ -38,6 +49,7 @@ const TaskUIApp: React.FC = () => {
 		);
 	}, []);
 
+	// Returns the main component, which displays the list and board view of the tasks. Also includes a settings view.
 	return (
 		<div>
 			<Tabs defaultValue="all" className="w-full h-full">
@@ -95,6 +107,11 @@ const TaskUIApp: React.FC = () => {
 	);
 };
 
+/**
+ * Main View for the Task UI Plugin. This is the entry point for the plugin and is registered in the main.ts file.
+ * @extends ItemView from "obsidian" to create a new view in the Obsidian workspace.
+ * Itself
+ */
 export class MainView extends ItemView {
 	root: Root | null = null;
 
