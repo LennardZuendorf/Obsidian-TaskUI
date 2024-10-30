@@ -1,6 +1,7 @@
 // src/api/pluginApiProvider.ts
 import { getAPI } from "obsidian-dataview";
 import { logger } from "../utils/logger";
+import { taskStatus, taskTransferObject, taskType } from "../types/taskType";
 
 export class PluginApiProvider {
 	private readonly app;
@@ -39,15 +40,19 @@ export class PluginApiProvider {
 
 	/**
 	 * Triggers the creation of a task modal via the Tasks API.
-	 * @returns The task modal or null if it is not available.
+	 * @returns The task line
+	 * This toggles the task modal for creating a new task in the Obsidian UI.
 	 */
-	public taskPluginCreateTaskModal() {
+	public async taskPluginCreateTaskModal(): Promise<taskTransferObject> {
 		try {
-			return this.app.plugins.plugins["obsidian-tasks-plugin"]
-				.createTaskLineModal;
+			const lineString: string =
+				await this.app.plugins.plugins["obsidian-tasks-plugin"]
+					.createTaskLineModal;
+
+			return { status: true, lineString: lineString };
 		} catch (error) {
 			console.error("Error fetching tasks API: " + error.message);
-			return null;
+			return { status: false };
 		}
 	}
 
@@ -55,15 +60,23 @@ export class PluginApiProvider {
 	 * Toggles the done status of a task via the Tasks API.
 	 * @param line The markdown string of the task line being toggled
 	 * @param path The path to the file containing line
+	 * @param task The task object being toggled
 	 */
-	public taskPluginToggleTaskDone(line: string, path: string) {
+	public async taskPluginToggleTaskDone(
+		line: string,
+		path: string,
+		task: taskType,
+	): Promise<taskTransferObject> {
 		try {
-			return this.app.plugins.plugins[
+			const lineString: string = await this.app.plugins.plugins[
 				"obsidian-tasks-plugin"
 			].executeToggleTaskDoneCommand(line, path);
+
+			task.status = taskStatus.DONE;
+			return { status: true, lineString: lineString, task: task };
 		} catch (error) {
 			console.error("Error fetching tasks API: " + error.message);
-			return null;
+			return { status: false };
 		}
 	}
 }
