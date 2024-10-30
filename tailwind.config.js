@@ -52,7 +52,7 @@ module.exports = {
 			borderRadius: {
 				lg: `var(--modal-radius)`,
 				md: `var(--checkbox-radius)`,
-				sm: "var(--modal-radius)",
+				sm: "0.1rem",
 			},
 			fontFamily: {
 				sans: ["var(---font-interface-theme)"],
