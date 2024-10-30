@@ -1,9 +1,14 @@
-// Description: Main Plugin File for the Obsidian Plugin
 import { Plugin, WorkspaceLeaf, Notice } from "obsidian";
 import { MainView, VIEW_TYPE_MAIN } from "./MainView";
 import { logger } from "./utils/logger";
 import { pluginChecker } from "./utils/pluginChecker";
 
+/**
+ * Main Plugin Class of the Shards Task UI Plugin
+ * As defined by obsidian, this extends the generic Plugin class from obsidian.
+ * This class is the entry point of the plugin.
+ * @extends Plugin from "obsidian"
+ */
 export default class ShardsTaskUIPlugin extends Plugin {
 	async onload() {
 		// Register the Main Tab View
