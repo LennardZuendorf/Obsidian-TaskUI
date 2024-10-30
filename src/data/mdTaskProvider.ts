@@ -1,8 +1,8 @@
 // src/data/mdTaskProvider.ts
 import type {
-	taskType,
-	taskTransferObject,
 	tasksTransferObject,
+	taskTransferObject,
+	taskType,
 } from "../types/taskType";
 import { logger } from "../utils/logger";
 import { DataviewApi } from "obsidian-dataview";
@@ -10,19 +10,23 @@ import { PluginApiProvider } from "../api/pluginApiProvider";
 import { useApp } from "../appContext";
 import type { App } from "obsidian";
 import { TFile } from "obsidian";
-import { defaultPath, defaultHeading } from "../settings";
+import { defaultHeading, defaultPath } from "../settings";
 import { TaskMapper } from "./mdTaskMapper";
 
 /**
  * Service class for managing tasks using the Dataview API and Obsidian App directly.
  */
-export class mdTaskService {
+export class mdTaskProvider {
 	private readonly app: App;
 	private readonly pluginApiProvider;
 	private readonly dv: DataviewApi;
 	private readonly defaultPath = defaultPath;
 	private readonly defaultHeading = defaultHeading;
 	private readonly taskMapper: TaskMapper;
+	private readonly taskPluginToggleTaskDone: (
+		line: string,
+		path: string,
+	) => void;
 
 	/**
 	 * Constructs an instance of the mdTaskService.
@@ -206,5 +210,42 @@ export class mdTaskService {
 			return { status: false };
 		}
 		return { status: true };
+	}
+
+	/**
+	 * Creates a new task via the Tasks API modal.
+	 * @returns A promise that resolves to a taskTransferObject.
+	 */
+	public async createTaskViaModal(): Promise<taskTransferObject> {
+		const taskDTO: taskTransferObject =
+			await this.pluginApiProvider.taskPluginCreateTaskModal();
+
+		if (!taskDTO.lineString || !taskDTO.status) {
+			logger.error("Shards: Error creating task via tasks API modal");
+			return { status: false };
+		}
+
+		const task = this.taskMapper.mapTaskLineStringToTaskType(
+			taskDTO.lineString,
+		);
+		return this.createTask(task);
+	}
+
+	/**
+	 * Toggles the done status of a task via the Tasks API.
+	 * @param line The markdown string of the task line being toggled
+	 * @param path The path to the file containing line
+	 * @param task The task object being toggled
+	 */
+	private toggleTaskDoneViaPlugin(
+		line: string,
+		path: string,
+		task: taskType,
+	): Promise<taskTransferObject> {
+		return this.pluginApiProvider.taskPluginToggleTaskDone(
+			line,
+			path,
+			task,
+		);
 	}
 }

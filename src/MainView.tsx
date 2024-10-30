@@ -8,7 +8,7 @@ import { Button } from "@//base/Button";
 import { Bell, Settings } from "lucide-react";
 import { KanbanSquare, List } from "lucide-react";
 import { useAtom } from "jotai";
-import { mdTaskService } from "./data/mdTaskProvider";
+import { mdTaskProvider } from "./data/mdTaskProvider";
 import { allTasksAtom } from "./data/taskAtoms";
 import KanbanBoard from "@//BoardView";
 import TaskList from "@//ListView";
@@ -27,15 +27,17 @@ export const VIEW_TYPE_MAIN = "react-view";
  */
 const TaskUIApp: React.FC = () => {
 	// Requires the mdTaskService to fetch tasks from the vault via the DataView API.
-	const dvTaskService = new mdTaskService();
+	const mdTaskService = new mdTaskProvider();
 
 	// Fetches the allTasksAtom from the taskAtoms file. This atom stores all tasks.
 	const [, setAllTasks] = useAtom(allTasksAtom);
 
+	// Function to create a new task via the Tasks API.
+
 	// Fetches all tasks from the DataView API and saves them into the allTasksAtom. This is done once on component mount.
 	useEffect(() => {
 		const fetchTasks = async () => {
-			const tasksTO = await dvTaskService.getTasks();
+			const tasksTO = await mdTaskService.getTasks();
 
 			if (!tasksTO.status || tasksTO.tasks === undefined) {
 				logger.error(`No tasks found.`);

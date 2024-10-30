@@ -8,6 +8,7 @@ import {
 import { dvTaskType } from "../types/dvTaskType";
 import short from "short-uuid";
 import { parseDate } from "../utils/dataUtils";
+import { defaultPath } from "../settings";
 
 export class TaskMapper {
 	/**
@@ -42,35 +43,25 @@ export class TaskMapper {
 		return `${task.description} ${id} ${dependsOn} ${priority} ${recurs} ${created} ${start} ${scheduled} ${due} ${completion}\n${subtaskStrings}`.trim();
 	}
 
-	/**
-	 * Maps a dvTaskType object to a taskType object.
-	 * @param dvTask - The dvTaskType object to map.
-	 * @returns The taskType object.
-	 */
-	public mapDvTaskToTaskType(dvTask: dvTaskType): taskType {
-		const idMatch = dvTask.id
-			? dvTask.id
-			: dvTask.text.match(/\[id:: ([^\]]+)\]/);
-		const dependsOnMatch = dvTask.text.match(/\[dependsOn:: ([^\]]+)\]/);
-		const priorityMatch = dvTask.text.match(/\[priority:: ([^\]]+)\]/);
-		const recursMatch = dvTask.text.match(/\[repeat:: ([^\]]+)\]/);
-		const createdMatch = dvTask.text.match(/\[created:: ([^\]]+)\]/);
-		const startMatch = dvTask.text.match(/\[start:: ([^\]]+)\]/);
-		const scheduledMatch = dvTask.scheduled
-			? dvTask.scheduled
-			: dvTask.text.match(/\[scheduled:: ([^\]]+)\]/);
-		const dueMatch = dvTask.text.match(/\[due:: ([^\]]+)\]/);
-		const completionMatch = dvTask.text.match(/\[completion:: ([^\]]+)\]/);
-
-		const getCleanDescription = (desc: string): string => {
-			return desc.replace(/\[.*?\]/g, "").trim();
-		};
-
-		const subtasks: taskType[] = [];
+	public mapTaskLineStringToTaskType(lineString: string): taskType {
+		const idMatch = lineString.match(/\[id:: ([^\]]+)\]/);
+		const dependsOnMatch = lineString.match(/\[dependsOn:: ([^\]]+)\]/);
+		const priorityMatch = lineString.match(/\[priority:: ([^\]]+)\]/);
+		const recursMatch = lineString.match(/\[repeat:: ([^\]]+)\]/);
+		const createdMatch = lineString.match(/\[created:: ([^\]]+)\]/);
+		const startMatch = lineString.match(/\[start:: ([^\]]+)\]/);
+		const scheduledMatch = lineString.match(/\[scheduled:: ([^\]]+)\]/);
+		const dueMatch = lineString.match(/\[due:: ([^\]]+)\]/);
+		const completionMatch = lineString.match(/\[completion:: ([^\]]+)\]/);
+		const statusMatch = lineString.match(/\[(.*?)\]/)?.toString();
+		const cleanDescriptionMatch = lineString
+			.split(/\[.*?\]/)
+			.join(" ")
+			.trim();
 
 		return {
 			id: idMatch ? idMatch[1] : short.uuid(),
-			description: getCleanDescription(dvTask.text),
+			description: cleanDescriptionMatch,
 			priority: priorityMatch
 				? this.mapPriorityEnum(priorityMatch[1])
 				: taskPriority.NORMAL,
@@ -81,21 +72,41 @@ export class TaskMapper {
 			blocks: dependsOnMatch
 				? dependsOnMatch.toString().split(/(\s+)/)
 				: [],
-			status: this.mapStatusEnum(dvTask.status),
+			status: statusMatch
+				? this.mapStatusEnum(statusMatch)
+				: taskStatus.IN_PROGRESS,
 			createdDate: parseDate(createdMatch ? createdMatch[1] : null),
 			doneDate: parseDate(completionMatch ? completionMatch[1] : null),
-			path: dvTask.path,
+			path: defaultPath,
 			symbol: "",
 			source: taskSource.OBSIDIAN,
-			line: dvTask.line ? dvTask.line : 0,
-			rawDescription: dvTask.text,
-			subtasks:
-				dvTask.subtasks && dvTask.subtasks.length > 0
-					? dvTask.subtasks.map((subtask) =>
-							this.mapDvTaskToTaskType(subtask),
-						)
-					: subtasks,
+			rawDescription: lineString,
 		};
+	}
+
+	/**
+	 * Maps a dvTaskType object to a taskType object.
+	 * @param dvTask - The dvTaskType object to map.
+	 * @returns The taskType object.
+	 */
+	public mapDvTaskToTaskType(dvTask: dvTaskType): taskType {
+		const subtasks: taskType[] = [];
+
+		// Map the task line string to a taskType object.
+		const mappedTask = this.mapTaskLineStringToTaskType(dvTask.text);
+
+		// Enriching the taskType object with additional properties from the dvTaskType object.
+		mappedTask.status = this.mapStatusEnum(dvTask.status);
+		mappedTask.line = dvTask.line ? dvTask.line : 0;
+		mappedTask.path = dvTask.path;
+		mappedTask.subtasks =
+			dvTask.subtasks && dvTask.subtasks.length > 0
+				? dvTask.subtasks.map((subtask) =>
+						this.mapDvTaskToTaskType(subtask),
+					)
+				: subtasks;
+
+		return mappedTask;
 	}
 
 	/**
