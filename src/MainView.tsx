@@ -24,9 +24,15 @@ const TaskUIApp: React.FC = () => {
 
 	useEffect(() => {
 		const fetchTasks = async () => {
-			const tasks = dvTaskService.getTasks();
-			setAllTasks(tasks);
+			const tasksTO = await dvTaskService.getTasks();
+
+			if (!tasksTO.status || tasksTO.tasks === undefined) {
+				logger.error(`No tasks found.`);
+				return;
+			}
+			setAllTasks(tasksTO.tasks);
 		};
+
 		fetchTasks().then(() =>
 			logger.info(`Tasks fetched and saved into state.`),
 		);
