@@ -5,7 +5,6 @@
  * @param value
  * @param allowedValues
  */
-
 // this is literally meant to be able to validate any value against a list of allowed values. So the type of the value is any
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function validateValue<T>(value: any, allowedValues: readonly T[]): T {
