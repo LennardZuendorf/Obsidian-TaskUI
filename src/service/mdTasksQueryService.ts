@@ -3,7 +3,7 @@ import type { tasksTransferObject, taskType } from "../data/types/taskType";
 import { loggerUtil } from "../utils/loggerUtil";
 import { DataviewApi } from "obsidian-dataview";
 import { PluginApiProvider } from "../api/pluginApiProvider";
-import { useApp } from "../utils/appContextUtil";
+import { useApp } from "../utils/contextUtil";
 import type { App } from "obsidian";
 import { defaultHeading, defaultPath } from "../config";
 import { TaskMapper } from "../data/utils/taskTypeMapper";
