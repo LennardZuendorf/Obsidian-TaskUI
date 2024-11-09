@@ -7,7 +7,7 @@ import type {
 import { loggerUtil } from "../utils/loggerUtil";
 import { DataviewApi } from "obsidian-dataview";
 import { DataviewApiProvider } from "../api/dataviewApi";
-import { useApp } from "../utils/appContextUtil";
+import { useApp } from "../utils/contextUtil";
 import type { App } from "obsidian";
 import { TFile } from "obsidian";
 import { defaultHeading, defaultPath } from "../config/settings";

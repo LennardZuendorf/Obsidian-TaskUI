@@ -30,8 +30,8 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@//base/Dropdown";
-import type { taskType } from "../../types/taskType";
-import { taskStatus } from "../../types/taskType";
+import type { taskType } from "../../data/types/taskType";
+import { taskStatus } from "../../data/types/taskType";
 
 /**
  * TaskCard component to display a single task card.

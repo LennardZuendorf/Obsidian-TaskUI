@@ -1,14 +1,14 @@
 import React, { useEffect } from "react";
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
-import { AppContext } from "./appContext";
+import { AppContext } from "./utils/contextUtil";
 import "./styles.css";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@//base/Tabs";
 import { Button } from "@//base/Button";
 import { Bell, Settings } from "lucide-react";
 import { KanbanSquare, List } from "lucide-react";
 import { useAtom } from "jotai";
-import { mdTaskProvider } from "./data/mdTaskProvider";
+import { mdTaskProvider } from "./service/mdTaskProvider";
 import { allTasksAtom } from "./data/taskAtoms";
 import KanbanBoard from "@//BoardView";
 import TaskList from "@//ListView";
