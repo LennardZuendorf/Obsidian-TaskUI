@@ -3,30 +3,30 @@ import type {
 	tasksTransferObject,
 	taskTransferObject,
 	taskType,
-} from "../types/taskType";
-import { logger } from "../utils/logger";
+} from "../data/types/taskType";
+import { loggerUtil } from "../utils/loggerUtil";
 import { DataviewApi } from "obsidian-dataview";
-import { PluginApiProvider } from "../api/pluginApiProvider";
-import { useApp } from "../appContext";
+import { DataviewApiProvider } from "../api/dataviewApi";
+import { useApp } from "../utils/appContextUtil";
 import type { App } from "obsidian";
 import { TFile } from "obsidian";
-import { defaultHeading, defaultPath } from "../settings";
-import { TaskMapper } from "./mdTaskMapper";
+import { defaultHeading, defaultPath } from "../config/settings";
+import { TaskMapper } from "../data/utils/taskTypeMapper";
+import { TasksApiProvider } from "../api/tasksApi";
 
 /**
  * Service class for managing tasks using the Dataview API and Obsidian App directly.
  */
+
+//TODO: Split This class into multiple providers for editing and querying tasks.
 export class mdTaskProvider {
 	private readonly app: App;
-	private readonly pluginApiProvider;
-	private readonly dv: DataviewApi;
+	private readonly dvApi: DataviewApi;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private readonly tasksApiProvider: TasksApiProvider;
 	private readonly defaultPath = defaultPath;
 	private readonly defaultHeading = defaultHeading;
 	private readonly taskMapper: TaskMapper;
-	private readonly taskPluginToggleTaskDone: (
-		line: string,
-		path: string,
-	) => void;
 
 	/**
 	 * Constructs an instance of the mdTaskService.
@@ -34,11 +34,11 @@ export class mdTaskProvider {
 	 */
 	constructor() {
 		this.app = <App>useApp();
-		this.pluginApiProvider = new PluginApiProvider(this.app);
-		this.dv = this.pluginApiProvider.getDvApi();
+		this.dvApi = new DataviewApiProvider().getDvApi();
+		this.tasksApiProvider = new TasksApiProvider(this.app);
 		this.taskMapper = new TaskMapper();
 
-		if (!this.dv || !this.app) {
+		if (!this.dvApi || !this.app) {
 			throw new Error("Dataview API or Obsidian App not available");
 		}
 	}
@@ -47,11 +47,13 @@ export class mdTaskProvider {
 	 * Retrieves all tasks from the Dataview API.
 	 * @returns An array of taskType objects.
 	 */
+
+	//TODO: Split this method into multiple methods for fetching raw data from the API and mapping it to taskType objects. One is API layer, the other is service layer.
 	public async getTasks(): Promise<tasksTransferObject> {
 		const tasks: taskType[] = [];
 
 		try {
-			const allTasks = this.dv.pages("").file.tasks;
+			const allTasks = this.dvApi.pages("").file.tasks;
 			for (const task of allTasks) {
 				if (task) {
 					const hasMatchingSubtask = tasks.some((existingTask) =>
@@ -63,19 +65,19 @@ export class mdTaskProvider {
 						const taskObject =
 							this.taskMapper.mapDvTaskToTaskType(task);
 						tasks.push(taskObject);
-						logger.info({ taskObject }, "Task loaded");
+						loggerUtil.info({ taskObject }, "Task loaded");
 					} else {
-						logger.info(
+						loggerUtil.info(
 							"Shards: Task already loaded as a subtask. Skipping...",
 						);
 					}
 				}
 			}
 		} catch (error) {
-			logger.error("Shards: Error fetching tasks: " + error.message);
+			loggerUtil.error("Shards: Error fetching tasks: " + error.message);
 			return { status: false };
 		}
-		logger.info("Shards: Task loaded via dataview: " + tasks.length);
+		loggerUtil.info("Shards: Task loaded via dataview: " + tasks.length);
 		return { status: true, tasks: tasks };
 	}
 
@@ -85,6 +87,8 @@ export class mdTaskProvider {
 	 * @param task - The task object to be created.
 	 * @param heading - The heading to insert the task under.
 	 */
+
+	//TODO: Split this method into multiple methods for creating a task and writing it to the file. One is API layer, the other is service layer.
 	public async createTask(
 		task: taskType,
 		heading: string = this.defaultHeading,
@@ -97,7 +101,9 @@ export class mdTaskProvider {
 			try {
 				file = this.app.vault.getAbstractFileByPath(path) as TFile;
 			} catch (error) {
-				logger.info("Shards: Error fetching file: " + error.message);
+				loggerUtil.info(
+					"Shards: Error fetching file: " + error.message,
+				);
 			}
 
 			if (file === null) {
@@ -145,6 +151,7 @@ export class mdTaskProvider {
 	 * @param task - The task object to be edited.
 	 * @returns A promise that resolves to a tuple containing a boolean indicating success and the new task line.
 	 */
+	//TODO: Split this method into multiple methods for editing a task and writing it to the file. One is API layer, the other is service layer. Also rewrite the method to use obsidian properly.
 	public async editTask(task: taskType): Promise<taskTransferObject> {
 		const newTaskLine = this.taskMapper.mapTaskTypeToDvTask(task);
 		const oldTaskLine = task.rawDescription;
@@ -180,6 +187,7 @@ export class mdTaskProvider {
 	 * @param taskLine - The task line to be deleted.
 	 * @returns A promise that resolves to a tuple containing a boolean indicating success and a message.
 	 */
+	//TODO: Split this method into multiple methods for deleting a task and writing it to the file. One is API layer, the other is service layer.
 	public async deleteTask(
 		path: string,
 		taskLine: string,
@@ -221,7 +229,7 @@ export class mdTaskProvider {
 			await this.pluginApiProvider.taskPluginCreateTaskModal();
 
 		if (!taskDTO.lineString || !taskDTO.status) {
-			logger.error("Shards: Error creating task via tasks API modal");
+			loggerUtil.error("Shards: Error creating task via tasks API modal");
 			return { status: false };
 		}
 
@@ -248,4 +256,12 @@ export class mdTaskProvider {
 			task,
 		);
 	}
+
+	/**
+	 * Listens for task events via the dataview API. This method should be called once on component mount.
+	 * Upon receiving a task event, the method will trigger the appropriate task operation that will be handled in the main component.
+	 */
+
+	//TODO: Implement taskListener method and hook it up to the main component.
+	public taskListener(): void {}
 }

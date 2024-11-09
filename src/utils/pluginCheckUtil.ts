@@ -1,16 +1,16 @@
-import { logger } from "./logger";
+import { loggerUtil } from "./loggerUtil";
 
-export function pluginChecker(requiredPluginIds: string[]) {
+export function pluginCheckUtil(requiredPluginIds: string[]) {
 	const missingOrNotEnabledPlugins: string[] = [];
 
 	requiredPluginIds.forEach((pluginId) => {
 		if (!this.app.plugins.enabledPlugins.has(pluginId)) {
 			if (this.app.plugins.plugins[pluginId]) {
 				missingOrNotEnabledPlugins.push(pluginId);
-				logger.warn(`${pluginId} is installed, but not enabled.`);
+				loggerUtil.warn(`${pluginId} is installed, but not enabled.`);
 			} else {
 				missingOrNotEnabledPlugins.push(pluginId);
-				logger.warn(`${pluginId} is not installed.`);
+				loggerUtil.warn(`${pluginId} is not installed.`);
 			}
 		}
 	});

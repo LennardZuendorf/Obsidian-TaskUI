@@ -7,8 +7,8 @@ import {
 } from "../types/taskType";
 import { dvTaskType } from "../types/dvTaskType";
 import short from "short-uuid";
-import { parseDate } from "../utils/dataUtils";
-import { defaultPath } from "../settings";
+import { parseDate } from "../../utils/dataUtils";
+import { defaultPath } from "../../config/settings";
 
 export class TaskMapper {
 	/**

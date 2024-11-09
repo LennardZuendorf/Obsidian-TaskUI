@@ -1,6 +1,6 @@
 /**
- * Type definition for a task type returned from the data view plugin.
- * This type represents the structure of a task as provided by the data view plugin,
+ * Type definition for a task type returned from the data view config.
+ * This type represents the structure of a task as provided by the data view config,
  * including metadata such as tags, status, and scheduling information.
  */
 export type dvTaskType = {

@@ -12,7 +12,7 @@ import { mdTaskProvider } from "./data/mdTaskProvider";
 import { allTasksAtom } from "./data/taskAtoms";
 import KanbanBoard from "@//BoardView";
 import TaskList from "@//ListView";
-import { logger } from "./utils/logger";
+import { loggerUtil } from "./utils/loggerUtil";
 import { DevTools } from "jotai-devtools";
 
 /**
@@ -21,7 +21,7 @@ import { DevTools } from "jotai-devtools";
 export const VIEW_TYPE_MAIN = "react-view";
 
 /**
- * Main React Component for the Task UI Plugin, which is the entry point for the plugin.
+ * Main React Component for the Task UI Plugin, which is the entry point for the config.
  * This component fetches all tasks from the Dataview API and displays them in a list or board view.
  * @returns The main React component for the Task UI Plugin.
  */
@@ -40,18 +40,18 @@ const TaskUIApp: React.FC = () => {
 			const tasksTO = await mdTaskService.getTasks();
 
 			if (!tasksTO.status || tasksTO.tasks === undefined) {
-				logger.error(`No tasks found.`);
+				loggerUtil.error(`No tasks found.`);
 				return;
 			}
 			setAllTasks(tasksTO.tasks);
 		};
 
 		fetchTasks().then(() =>
-			logger.info(`Tasks fetched and saved into state.`),
+			loggerUtil.info(`Tasks fetched and saved into state.`),
 		);
 	}, []);
 
-	// Returns the main component, which displays the list and board view of the tasks. Also includes a settings view.
+	// Returns the main component, which displays the list and board view of the tasks. Also includes a config view.
 	return (
 		<div>
 			<Tabs defaultValue="all" className="w-full h-full">
@@ -110,7 +110,7 @@ const TaskUIApp: React.FC = () => {
 };
 
 /**
- * Main View for the Task UI Plugin. This is the entry point for the plugin and is registered in the main.ts file.
+ * Main View for the Task UI Plugin. This is the entry point for the config and is registered in the main.ts file.
  * @extends ItemView from "obsidian" to create a new view in the Obsidian workspace.
  * Itself
  */

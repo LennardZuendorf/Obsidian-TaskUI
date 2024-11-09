@@ -1,12 +1,12 @@
 import { Plugin, WorkspaceLeaf, Notice } from "obsidian";
 import { MainView, VIEW_TYPE_MAIN } from "./MainView";
-import { logger } from "./utils/logger";
-import { pluginChecker } from "./utils/pluginChecker";
+import { loggerUtil } from "./utils/loggerUtil";
+import { pluginCheckUtil } from "./utils/pluginCheckUtil";
 
 /**
  * Main Plugin Class of the Shards Task UI Plugin
  * As defined by obsidian, this extends the generic Plugin class from obsidian.
- * This class is the entry point of the plugin.
+ * This class is the entry point of the config.
  * @extends Plugin from "obsidian"
  */
 export default class ShardsTaskUIPlugin extends Plugin {
@@ -27,11 +27,11 @@ export default class ShardsTaskUIPlugin extends Plugin {
 	// Method to activate the Main Tab View
 	async activateMainTabView() {
 		const { workspace } = this.app;
-		const requiredPluginIds = ["obsidian-tasks-plugin", "dataview"];
+		const requiredPluginIds = ["obsidian-tasks-config", "dataview"];
 
-		logger.info("Shards: Activating Main Tab View");
+		loggerUtil.info("Shards: Activating Main Tab View");
 		const { allPluginsEnabled, missingPlugins } =
-			pluginChecker(requiredPluginIds);
+			pluginCheckUtil(requiredPluginIds);
 
 		if (allPluginsEnabled) {
 			let leaf: WorkspaceLeaf | null = null;
@@ -40,7 +40,7 @@ export default class ShardsTaskUIPlugin extends Plugin {
 			if (leaves.length > 0) {
 				leaf = leaves[0];
 				await workspace.revealLeaf(leaf);
-				logger.info("Shards: Switched to existing main tab leaf.");
+				loggerUtil.info("Shards: Switched to existing main tab leaf.");
 			} else {
 				leaf = workspace.getLeaf(false);
 
@@ -50,13 +50,13 @@ export default class ShardsTaskUIPlugin extends Plugin {
 						active: true,
 					});
 				}
-				logger.info("Shards: Created new main tab leaf.");
+				loggerUtil.info("Shards: Created new main tab leaf.");
 			}
 		} else {
 			new Notice(
 				`The following required plugins are missing or not enabled: ${missingPlugins.join(", ")}\n\nYou won't be able to use Shards without it!`,
 			);
-			logger.warn(
+			loggerUtil.warn(
 				"Shards: Some required plugins are missing or not enabled.",
 			);
 		}

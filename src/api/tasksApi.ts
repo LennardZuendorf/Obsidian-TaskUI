@@ -1,9 +1,11 @@
 // src/api/pluginApiProvider.ts
-import { getAPI } from "obsidian-dataview";
-import { logger } from "../utils/logger";
-import { taskStatus, taskTransferObject, taskType } from "../types/taskType";
+import {
+	taskStatus,
+	taskTransferObject,
+	taskType,
+} from "../data/types/taskType";
 
-export class PluginApiProvider {
+export class TasksApiProvider {
 	private readonly app;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -13,25 +15,12 @@ export class PluginApiProvider {
 	}
 
 	/**
-	 * Fetches the Dataview API via the Obsidian App.
-	 * @returns The Dataview API.
-	 */
-	public getDvApi() {
-		try {
-			return getAPI();
-		} catch (error) {
-			logger.error("Error fetching dataview API: " + error.message);
-			return null;
-		}
-	}
-
-	/**
 	 * Fetches the Tasks API via the Obsidian App.
 	 * @returns The Tasks API or null if it is not available.
 	 */
-	public getTasksApiV1() {
+	private getTasksApiV1() {
 		try {
-			return this.app.plugins.plugins["obsidian-tasks-plugin"].apiV1;
+			return this.app.plugins.plugins["obsidian-tasks-config"].apiV1;
 		} catch (error) {
 			console.error("Error fetching tasks API: " + error.message);
 			return null;
@@ -43,10 +32,10 @@ export class PluginApiProvider {
 	 * @returns The task line
 	 * This toggles the task modal for creating a new task in the Obsidian UI.
 	 */
-	public async taskPluginCreateTaskModal(): Promise<taskTransferObject> {
+	public async getCreateTaskModal(): Promise<taskTransferObject> {
 		try {
 			const lineString: string =
-				await this.app.plugins.plugins["obsidian-tasks-plugin"]
+				await this.app.plugins.plugins["obsidian-tasks-config"]
 					.createTaskLineModal;
 
 			return { status: true, lineString: lineString };
@@ -62,14 +51,14 @@ export class PluginApiProvider {
 	 * @param path The path to the file containing line
 	 * @param task The task object being toggled
 	 */
-	public async taskPluginToggleTaskDone(
+	public async toggleTaskDone(
 		line: string,
 		path: string,
 		task: taskType,
 	): Promise<taskTransferObject> {
 		try {
 			const lineString: string = await this.app.plugins.plugins[
-				"obsidian-tasks-plugin"
+				"obsidian-tasks-config"
 			].executeToggleTaskDoneCommand(line, path);
 
 			task.status = taskStatus.DONE;

@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { exampleTask, taskStatus, taskType } from "../types/taskType";
+import { exampleTask, taskStatus, taskType } from "./types/taskType";
 
 //This file is used to store atoms for tasks and task data. It is used to manage the state of tasks in the application in a bottom-up approach.
 
@@ -64,4 +64,8 @@ export const animeAtom = atom([
 if (process.env.NODE_ENV !== "production") {
 	animeAtom.debugLabel = "anime";
 	allTasksAtom.debugLabel = "tasks";
+	mdTaskAtom.debugLabel = "mdTasks";
+	todoTasksAtom.debugLabel = "todoTasks";
+	inProgressTasksAtom.debugLabel = "inProgressTasks";
+	doneTasksAtom.debugLabel = "doneAndCancelledTasks";
 }
