@@ -1,5 +1,5 @@
 import { TaskMapper } from "../../data/utils/mapper";
-import {taskType } from "../../data/types/taskType";
+import { taskType } from "../../data/types/taskType";
 import { taskTransferObject } from "../../data/types/transferObjects";
 import { App } from "obsidian";
 import { loggerUtil as logger } from "../../utils/loggerUtil";

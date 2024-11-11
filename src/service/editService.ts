@@ -79,13 +79,10 @@ export class TaskEditService {
 
 				if (response.status && response.task) {
 					return response.task;
-				} else{
-					logger.error(
-                        "Error while toggling task via tasks API",
-                    );
+				} else {
+					logger.error("Error while toggling task via tasks API");
 					return null;
 				}
-
 			} catch (error) {
 				logger.error(
 					"Error while toggling task via tasks API: " + error.message,
