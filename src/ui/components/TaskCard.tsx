@@ -1,5 +1,5 @@
 import { atom, useAtom } from "jotai";
-import { allTasksAtom } from "../../data/taskAtoms";
+import { allTasksAtom } from "../../data/atoms";
 import {
 	Card,
 	CardContent,

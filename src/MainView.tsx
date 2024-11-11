@@ -1,19 +1,21 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
-import { AppContext } from "./utils/contextUtil";
+import { AppContext, useApp } from "./utils/contextUtil";
 import "./styles.css";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@//base/Tabs";
 import { Button } from "@//base/Button";
 import { Bell, Settings } from "lucide-react";
 import { KanbanSquare, List } from "lucide-react";
 import { useAtom } from "jotai";
-import { mdTaskProvider } from "./service/mdTaskProvider";
-import { allTasksAtom } from "./data/taskAtoms";
+import { TaskQueryService } from "./service/queryService";
+import { TaskEditService } from "./service/editService";
+import { allTasksAtom } from "./data/atoms";
 import KanbanBoard from "@//BoardView";
 import TaskList from "@//ListView";
-import { loggerUtil } from "./utils/loggerUtil";
+import { loggerUtil as logger } from "./utils/loggerUtil";
 import { DevTools } from "jotai-devtools";
+import { Card, CardContent, CardFooter, CardHeader } from "@//base/Card";
 
 /**
  * The view type for the main view of the Task UI Plugin. Needs to be defined for obsidian to recognize the view.
@@ -22,34 +24,101 @@ export const VIEW_TYPE_MAIN = "react-view";
 
 /**
  * Main React Component for the Task UI Plugin, which is the entry point for the config.
- * This component fetches all tasks from the Dataview API and displays them in a list or board view.
+ * This component fetches all tasks via the TaskQueryService and saves them into the allTasksAtom.
  * @returns The main React component for the Task UI Plugin.
  */
 const TaskUIApp: React.FC = () => {
-	// Requires the mdTaskService to fetch tasks from the vault via the DataView API.
-	const mdTaskService = new mdTaskProvider();
+	// Setting up app from context.
+	const app = useApp();
 
-	// Fetches the allTasksAtom from the taskAtoms file. This atom stores all tasks.
-	const [, setAllTasks] = useAtom(allTasksAtom);
+	// Defining services managed via state and error state for initialization errors.
+	const [queryService, setQueryService] = useState<TaskQueryService | null>(
+		null,
+	);
+	const [editService, setEditService] = useState<TaskEditService | null>(
+		null,
+	);
+	const [error, setError] = useState<Error | null>(null);
 
-	// Function to create a new task via the Tasks API.
+	// Defining state for tasks managed via jotai atoms.
+	const [allTasks, setAllTasks] = useAtom(allTasksAtom);
 
-	// Fetches all tasks from the DataView API and saves them into the allTasksAtom. This is done once on component mount.
+	// Setup services on initial load.
+	useEffect(() => {
+		const setupServices = async () => {
+			try {
+				if (!queryService || !editService) {
+					if (!app) {
+						throw new Error("App not available");
+					}
+					const queryServiceInstance = new TaskQueryService(app);
+					const editServiceInstance = new TaskEditService(app);
+					setQueryService(queryServiceInstance);
+					setEditService(editServiceInstance);
+				}
+			} catch (error) {
+				setError(
+					new Error(
+						"Failed to initialize services: " + error.message,
+					),
+				);
+			}
+		};
+		setupServices().then(() =>
+			logger.info("TasksUI: Finished service setup"),
+		);
+	}, [app, queryService, editService]);
+
+	// Fetch tasks on initial load.
 	useEffect(() => {
 		const fetchTasks = async () => {
-			const tasksTO = await mdTaskService.getTasks();
-
-			if (!tasksTO.status || tasksTO.tasks === undefined) {
-				loggerUtil.error(`No tasks found.`);
-				return;
+			if (queryService) {
+				try {
+					const tasks = await queryService.getTasks();
+					setAllTasks(tasks || []);
+				} catch (error) {
+					setError(new Error("Failed to fetch tasks"));
+				}
 			}
-			setAllTasks(tasksTO.tasks);
 		};
 
 		fetchTasks().then(() =>
-			loggerUtil.info(`Tasks fetched and saved into state.`),
+			logger.info("TasksUI: Finished initial task fetch"),
 		);
-	}, []);
+	}, [queryService, setAllTasks]);
+
+	// If there is no queryService, editService, or allTasks, return a loading screen. If there is an error, return an error screen.
+	if (!queryService || !editService || !allTasks || error) {
+		return (
+			<section className="flex flex-col items-center gap-2 sm:gap-4 lg:gap-8 py-4 h-full w-full">
+				<div>
+					<Card className="border-0">
+						<CardHeader className="justify-end">
+							{error
+								? "Error During Initialization"
+								: "Loading..."}
+						</CardHeader>
+						<CardContent className="justify-start">
+							{error ? (
+								<span>
+									Error during initialization: {error.message}
+									Try reloading the plugin or Obsidian.
+								</span>
+							) : (
+								<span>The Task UI Plugin is loading...</span>
+							)}
+						</CardContent>
+						{error && (
+							<CardFooter>
+								Please reach out to the creator via GitHub if
+								this error persists.
+							</CardFooter>
+						)}
+					</Card>
+				</div>
+			</section>
+		);
+	}
 
 	// Returns the main component, which displays the list and board view of the tasks. Also includes a config view.
 	return (
@@ -117,18 +186,31 @@ const TaskUIApp: React.FC = () => {
 export class MainView extends ItemView {
 	root: Root | null = null;
 
+	/**
+	 * Constructor for the Main View of the Task UI Plugin.
+	 * @param leaf
+	 */
 	constructor(leaf: WorkspaceLeaf) {
 		super(leaf);
 	}
 
+	/**
+	 * Gets the view type of the Main View of the Task UI Plugin.
+	 */
 	getViewType() {
 		return VIEW_TYPE_MAIN;
 	}
 
+	/**
+	 * Gets the display text of the Main View of the Task UI Plugin.
+	 */
 	getDisplayText() {
-		return "Shards | TaskUI";
+		return "TaskUI";
 	}
 
+	/**
+	 * Renders the Main View of the Task UI Plugin.
+	 */
 	async onOpen() {
 		this.root = createRoot(this.containerEl.children[1]);
 		this.root.render(
@@ -140,10 +222,16 @@ export class MainView extends ItemView {
 		);
 	}
 
+	/**
+	 * Unmounts the Main View of the Task UI Plugin on close.
+	 */
 	async onClose() {
 		this.root?.unmount();
 	}
 
+	/**
+	 * Unmounts the Main View of the Task UI Plugin on unload.
+	 */
 	async onunload() {
 		this.root?.unmount();
 	}
