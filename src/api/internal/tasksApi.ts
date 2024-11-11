@@ -1,16 +1,22 @@
-// src/api/pluginApiProvider.ts
-import {
-	taskStatus,
-	taskTransferObject,
-	taskType,
-} from "../data/types/taskType";
+import { taskStatus, taskType } from "../../data/types/taskType";
 
+import type { taskTransferObject } from "../../data/types/transferObjects";
+
+/**
+ * TasksApiProvider class provides two specific methods for interacting with the Tasks API.
+ */
 export class TasksApiProvider {
+	//This is handed over through the context which itself comes straight from the Obsidian App. But there's no type for the App object that works...
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private readonly app;
 
+	/**
+	 * Constructor for the TasksApiProvider class.
+	 * @param app - The Obsidian App object, handed over through the context from React.
+	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	constructor(app: any) {
-		//This is handed over through the context which itself comes straight from the Obsidian App. But there's no type for the App object...
+		//This is handed over through the context which itself comes straight from the Obsidian App. But there's no type for the App object that works...
 		this.app = app;
 	}
 

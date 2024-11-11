@@ -1,8 +1,6 @@
 import { atom } from "jotai";
 import { exampleTask, taskStatus, taskType } from "./types/taskType";
 
-//This file is used to store atoms for tasks and task data. It is used to manage the state of tasks in the application in a bottom-up approach.
-
 /**
  * The main atom to store all tasks, initialized with an example task. This atom is used to manage the state of all tasks in the application.
  */
