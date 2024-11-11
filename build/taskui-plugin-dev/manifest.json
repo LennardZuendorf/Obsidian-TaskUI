@@ -1,0 +1,10 @@
+{
+	"id": "taskui-plugin-dev",
+	"name": "TaskUI",
+	"version": "0.0.1",
+	"minAppVersion": "0.0.1",
+	"description": "TaskUI enables simple visual management of tasks based on the popular tasks plugin for obsidian.",
+	"author": "Lennard Zündorf",
+	"authorUrl": "https://zuendorf.me",
+	"isDesktopOnly": true
+}
