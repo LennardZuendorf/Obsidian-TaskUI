@@ -3,7 +3,7 @@ import {
 	taskSource,
 	taskStatus,
 	taskType,
-} from "../types/taskType";
+} from "../types/taskTypes";
 import { dvTaskType } from "../../api/internal/dataviewApi";
 import short from "short-uuid";
 import { parseDate } from "../../utils/dataUtils";
@@ -63,7 +63,7 @@ export class TaskMapper {
 			description: cleanDescriptionMatch,
 			priority: priorityMatch
 				? this.mapPriorityEnum(priorityMatch[1])
-				: taskPriority.NORMAL,
+				: taskPriority.MEDIUM,
 			recurs: recursMatch ? recursMatch[1] : null,
 			dueDate: parseDate(dueMatch ? dueMatch[1] : null),
 			scheduledDate: parseDate(scheduledMatch ? scheduledMatch[1] : null),
@@ -144,7 +144,7 @@ export class TaskMapper {
 			case "medium":
 				return taskPriority.MEDIUM;
 			default:
-				return taskPriority.NORMAL;
+				return taskPriority.MEDIUM;
 		}
 	}
 }

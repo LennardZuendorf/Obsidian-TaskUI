@@ -1,4 +1,4 @@
-import { taskType } from "./taskType";
+import { taskType } from "./taskTypes";
 
 /**
  * taskTransferObject interface for task operations, used to define the structure of a task transfer object used calls against the providers.

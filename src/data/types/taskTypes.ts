@@ -12,7 +12,6 @@ export enum taskSource {
 export enum taskPriority {
 	LOWEST = "lowest",
 	LOW = "low",
-	NORMAL = "normal",
 	MEDIUM = "medium",
 	HIGH = "high",
 	HIGHEST = "highest",
@@ -58,7 +57,7 @@ export type taskType = {
 export const exampleTask: taskType = {
 	id: "1",
 	description: "Take out the trash",
-	priority: taskPriority.NORMAL,
+	priority: taskPriority.MEDIUM,
 	recurs: null,
 	dueDate: new Date("2024-10-25"),
 	scheduledDate: null,
