@@ -1,34 +1,28 @@
 import { TaskMapper } from "../../data/utils/mapper";
-import { taskType } from "../../data/types/taskType";
-import { taskTransferObject } from "../../data/types/transferObjects";
+import { taskType } from "../../data/types/taskTypes";
+import { taskTransferObject } from "../../data/types/transferObjectTypes";
 import { App } from "obsidian";
-import { loggerUtil as logger } from "../../utils/loggerUtil";
-import { DataviewApiProvider } from "./dataviewApi";
+import { loggerUtil, loggerUtil as logger } from "../../utils/loggerUtil";
 
 /**
  * ObsidianApiProvider class provides methods for creating, updating, and deleting tasks via the Obsidian API.
- * It always transfers results via a transfer object and returns already mapped, typed tasks.
- * For request it always uses the taskType.
- * TODO: All the business logic/mapping in here should probably be moved to another class...
  */
 export class ObsidianApiProvider {
 	private readonly taskMapper: TaskMapper;
-
-	//This is handed over through the context which itself comes straight from the Obsidian App. But there's no type for the App object that works...
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private readonly obsidianApp: App;
-	private readonly dvApi: DataviewApiProvider;
 
 	/**
 	 * Constructs an instance of the Dataview API Provider.
 	 * @throws Will throw an error if the Dataview API or Obsidian App is not available.
 	 */
-	//This is handed over through the context which itself comes straight from the Obsidian App. But there's no type for the App object that works...
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	constructor(app: any) {
+	constructor(app: App) {
 		this.taskMapper = new TaskMapper();
-		this.obsidianApp = app;
-		this.dvApi = new DataviewApiProvider();
+		try {
+			this.obsidianApp = app;
+		} catch (error) {
+			loggerUtil.error("Error fetching obsidian API: " + error.message);
+			throw new Error("Obsidian API not available: " + error.message);
+		}
 	}
 
 	/**
