@@ -27,4 +27,8 @@ data.json
 /main.css
 /styles.css
 /styles.js
-/build/taskui-plugin-dev/
+/build/taskui-plugin-dev/main.css
+/build/taskui-plugin-dev/main.js
+/build/taskui-plugin-dev/styles.css
+/build/taskui-plugin-dev/styles.js
+
