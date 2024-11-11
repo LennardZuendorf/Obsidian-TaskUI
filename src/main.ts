@@ -1,7 +1,7 @@
 import { Plugin, WorkspaceLeaf, Notice } from "obsidian";
 import { MainView, VIEW_TYPE_MAIN } from "./MainView";
 import { loggerUtil } from "./utils/loggerUtil";
-import { pluginCheckUtil } from "./utils/pluginCheckUtil";
+import { checkRequiredPlugins } from "./utils/pluginCheckUtil";
 
 /**
  * Main Plugin Class of the Shards Task UI Plugin
@@ -10,7 +10,17 @@ import { pluginCheckUtil } from "./utils/pluginCheckUtil";
  * @extends Plugin from "obsidian"
  */
 export default class ShardsTaskUIPlugin extends Plugin {
-	async onload() {
+	/**
+	 * Initializes the plugin when it's loaded by Obsidian.
+	 * This method registers the main view and adds a ribbon icon to activate it.
+	 *
+	 * @remarks
+	 * This method is called automatically by Obsidian when the plugin is loaded.
+	 * It sets up the necessary components for the plugin to function within the Obsidian environment.
+	 *
+	 * @returns {Promise<void>} A promise that resolves when the plugin has finished loading.
+	 */
+	async onload(): Promise<void> {
 		// Register the Main Tab View
 		this.registerView(VIEW_TYPE_MAIN, (leaf) => new MainView(leaf));
 
@@ -20,27 +30,39 @@ export default class ShardsTaskUIPlugin extends Plugin {
 		});
 	}
 
-	async onunload() {
+	/**
+	 * Detaches the Main Tab View from the Obsidian workspace.
+	 * This function is called when the plugin is unloaded.
+	 * @returns {Promise<void>} A promise that resolves when the Main Tab View is detached.
+	 */
+	async onunload(): Promise<void> {
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_MAIN);
 	}
 
-	// Method to activate the Main Tab View
-	async activateMainTabView() {
+	/**
+	 * Activates the Main Tab View in the Obsidian workspace.
+	 * This function checks for required plugins, creates or reveals the Main Tab View,
+	 * and provides notifications for missing required or optional plugins.
+	 * @returns {Promise<void>} A promise that resolves when the Main Tab View is activated or appropriate notifications are shown.
+	 */
+	async activateMainTabView(): Promise<void> {
 		const { workspace } = this.app;
 		const requiredPluginIds = ["obsidian-tasks-config", "dataview"];
 
-		loggerUtil.info("Shards: Activating Main Tab View");
-		const { allPluginsEnabled, missingPlugins } =
-			pluginCheckUtil(requiredPluginIds);
+		const {
+			requiredPluginsEnabled,
+			optionalPluginsEnabled,
+			missingRequiredPlugins,
+			missingOptionalPlugins,
+		} = checkRequiredPlugins(requiredPluginIds);
 
-		if (allPluginsEnabled) {
+		if (requiredPluginsEnabled) {
 			let leaf: WorkspaceLeaf | null = null;
 			const leaves = workspace.getLeavesOfType(VIEW_TYPE_MAIN);
 
 			if (leaves.length > 0) {
 				leaf = leaves[0];
 				await workspace.revealLeaf(leaf);
-				loggerUtil.info("Shards: Switched to existing main tab leaf.");
 			} else {
 				leaf = workspace.getLeaf(false);
 
@@ -50,15 +72,21 @@ export default class ShardsTaskUIPlugin extends Plugin {
 						active: true,
 					});
 				}
-				loggerUtil.info("Shards: Created new main tab leaf.");
 			}
 		} else {
 			new Notice(
-				`The following required plugins are missing or not enabled: ${missingPlugins.join(", ")}\n\nYou won't be able to use Shards without it!`,
+				`The following required plugins are missing or not enabled: ${missingRequiredPlugins.join(", ")}\n\nYou won't be able to use TaskUI without it!`,
 			);
-			loggerUtil.warn(
-				"Shards: Some required plugins are missing or not enabled.",
+			loggerUtil.error(
+				"Some required plugins are missing or not enabled.",
 			);
+		}
+
+		if (!optionalPluginsEnabled) {
+			new Notice(
+				`For the best experience, I suggest installing the following optional plugins: ${missingOptionalPlugins.join(", ")}\n\n`,
+			);
+			loggerUtil.info("Some optional plugins are not installed.");
 		}
 	}
 }
