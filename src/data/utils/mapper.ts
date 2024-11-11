@@ -1,22 +1,21 @@
-// src/utils/taskHelpers.ts
 import {
 	taskPriority,
 	taskSource,
 	taskStatus,
 	taskType,
 } from "../types/taskType";
-import { dvTaskType } from "../types/dvTaskType";
+import { dvTaskType } from "../../api/internal/dataviewApi";
 import short from "short-uuid";
 import { parseDate } from "../../utils/dataUtils";
 import { defaultPath } from "../../config/settings";
 
 export class TaskMapper {
 	/**
-	 * Maps a taskType object to a string representation for Dataview.
-	 * @param task - The taskType object to map.
+	 * Maps a taskTypes object to a string representation for Dataview.
+	 * @param task - The taskTypes object to map.
 	 * @returns The string representation of the task for Dataview.
 	 */
-	public mapTaskTypeToDvTask(task: taskType): string {
+	public mapTaskToLineString(task: taskType): string {
 		const id = task.id ? `[id:: ${task.id}]` : "";
 		const dependsOn =
 			task.blocks && task.blocks.length > 0
@@ -37,13 +36,13 @@ export class TaskMapper {
 			: "";
 
 		const subtaskStrings = task.subtasks
-			?.map(this.mapTaskTypeToDvTask)
+			?.map(this.mapTaskToLineString)
 			.join("\n");
 
 		return `${task.description} ${id} ${dependsOn} ${priority} ${recurs} ${created} ${start} ${scheduled} ${due} ${completion}\n${subtaskStrings}`.trim();
 	}
 
-	public mapTaskLineStringToTaskType(lineString: string): taskType {
+	public mapMdToTaskType(lineString: string): taskType {
 		const idMatch = lineString.match(/\[id:: ([^\]]+)\]/);
 		const dependsOnMatch = lineString.match(/\[dependsOn:: ([^\]]+)\]/);
 		const priorityMatch = lineString.match(/\[priority:: ([^\]]+)\]/);
@@ -80,29 +79,29 @@ export class TaskMapper {
 			path: defaultPath,
 			symbol: "",
 			source: taskSource.OBSIDIAN,
-			rawDescription: lineString,
+			lineDescription: lineString,
 		};
 	}
 
 	/**
-	 * Maps a dvTaskType object to a taskType object.
+	 * Maps a dvTaskType object to a taskTypes object.
 	 * @param dvTask - The dvTaskType object to map.
-	 * @returns The taskType object.
+	 * @returns The taskTypes object.
 	 */
-	public mapDvTaskToTaskType(dvTask: dvTaskType): taskType {
+	public mapDvToTaskType(dvTask: dvTaskType): taskType {
 		const subtasks: taskType[] = [];
 
-		// Map the task line string to a taskType object.
-		const mappedTask = this.mapTaskLineStringToTaskType(dvTask.text);
+		// Map the task line string to a taskTypes object.
+		const mappedTask = this.mapMdToTaskType(dvTask.text);
 
-		// Enriching the taskType object with additional properties from the dvTaskType object.
+		// Enriching the taskTypes object with additional properties from the dvTaskType object.
 		mappedTask.status = this.mapStatusEnum(dvTask.status);
 		mappedTask.line = dvTask.line ? dvTask.line : 0;
 		mappedTask.path = dvTask.path;
 		mappedTask.subtasks =
 			dvTask.subtasks && dvTask.subtasks.length > 0
-				? dvTask.subtasks.map((subtask) =>
-						this.mapDvTaskToTaskType(subtask),
+				? dvTask.subtasks.map((subtask: dvTaskType) =>
+						this.mapDvToTaskType(subtask),
 					)
 				: subtasks;
 

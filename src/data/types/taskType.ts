@@ -1,7 +1,6 @@
 /**
  * Enum for task source, which can be either "obsidian" or "shards-app".
  */
-
 export enum taskSource {
 	OBSIDIAN = "obsidian",
 	SHARDS_APP = "shards-app",
@@ -30,7 +29,7 @@ export enum taskStatus {
 }
 
 /**
- * main taskType interface for tasks, used to define the structure of a task object.
+ * main taskTypes interface for tasks, used to define the structure of a task object.
  */
 export type taskType = {
 	id: string; // Unique identifier for the task
@@ -49,7 +48,7 @@ export type taskType = {
 	source: taskSource; // Enum for the task's source
 	line?: number; // Line number in the source file
 	subtasks?: taskType[]; // Array of subtasks
-	rawDescription: string; // Raw description from the source
+	lineDescription: string; // Raw description from the source
 	tags?: string[]; // Array of tags associated with the task
 };
 
@@ -73,5 +72,5 @@ export const exampleTask: taskType = {
 	source: taskSource.OBSIDIAN, // Using enum for source
 	line: 12,
 	subtasks: [],
-	rawDescription: "Take out the trash",
+	lineDescription: "Take out the trash",
 };
