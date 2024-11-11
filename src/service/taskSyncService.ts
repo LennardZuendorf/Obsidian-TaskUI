@@ -1,4 +1,4 @@
-import type {taskSource } from "../data/types/taskTypes";
+import type { taskSource } from "../data/types/taskTypes";
 import type { App } from "obsidian";
 import { ApiService } from "../api/apiService";
 

@@ -56,7 +56,7 @@ export class ApiService {
 		task: taskType,
 	): Promise<taskTransferObject> {
 		const newTask: taskType = { ...task, ...update };
-		return { status: false, task:newTask};
+		return { status: false, task: newTask };
 	}
 
 	public async getTask(task: taskType): Promise<taskTransferObject> {
