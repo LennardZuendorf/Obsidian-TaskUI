@@ -1,6 +1,6 @@
-import { taskStatus, taskType } from "../../data/types/taskType";
+import { taskStatus, taskType } from "../../data/types/taskTypes";
 
-import type { taskTransferObject } from "../../data/types/transferObjects";
+import type { taskTransferObject } from "../../data/types/transferObjectTypes";
 
 /**
  * TasksApiProvider class provides two specific methods for interacting with the Tasks API.
