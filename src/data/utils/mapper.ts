@@ -11,7 +11,7 @@ import { defaultPath } from "../../config/settings";
 
 export class TaskMapper {
 	/**
-	 * Maps a taskTypes object to a string representation for Dataview.
+	 * Maps a taskTypes object to a string representation for Obsidian.
 	 * @param task - The taskTypes object to map.
 	 * @returns The string representation of the task for Dataview.
 	 */
@@ -39,7 +39,9 @@ export class TaskMapper {
 			?.map(this.mapTaskToLineString)
 			.join("\n");
 
-		return `${task.description} ${id} ${dependsOn} ${priority} ${recurs} ${created} ${start} ${scheduled} ${due} ${completion}\n${subtaskStrings}`.trim();
+		const status = this.mapStatusEnum(task.status);
+
+		return `- [${status}]${task.description} ${id} ${dependsOn} ${priority} ${recurs} ${created} ${start} ${scheduled} ${due} ${completion}\n	${subtaskStrings}`.trim();
 	}
 
 	public mapMdToTaskType(lineString: string): taskType {
