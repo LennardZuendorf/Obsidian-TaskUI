@@ -8,6 +8,7 @@ import { TaskMapper } from "../data/utils/mapper";
 import { taskOperation } from "../data/utils/operationTypes";
 import { loggerUtil as logger } from "../utils/loggerUtil";
 import { InternalApiService } from "../api/internalApiService";
+import { defaultPath, defaultHeading } from "../config/settings";
 
 export interface ApiService {
 	getTasks(filePath?: string): Promise<tasksTransferObject>;
@@ -50,20 +51,40 @@ export class TaskService {
 		oldTask?: taskType,
 		filePath?: string,
 		heading?: string,
-	): Promise<any> {
+	): Promise<taskTransferObject | tasksTransferObject> {
 		const apiService = this.getApiService(source);
 
 		switch (operation) {
 			case taskOperation.GET:
-				throw new Error("Get operation not supported.");
+				throw new Error(`Unsupported Operation: ${taskOperation.GET}`);
 			case taskOperation.GET_ALL:
+				if (!filePath)
+					throw new Error(
+						`Operation ${taskOperation.GET} requires a file path.`,
+					);
 				return apiService.getTasks(filePath);
 			case taskOperation.CREATE:
-				return apiService.createTask(task!, filePath!, heading!);
+				if (!task)
+					throw new Error(
+						`Operation ${taskOperation.GET} requires a task.`,
+					);
+				return apiService.createTask(
+					task,
+					filePath ? filePath : defaultPath,
+					heading ? heading : defaultHeading,
+				);
 			case taskOperation.UPDATE:
-				return apiService.editTask(newTask!, oldTask!);
+				if (!newTask || !oldTask)
+					throw new Error(
+						`Operation ${taskOperation.GET} required both newTask and oldTask.`,
+					);
+				return apiService.editTask(newTask, oldTask);
 			case taskOperation.DELETE:
-				return apiService.deleteTask(task!);
+				if (!task)
+					throw new Error(
+						`Operation ${taskOperation.GET} requires a task.`,
+					);
+				return apiService.deleteTask(task);
 			default:
 				throw new Error(`Unsupported operation: ${operation}`);
 		}

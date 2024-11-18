@@ -40,9 +40,10 @@ export class DataviewApiProvider {
 	public async getTasksFromFile(filePath: string): Promise<STask[] | null> {
 		try {
 			return await this.dvApi.page(filePath).tasks();
-		} catch (error: any) {
-			const errorMsg = `Error fetching tasks from file: ${filePath} - ${error.message}`;
-			logger.error(errorMsg);
+		} catch (error) {
+			logger.error(
+				`Error fetching tasks from file: ${filePath} - ${error.message}`,
+			);
 			return null;
 		}
 	}
@@ -55,9 +56,8 @@ export class DataviewApiProvider {
 	public async getAllTasks(): Promise<STask[] | null> {
 		try {
 			return this.dvApi.pages().tasks();
-		} catch (error: any) {
-			const errorMsg = `Error fetching all tasks: ${error.message}`;
-			logger.error(errorMsg);
+		} catch (error) {
+			logger.error(`Error fetching all tasks: ${error.message}`);
 			return null;
 		}
 	}

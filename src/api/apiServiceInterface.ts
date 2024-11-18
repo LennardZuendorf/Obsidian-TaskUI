@@ -1,4 +1,7 @@
-import { tasksTransferObject, taskTransferObject } from "../data/types/transferObjectTypes";
+import {
+	tasksTransferObject,
+	taskTransferObject,
+} from "../data/types/transferObjectTypes";
 import { taskType } from "../data/types/taskTypes";
 
 export interface ApiService {
