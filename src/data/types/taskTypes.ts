@@ -3,7 +3,7 @@
  */
 export enum taskSource {
 	OBSIDIAN = "obsidian",
-	SHARDS_APP = "shards-app",
+	TODOIST = "todoist",
 }
 
 /**

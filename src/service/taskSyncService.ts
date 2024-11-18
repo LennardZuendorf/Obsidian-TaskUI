@@ -1,6 +1,5 @@
 import type { taskSource } from "../data/types/taskTypes";
 import type { App } from "obsidian";
-import { ApiService } from "../api/apiService";
 
 /**
  * This service provides methods to listen for task-related events and handle changes
@@ -8,7 +7,6 @@ import { ApiService } from "../api/apiService";
  */
 export class TaskQueryService {
 	private readonly app: App;
-	private readonly service: ApiService;
 
 	/**
 	 * Constructs an instance of the TaskQueryService.
@@ -17,7 +15,6 @@ export class TaskQueryService {
 	 */
 	constructor(obsidianApp: App) {
 		this.app = obsidianApp;
-		this.service = new ApiService(this.app);
 	}
 
 	/**

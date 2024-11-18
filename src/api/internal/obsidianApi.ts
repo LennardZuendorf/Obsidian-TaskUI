@@ -1,27 +1,97 @@
-import { TaskMapper } from "../../data/utils/mapper";
+// src/data/providers/ObsidianApiProvider.ts
+
+import { App, TAbstractFile, TFile } from "obsidian";
 import { taskType } from "../../data/types/taskTypes";
 import { taskTransferObject } from "../../data/types/transferObjectTypes";
-import { App } from "obsidian";
-import { loggerUtil, loggerUtil as logger } from "../../utils/loggerUtil";
+import { loggerUtil as logger } from "../../utils/loggerUtil";
 
 /**
  * ObsidianApiProvider class provides methods for creating, updating, and deleting tasks via the Obsidian API.
  */
 export class ObsidianApiProvider {
-	private readonly taskMapper: TaskMapper;
 	private readonly obsidianApp: App;
 
 	/**
-	 * Constructs an instance of the Dataview API Provider.
-	 * @throws Will throw an error if the Dataview API or Obsidian App is not available.
+	 * Constructs an instance of the Obsidian API Provider.
+	 *
+	 * @throws Will throw an error if the Obsidian App is not available.
 	 */
 	constructor(app: App) {
-		this.taskMapper = new TaskMapper();
 		try {
 			this.obsidianApp = app;
-		} catch (error) {
-			loggerUtil.error("Error fetching obsidian API: " + error.message);
-			throw new Error("Obsidian API not available: " + error.message);
+		} catch (error: any) {
+			logger.error(`Error fetching Obsidian API: ${error.message}`);
+			throw new Error(`Obsidian API not available: ${error.message}`);
+		}
+	}
+
+	/**
+	 * Adds a task line string to a markdown file under the given path and heading.
+	 * If the file does not exist, it will be created with the heading and task line.
+	 *
+	 * @param lineString
+	 * @param filePath
+	 * @param mdHeading
+	 *
+	 * @returns A promise that resolves to a taskTransferObject indicating the success or failure of the operation.
+	 */
+	public async createTask(
+		lineString: string,
+		filePath: string,
+		mdHeading: string,
+	): Promise<string | null> {
+		try {
+			const fileExists = await this.checkFileExists(filePath);
+
+			if (!fileExists) {
+				const initialContent = `${mdHeading}\n${lineString}`;
+				const created = await this.createFile(filePath, initialContent);
+				if (!created) {
+					const errorMsg = `Failed to create file at path: ${filePath}`;
+					logger.error(errorMsg);
+					return null;
+				}
+				// Optionally return the created task
+				return lineString;
+			} else {
+				// File exists, proceed to add task line under heading
+				try {
+					const file = this.obsidianApp.vault.getFileByPath(filePath);
+
+					if (!file) {
+						const errorMsg = `Could not find file at path: ${filePath}`;
+						logger.error(errorMsg);
+						return null;
+					}
+
+					const content = await this.obsidianApp.vault.read(file);
+					const lines = content.split("\n");
+					let headingIndex = lines.findIndex(
+						(currentLine) =>
+							currentLine.trim() === mdHeading.trim(),
+					);
+
+					// If heading can't be found, add the heading at the end
+					if (headingIndex === -1) {
+						lines.push(mdHeading);
+						headingIndex = lines.length - 1;
+					}
+
+					// Add the task line after the heading
+					lines.splice(headingIndex + 1, 0, mdHeading);
+					await this.obsidianApp.vault.modify(file, lines.join("\n"));
+
+					return lineString;
+				} catch (error) {
+					const errorMsg = `Error fetching file at path: ${filePath}`;
+					logger.error(errorMsg);
+					return null;
+				}
+			}
+		} catch (error: any) {
+			const errorMsg = `Error while trying to add a new task: ${error.message}`;
+			logger.error(errorMsg);
+			return null;
 		}
 	}
 
@@ -29,138 +99,132 @@ export class ObsidianApiProvider {
 	 * Edits an existing task in a markdown file at the specified path.
 	 *
 	 *
-	 * @returns A promise that resolves to a taskTransferObject. The status is true if the task was successfully edited,
-	 * and false if the task could not be found or an error occurred.
-	 * @param newTask
-	 * @param oldTask
+	 * @returns A promise that resolves to a taskTransferObject indicating the success or failure of the operation.
+	 * @param newLineString
+	 * @param oldLineString
+	 * @param path
 	 */
-
 	public async editTask(
-		newTask: taskType,
-		oldTask: taskType,
-	): Promise<taskTransferObject> {
-		try {
-			const file = this.obsidianApp.vault.getFileByPath(oldTask.path);
-
-			if (!file) {
-				return { status: false };
-			}
-
-			const content = await this.obsidianApp.vault.read(file);
-			const lines = content.split("\n");
-			const taskLineIndex = oldTask.line
-				? oldTask.line
-				: lines.findIndex((line) =>
-						line.includes(oldTask.lineDescription),
-					);
-
-			if (taskLineIndex === -1) {
-				return { status: false };
-			}
-
-			lines[taskLineIndex] = this.taskMapper.mapTaskToLineString(newTask);
-			await this.obsidianApp.vault
-				.modify(file, lines.join("\n"))
-				.then(() => {});
-			const check = await this.dvApi.getTask(newTask.path, newTask);
-
-			return { status: check.status };
-		} catch (error) {
-			logger.error("Error editing task via Obsidian API:", error.message);
-			return { status: false };
-		}
-	}
-
-	/**
-	 * Adds a task line string to a markdown file under the given path. The task will be placed under the given heading.
-	 *
-	 * @param task - The task object containing details to be added to the markdown file.
-	 * @param path - The file path where the task should be added.
-	 * @param heading - The heading under which the task should be placed. If the heading does not exist, it will be created.
-	 *
-	 * @returns A promise that resolves to a taskTransferObject. The status is true if the task was successfully added,
-	 * and false if the file could not be found or an error occurred.
-	 */
-	public async createTask(
-		task: taskType,
+		newLineString: string,
+		oldLineString: string,
 		path: string,
-		heading: string,
-	): Promise<taskTransferObject> {
-		let newLine = this.taskMapper.mapTaskToLineString(task);
-
+	): Promise<string | null> {
 		try {
-			const file = this.obsidianApp.vault.getFileByPath(path);
+			const file = this.obsidianApp.vault.getFileByPath(path) as TFile;
 
 			if (!file) {
-				logger.error(`Could not find file at path: ${path}`);
-				return { status: false };
+				const errorMsg = `Could not find file at path: ${path}`;
+				logger.error(errorMsg);
+				return null;
+			} else {
+				const content = await this.obsidianApp.vault.read(file);
+				const lines = content.split("\n");
+
+				let taskLineIndex: number | undefined = lines.findIndex(
+					(line) => line.includes(oldLineString),
+				);
+
+				if (taskLineIndex === -1 || taskLineIndex === undefined) {
+					const errorMsg = `Could not find task line in file: ${path}`;
+					logger.error(errorMsg);
+					return null;
+				}
+
+				lines.splice(taskLineIndex, 1, newLineString);
+				await this.obsidianApp.vault.modify(file, lines.join("\n"));
+
+				// Optionally, return the updated task
+				return newLineString;
 			}
-
-			const content = await this.obsidianApp.vault.read(file);
-			const lines = content.split("\n");
-			let headingIndex = lines.findIndex(
-				(line) => line.trim() === `${heading}`,
-			);
-
-			//If heading can't be found (which may be expected, add the heading and the line string at the bottom of the file
-			if (headingIndex === -1) {
-				newLine = `${heading}\n${newLine}`;
-				headingIndex = lines.length;
-			}
-
-			lines.splice(headingIndex + 1, 0, newLine);
-			await this.obsidianApp.vault.modify(file, lines.join("\n"));
-			return { status: true, task };
-		} catch (error) {
-			logger.error(
-				`Error while trying to add a new task: ${error.message}`,
-			);
-			return { status: false };
+		} catch (error: any) {
+			const errorMsg = `Error editing task via Obsidian API: ${error.message}`;
+			logger.error(errorMsg);
+			return null;
 		}
 	}
 
 	/**
 	 * Deletes a task line string from a markdown file under the given path.
 	 *
-	 * @param task - The task object containing details such as line or lineDescription to identify the task to be deleted.
+	 * @param lineString
 	 * @param path - The file path from which the task should be deleted.
 	 *
-	 * @returns A promise that resolves to a taskTransferObject. The status is true if the task was successfully deleted,
-	 * and false if the task could not be found or an error occurred.
+	 * @returns A promise that resolves to a taskTransferObject indicating the success or failure of the operation.
 	 */
 	public async deleteTask(
-		task: taskType,
+		lineString: string,
 		path: string,
-	): Promise<taskTransferObject> {
+	): Promise<boolean> {
 		try {
 			const file = this.obsidianApp.vault.getFileByPath(path);
 
 			if (!file) {
-				logger.error(`Could not find file at path: ${path}`);
-				return { status: false };
+				const errorMsg = `Could not find file at path: ${path}`;
+				logger.error(errorMsg);
+				return false;
+			} else {
+				const content = await this.obsidianApp.vault.read(file);
+				const lines = content.split("\n");
+
+				const taskLineIndex = lines.findIndex((line) =>
+					line.includes(lineString),
+				);
+
+				if (taskLineIndex === -1) {
+					const errorMsg = `Could not find task line: ${lineString} in file: ${path}`;
+					logger.error(errorMsg);
+					return false;
+				}
+
+				lines.splice(taskLineIndex, 1);
+				await this.obsidianApp.vault.modify(file, lines.join("\n"));
+
+				// Optionally, return the deleted task's line string
+				return true;
 			}
+		} catch (error: any) {
+			const errorMsg = `Error while trying to delete a task: ${error.message}`;
+			logger.error(errorMsg);
+			return false;
+		}
+	}
 
-			const content = await this.obsidianApp.vault.read(file);
-			const lines = content.split("\n");
-			const taskLineIndex = task.line
-				? task.line
-				: lines.findIndex((line) =>
-						line.includes(task.lineDescription),
-					);
-
-			if (taskLineIndex === -1) {
-				logger.error(`Could not find task line in file: ${path}`);
-				return { status: false };
-			}
-
-			lines.splice(taskLineIndex, 1);
-			await this.obsidianApp.vault.modify(file, lines.join("\n"));
-			return { status: true, task };
-		} catch (error) {
+	/**
+	 * Checks if a file exists at the given path.
+	 *
+	 * @param path - The file path to check.
+	 *
+	 * @returns A promise that resolves to true if the file exists, false otherwise.
+	 */
+	private async checkFileExists(path: string): Promise<boolean> {
+		try {
+			const file = this.obsidianApp.vault.getAbstractFileByPath(path);
+			return file instanceof TAbstractFile;
+		} catch (error: any) {
 			logger.error(
-				`Error while trying to delete a task: ${error.message}`,
+				`Error checking if file exists at path: ${path} - ${error.message}`,
 			);
-			return { status: false };
+			return false;
+		}
+	}
+
+	/**
+	 * Creates a new file at the given path with optional content.
+	 *
+	 * @param path - The file path where the new file should be created.
+	 * @param content - Optional content to be added to the new file.
+	 *
+	 * @returns A promise that resolves to true if the file was successfully created, false otherwise.
+	 */
+	private async createFile(path: string, content: string): Promise<boolean> {
+		try {
+			await this.obsidianApp.vault.create(path, content);
+			return true;
+		} catch (error: any) {
+			logger.error(
+				`Error while trying to create a file at path: ${path} - ${error.message}`,
+			);
+			return false;
 		}
 	}
 }
