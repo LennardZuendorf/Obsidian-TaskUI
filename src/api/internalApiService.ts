@@ -23,33 +23,33 @@ export class InternalApiService implements ApiService {
 	}
 
 	public async getTasks(filePath?: string): Promise<tasksTransferObject> {
-		try{
-			if(!this.dvApi.isDataviewApiAvailable()) {
-                logger.error("Dataview API is not available");
-                return { status: false }
-            }
+		try {
+			if (!this.dvApi.isDataviewApiAvailable()) {
+				logger.error("Dataview API is not available");
+				return { status: false };
+			}
 
-            let tasks: taskType[] = [];
-            if (filePath) {
-                const dvTasks = await this.dvApi.getTasksFromFile(filePath);
-                if (dvTasks) {
-                    tasks = dvTasks.map((dvTask) =>
-                        this.taskMapper.mapDvToTaskType(dvTask),
-                    );
-                }
-            } else {
-                const allDvTasks = await this.dvApi.getAllTasks();
-                if (allDvTasks) {
-                    tasks = allDvTasks.map((dvTask) =>
-                        this.taskMapper.mapDvToTaskType(dvTask),
-                    );
-                }
-            }
+			let tasks: taskType[] = [];
+			if (filePath) {
+				const dvTasks = await this.dvApi.getTasksFromFile(filePath);
+				if (dvTasks) {
+					tasks = dvTasks.map((dvTask) =>
+						this.taskMapper.mapDvToTaskType(dvTask),
+					);
+				}
+			} else {
+				const allDvTasks = await this.dvApi.getAllTasks();
+				if (allDvTasks) {
+					tasks = allDvTasks.map((dvTask) =>
+						this.taskMapper.mapDvToTaskType(dvTask),
+					);
+				}
+			}
 
-            return { status: true, tasks };
-		}catch (error) {
+			return { status: true, tasks };
+		} catch (error) {
 			logger.error(error.message);
-            return { status: false }
+			return { status: false };
 		}
 	}
 
@@ -57,52 +57,53 @@ export class InternalApiService implements ApiService {
 		newTask: taskType,
 		oldTask: taskType,
 	): Promise<taskTransferObject> {
-		try{
-			if(!this.dvApi.isDataviewApiAvailable()) {
-                logger.error("Dataview API is not available");
-                return { status: false }
-            }
+		try {
+			if (!this.dvApi.isDataviewApiAvailable()) {
+				logger.error("Dataview API is not available");
+				return { status: false };
+			}
 
-            const updatedDvTask = await this.mdApi.editTask(
-                this.taskMapper.mapTaskToLineString(newTask),
-                this.taskMapper.mapTaskToLineString(oldTask),
+			const updatedDvTask = await this.mdApi.editTask(
+				this.taskMapper.mapTaskToLineString(newTask),
+				this.taskMapper.mapTaskToLineString(oldTask),
 				oldTask.path,
-            )
+			);
 
-            if (!updatedDvTask) {
-                logger.error(
-                    `Updating task with path ${oldTask.path} failed`,
-                );
-                return { status: false };
-            }
+			if (!updatedDvTask) {
+				logger.error(`Updating task with path ${oldTask.path} failed`);
+				return { status: false };
+			}
 
-            const mappedTask = this.taskMapper.mapDvToTaskType(updatedDvTask);
-            return { status: true, task: mappedTask };
-		}catch (error) {
+			const mappedTask = this.taskMapper.mapDvToTaskType(updatedDvTask);
+			return { status: true, task: mappedTask };
+		} catch (error) {
 			logger.error(error.message);
-            return { status: false }
+			return { status: false };
 		}
 	}
 
 	public async deleteTask(task: taskType): Promise<taskTransferObject> {
-		try{
+		try {
 			const deleted = await this.mdApi.deleteTask(
-                this.taskMapper.mapTaskToLineString(task),
-                task.path,
-            );
+				this.taskMapper.mapTaskToLineString(task),
+				task.path,
+			);
 
-            if (deleted) {
-                return { status: true, task };
-            } else {
-                logger.error(`Deleting task with path ${task.path} failed.`);
-                return { status: false };
-            }
-        } catch (error) {
-            logger.error(
-                "Error deleting task with path " + task.path + ": " + error.message,
-            );
-            return { status: false };
-        }
+			if (deleted) {
+				return { status: true, task };
+			} else {
+				logger.error(`Deleting task with path ${task.path} failed.`);
+				return { status: false };
+			}
+		} catch (error) {
+			logger.error(
+				"Error deleting task with path " +
+					task.path +
+					": " +
+					error.message,
+			);
+			return { status: false };
+		}
 	}
 
 	public async createTask(

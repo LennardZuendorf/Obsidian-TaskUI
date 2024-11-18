@@ -1,8 +1,4 @@
-// src/data/providers/ObsidianApiProvider.ts
-
 import { App, TAbstractFile, TFile } from "obsidian";
-import { taskType } from "../../data/types/taskTypes";
-import { taskTransferObject } from "../../data/types/transferObjectTypes";
 import { loggerUtil as logger } from "../../utils/loggerUtil";
 
 /**
@@ -19,9 +15,10 @@ export class ObsidianApiProvider {
 	constructor(app: App) {
 		try {
 			this.obsidianApp = app;
-		} catch (error: any) {
-			logger.error(`Error fetching Obsidian API: ${error.message}`);
-			throw new Error(`Obsidian API not available: ${error.message}`);
+		} catch (error) {
+			const errorMsg = `Obsidian App not available: ${error.message}`;
+			logger.error(errorMsg);
+			throw new Error(errorMsg);
 		}
 	}
 
@@ -88,9 +85,10 @@ export class ObsidianApiProvider {
 					return null;
 				}
 			}
-		} catch (error: any) {
-			const errorMsg = `Error while trying to add a new task: ${error.message}`;
-			logger.error(errorMsg);
+		} catch (error) {
+			logger.error(
+				`Error while trying to add a new task: ${error.message}`,
+			);
 			return null;
 		}
 	}
@@ -120,7 +118,7 @@ export class ObsidianApiProvider {
 				const content = await this.obsidianApp.vault.read(file);
 				const lines = content.split("\n");
 
-				let taskLineIndex: number | undefined = lines.findIndex(
+				const taskLineIndex: number | undefined = lines.findIndex(
 					(line) => line.includes(oldLineString),
 				);
 
@@ -136,9 +134,10 @@ export class ObsidianApiProvider {
 				// Optionally, return the updated task
 				return newLineString;
 			}
-		} catch (error: any) {
-			const errorMsg = `Error editing task via Obsidian API: ${error.message}`;
-			logger.error(errorMsg);
+		} catch (error) {
+			logger.error(
+				`Error editing task via Obsidian API: ${error.message}`,
+			);
 			return null;
 		}
 	}
@@ -182,9 +181,10 @@ export class ObsidianApiProvider {
 				// Optionally, return the deleted task's line string
 				return true;
 			}
-		} catch (error: any) {
-			const errorMsg = `Error while trying to delete a task: ${error.message}`;
-			logger.error(errorMsg);
+		} catch (error) {
+			logger.error(
+				`Error while trying to delete a task: ${error.message}`,
+			);
 			return false;
 		}
 	}
@@ -200,7 +200,7 @@ export class ObsidianApiProvider {
 		try {
 			const file = this.obsidianApp.vault.getAbstractFileByPath(path);
 			return file instanceof TAbstractFile;
-		} catch (error: any) {
+		} catch (error) {
 			logger.error(
 				`Error checking if file exists at path: ${path} - ${error.message}`,
 			);
@@ -220,7 +220,7 @@ export class ObsidianApiProvider {
 		try {
 			await this.obsidianApp.vault.create(path, content);
 			return true;
-		} catch (error: any) {
+		} catch (error) {
 			logger.error(
 				`Error while trying to create a file at path: ${path} - ${error.message}`,
 			);
