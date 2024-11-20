@@ -13,4 +13,6 @@ export interface ApiService {
 	): Promise<taskTransferObject>;
 	editTask(newTask: taskType, oldTask: taskType): Promise<taskTransferObject>;
 	deleteTask(task: taskType): Promise<taskTransferObject>;
+	on(event: string, callback: (data: any) => void): void;
+	emit(event: string, data: any): void;
 }
