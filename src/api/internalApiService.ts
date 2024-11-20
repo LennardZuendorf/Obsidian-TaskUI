@@ -10,16 +10,22 @@ import {
 	taskTransferObject,
 } from "../data/types/transferObjectTypes";
 import { ApiService } from "./apiServiceInterface";
+import EventEmitter from "node:events";
 
 export class InternalApiService implements ApiService {
 	private readonly mdApi: ObsidianApiProvider;
 	private readonly dvApi: DataviewApiProvider;
 	private readonly taskMapper: TaskMapper;
+	private readonly eventEmitter: EventEmitter;
 
-	constructor(app: App, mapper: TaskMapper) {
+	constructor(app: App) {
 		this.mdApi = new ObsidianApiProvider(app);
 		this.dvApi = new DataviewApiProvider();
-		this.taskMapper = mapper;
+		this.taskMapper = new TaskMapper();
+		this.eventEmitter = new EventEmitter();
+		this.initiatePeriodicTaskFetch().then((r) =>
+			logger.debug("Periodic task fetch initiated for internal source."),
+		);
 	}
 
 	public async getTasks(filePath?: string): Promise<tasksTransferObject> {
@@ -137,7 +143,18 @@ export class InternalApiService implements ApiService {
 		}
 	}
 
-	private async updateTask() {
-		return { status: false };
+	private async initiatePeriodicTaskFetch() {
+		setInterval(async () => {
+			const tasks = await this.dvApi.getAllTasks();
+			this.eventEmitter.emit("tasksFetched", tasks);
+		}, 5000);
+	}
+
+	public on(event: string, callback: (data: any) => void): void {
+		this.eventEmitter.on(event, callback);
+	}
+
+	public emit(event: string, data: any): void {
+		this.eventEmitter.emit(event, data);
 	}
 }
