@@ -1,4 +1,5 @@
 [
   "taskui-plugin",
-  "hot-reload"
+  "hot-reload",
+  "dataview"
 ]
