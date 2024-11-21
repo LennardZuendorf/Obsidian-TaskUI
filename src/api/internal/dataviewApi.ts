@@ -1,5 +1,5 @@
 import { getAPI, STask, DataviewApi } from "obsidian-dataview";
-import { loggerUtil as logger } from "../../utils/loggerUtil";
+import { logger as logger } from "../../utils/logger";
 
 /**
  * Represents the structure of a task as provided by the Dataview API.

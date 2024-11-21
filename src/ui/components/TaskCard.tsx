@@ -30,8 +30,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@//base/Dropdown";
-import type { taskType } from "../../data/types/taskType";
-import { taskStatus } from "../../data/types/taskType";
+import { task, taskStatus } from "../../data/types/tasks";
 
 /**
  * TaskCard component to display a single task card.
@@ -49,7 +48,7 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 					const tasks = get(allTasksAtom);
 					return tasks.find((task) => task.id === taskId);
 				},
-				(get, set, update: Partial<taskType>) => {
+				(get, set, update: Partial<task>) => {
 					set(allTasksAtom, (prevTasks) =>
 						prevTasks.map((task) =>
 							task.id === taskId ? { ...task, ...update } : task,

@@ -7,8 +7,8 @@
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"version": "node ./build/version-bump.mjs",
-		"dev": "npx cpy manifest.json build/taskui-plugin-dev && node esbuild.config.mjs",
-		"build": "npm run lint && npm run format && node esbuild.config.mjs --production && npx cpy manifest.json build/taskui-plugin && rm build/taskui-plugin/main.css && rm build/taskui-plugin/styles.js",
+		"dev": "npx cpy manifest.json build/taskui-plugin && node esbuild.config.mjs",
+		"build": "npm run format && node esbuild.config.mjs --production && npx cpy manifest.json build/taskui-plugin && rm build/taskui-plugin/main.css && rm build/taskui-plugin/styles.js",
 		"build-release": "npm run build && npm run version",
 		"lint-staged": "lint-staged"
 	},

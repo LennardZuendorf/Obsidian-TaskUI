@@ -1,7 +1,6 @@
-import { Plugin, WorkspaceLeaf, Notice } from "obsidian";
+import { Plugin, WorkspaceLeaf } from "obsidian";
 import { MainView, VIEW_TYPE_MAIN } from "./MainView";
-import { loggerUtil } from "./utils/loggerUtil";
-import { checkRequiredPlugins } from "./utils/pluginCheckUtil";
+import { checkRequiredPlugins } from "./utils/pluginCheck";
 
 /**
  * Main Plugin Class of the Shards Task UI Plugin
@@ -9,7 +8,7 @@ import { checkRequiredPlugins } from "./utils/pluginCheckUtil";
  * This class is the entry point of the config.
  * @extends Plugin from "obsidian"
  */
-export default class ShardsTaskUIPlugin extends Plugin {
+export class ShardsTaskUIPlugin extends Plugin {
 	/**
 	 * Initializes the plugin when it's loaded by Obsidian.
 	 * This method registers the main view and adds a ribbon icon to activate it.
@@ -47,7 +46,7 @@ export default class ShardsTaskUIPlugin extends Plugin {
 	 */
 	async activateMainTabView(): Promise<void> {
 		const { workspace } = this.app;
-		const requiredPluginIds = ["obsidian-tasks-config", "dataview"];
+		const requiredPluginIds = ["dataview"];
 
 		const {
 			requiredPluginsEnabled,
@@ -57,7 +56,7 @@ export default class ShardsTaskUIPlugin extends Plugin {
 		} = checkRequiredPlugins(requiredPluginIds);
 
 		if (requiredPluginsEnabled) {
-			let leaf: WorkspaceLeaf | null = null;
+			let leaf: WorkspaceLeaf | null;
 			const leaves = workspace.getLeavesOfType(VIEW_TYPE_MAIN);
 
 			if (leaves.length > 0) {
@@ -73,20 +72,6 @@ export default class ShardsTaskUIPlugin extends Plugin {
 					});
 				}
 			}
-		} else {
-			new Notice(
-				`The following required plugins are missing or not enabled: ${missingRequiredPlugins.join(", ")}\n\nYou won't be able to use TaskUI without it!`,
-			);
-			loggerUtil.error(
-				"Some required plugins are missing or not enabled.",
-			);
-		}
-
-		if (!optionalPluginsEnabled) {
-			new Notice(
-				`For the best experience, I suggest installing the following optional plugins: ${missingOptionalPlugins.join(", ")}\n\n`,
-			);
-			loggerUtil.info("Some optional plugins are not installed.");
 		}
 	}
 }

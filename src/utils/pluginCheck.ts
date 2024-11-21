@@ -1,4 +1,4 @@
-import { loggerUtil } from "./loggerUtil";
+import { logger } from "./logger";
 
 /**
  * Checks for the presence and enabled status of required and optional plugins.
@@ -23,13 +23,11 @@ export function checkRequiredPlugins(
 		if (!this.app.plugins.enabledPlugins.has(pluginId)) {
 			missingRequiredPlugins.push(pluginId);
 			if (this.app.plugins.plugins[pluginId]) {
-				loggerUtil.warn(
+				logger.warn(
 					`Required plugin ${pluginId} is installed, but not enabled.`,
 				);
 			} else {
-				loggerUtil.warn(
-					`Required plugin ${pluginId} is not installed.`,
-				);
+				logger.warn(`Required plugin ${pluginId} is not installed.`);
 			}
 		}
 	});
@@ -38,13 +36,11 @@ export function checkRequiredPlugins(
 		if (!this.app.plugins.enabledPlugins.has(pluginId)) {
 			missingOptionalPlugins.push(pluginId);
 			if (this.app.plugins.plugins[pluginId]) {
-				loggerUtil.info(
+				logger.info(
 					`Optional plugin ${pluginId} is installed, but not enabled.`,
 				);
 			} else {
-				loggerUtil.info(
-					`Optional plugin ${pluginId} is not installed.`,
-				);
+				logger.info(`Optional plugin ${pluginId} is not installed.`);
 			}
 		}
 	});
@@ -67,6 +63,5 @@ export function checkRequiredPlugins(
  */
 export function checkSinglePlugin(requiredPlugin: string): boolean {
 	const { requiredPluginsEnabled } = checkRequiredPlugins([requiredPlugin]);
-
 	return requiredPluginsEnabled;
 }

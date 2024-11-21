@@ -1,6 +1,5 @@
 [
-  "dataview",
-  "hot-reload",
   "obsidian-tasks-plugin",
-  "taskui-plugin"
+  "hot-reload",
+  "dataview"
 ]

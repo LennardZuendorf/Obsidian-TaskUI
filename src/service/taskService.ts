@@ -1,39 +1,33 @@
 import { App } from "obsidian";
-import { taskSource, taskType } from "../data/types/taskTypes";
-import {
-	tasksTransferObject,
-	taskTransferObject,
-} from "../data/types/transferObjectTypes";
-import { TaskMapper } from "../data/utils/mapper";
-import { taskOperation } from "../data/utils/operationTypes";
-import { loggerUtil as logger } from "../utils/loggerUtil";
+import { taskSource, task } from "../data/types/tasks";
+import { tasksObject, taskObject } from "../data/types/transferObjectTypes";
+import { taskOperation } from "./types/operations";
+import { logger as logger } from "../utils/logger";
 import { InternalApiService } from "../api/internalApiService";
 import { defaultHeading, defaultPath } from "../config/settings";
 
 export interface ApiService {
-	getTasks(filePath?: string): Promise<tasksTransferObject>;
+	getTasks(filePath?: string): Promise<tasksObject>;
 	createTask(
-		task: taskType,
+		task: task,
 		filePath: string,
 		heading: string,
-	): Promise<taskTransferObject>;
-	editTask(newTask: taskType, oldTask: taskType): Promise<taskTransferObject>;
-	deleteTask(task: taskType): Promise<taskTransferObject>;
+	): Promise<taskObject>;
+	editTask(newTask: task, oldTask: task): Promise<taskObject>;
+	deleteTask(task: task): Promise<taskObject>;
 }
 
 export class TaskService {
-	private readonly taskMapper: TaskMapper;
 	private readonly app: App;
 
 	constructor(app: App) {
-		this.taskMapper = new TaskMapper();
 		this.app = app;
 	}
 
 	private getApiService(source: taskSource): ApiService {
 		switch (source) {
 			case taskSource.OBSIDIAN:
-				return new InternalApiService(this.app, this.taskMapper);
+				return new InternalApiService(this.app);
 			case taskSource.TODOIST:
 				logger.error(`Unsupported task source: ${source}`);
 				throw new Error(`Unsupported task source: ${source}`);
@@ -43,28 +37,16 @@ export class TaskService {
 		}
 	}
 
-	public async loadTasks(): Promise<tasksTransferObject> {
-		const taskList: taskType[] = [];
+	public async loadTasks(): Promise<tasksObject> {
+		const taskList: task[] = [];
 
 		try {
 			const mdResponse = await this.getAllTasks(taskSource.OBSIDIAN);
-			const todoistResponse = await this.getAllTasks(taskSource.TODOIST);
-			if (mdResponse.status && todoistResponse.status) {
-				if (mdResponse.tasks) taskList.push(...mdResponse.tasks);
-				if (todoistResponse.tasks)
-					taskList.push(...todoistResponse.tasks);
-			} else if (mdResponse.status && mdResponse.tasks) {
-				logger.warn(
-					"Failed to fetch tasks from Obsidian, using tasks only from Todoist",
-				);
+
+			if (mdResponse.status && mdResponse.tasks) {
 				taskList.push(...mdResponse.tasks);
-			} else if (todoistResponse.status && todoistResponse.tasks) {
-				logger.warn(
-					"Failed to fetch tasks from Todoist, using tasks only from Obsidian",
-				);
-				taskList.push(...todoistResponse.tasks);
 			} else {
-				logger.error("Couldn't fetch tasks from both sources");
+				logger.error("Couldn't fetch tasks from obsidian sources");
 				return { status: false };
 			}
 			return { status: true, tasks: taskList };
@@ -77,7 +59,7 @@ export class TaskService {
 	public async getAllTasks(
 		source: taskSource,
 		filePath?: string,
-	): Promise<tasksTransferObject> {
+	): Promise<tasksObject> {
 		const apiService = this.getApiService(source);
 		if (!filePath) return apiService.getTasks();
 		return apiService.getTasks(filePath);
@@ -85,10 +67,10 @@ export class TaskService {
 
 	public async createTask(
 		source: taskSource,
-		task: taskType,
+		task: task,
 		filePath?: string,
 		heading?: string,
-	): Promise<taskTransferObject> {
+	): Promise<taskObject> {
 		const apiService = this.getApiService(source);
 		if (!task)
 			throw new Error(
@@ -103,9 +85,9 @@ export class TaskService {
 
 	public async updateTask(
 		source: taskSource,
-		newTask: taskType,
-		oldTask: taskType,
-	): Promise<taskTransferObject> {
+		newTask: task,
+		oldTask: task,
+	): Promise<taskObject> {
 		const apiService = this.getApiService(source);
 		if (!newTask || !oldTask)
 			throw new Error(
@@ -116,8 +98,8 @@ export class TaskService {
 
 	public async deleteTask(
 		source: taskSource,
-		task: taskType,
-	): Promise<taskTransferObject> {
+		task: task,
+	): Promise<taskObject> {
 		const apiService = this.getApiService(source);
 		if (!task)
 			throw new Error(

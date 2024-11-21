@@ -30,7 +30,7 @@ export enum taskStatus {
 /**
  * main taskTypes interface for tasks, used to define the structure of a task object.
  */
-export type taskType = {
+export type task = {
 	id: string; // Unique identifier for the task
 	description: string; // Text input for task description
 	priority: taskPriority; // Priority levels
@@ -46,7 +46,7 @@ export type taskType = {
 	symbol?: string; // Symbol associated with the task (for visual identification)
 	source: taskSource; // Enum for the task's source
 	line?: number; // Line number in the source file
-	subtasks?: taskType[]; // Array of subtasks
+	subtasks?: task[]; // Array of subtasks
 	lineDescription: string; // Raw description from the source
 	tags?: string[]; // Array of tags associated with the task
 };
@@ -54,7 +54,7 @@ export type taskType = {
 /**
  * Example task object for reference.
  */
-export const exampleTask: taskType = {
+export const exampleTask: task = {
 	id: "1",
 	description: "Take out the trash",
 	priority: taskPriority.MEDIUM,
