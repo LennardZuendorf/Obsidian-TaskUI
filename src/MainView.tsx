@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { AppContext, useApp } from "./utils/context";
@@ -14,39 +14,48 @@ import KanbanBoard from "@//BoardView";
 import TaskList from "@//ListView";
 import { logger as logger } from "./utils/logger";
 import { DevTools } from "jotai-devtools";
+import { ErrorView } from "@//Error";
 
 export const VIEW_TYPE_MAIN = "react-view";
 
 const TaskUIApp: React.FC = () => {
+	const [error, setError] = useState<string | null>(null); // State for error message
+	const [crudService, setCrudService] = useState<CrudService | null>(null);
+	const [, setTasks] = useAtom(allTasksAtom);
+
 	const app = useApp();
-	if (!app) {
-		const msg =
-			"No app context available. This is a fatal error, aborting.";
-		logger.error(msg);
-		return (
-			<div>
-				<span>
-					Error during initialization: {msg}
-					Try reloading the plugin or Obsidian.
-				</span>
-			</div>
-		);
+
+	useEffect(() => {
+		try {
+			if (!app) throw new Error("App context is not available");
+			const service = new CrudService(app);
+			setCrudService(service);
+			logger.info("TaskUI: Loaded app and CRUD service successfully.");
+		} catch (err) {
+			setError(err.message);
+		}
+	}, [app]); // Add app as a dependency
+
+	async function fetchTasks() {
+		try {
+			const response = await crudService?.loadTasks();
+			if (response?.status && response.tasks) {
+				setTasks(response.tasks);
+				logger.info("Tasks fetched and state updated successfully.");
+			} else {
+				logger.error("Error fetching tasks from the API.");
+			}
+		} catch (error) {
+			logger.error(`Error fetching tasks: ${error.message}`);
+		}
 	}
 
-	const crudService = new CrudService(app);
-
-	const [, setAllTasks] = useAtom(allTasksAtom);
-
-	async function loadTasks(): Promise<boolean> {
-		try {
-			const response = await crudService.loadTasks();
-			setAllTasks(response.tasks ? response.tasks : []);
-			logger.info("Tasks loaded successfully.");
-			return true;
-		} catch (error) {
-			logger.error("Error fetching tasks:", error);
-			return false;
-		}
+	if (error) {
+		return (
+			<div className="flex items-center justify-center min-h-screen bg-gray-100">
+				<ErrorView message={error} />
+			</div>
+		);
 	}
 
 	return (
@@ -82,7 +91,7 @@ const TaskUIApp: React.FC = () => {
 							<Button
 								variant="ghost"
 								size="icon"
-								onClick={() => loadTasks()}
+								onClick={fetchTasks}
 							>
 								<RefreshCw className="h-5 w-5" />
 								<span className="sr-only">Reload Tasks</span>
@@ -134,7 +143,7 @@ export class MainView extends ItemView {
 		this.root.render(
 			<AppContext.Provider value={this.app}>
 				<React.StrictMode>
-					<div>Test Test</div>
+					<TaskUIApp />
 				</React.StrictMode>
 			</AppContext.Provider>,
 		);

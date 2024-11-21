@@ -1,25 +1,10 @@
 import { Plugin, WorkspaceLeaf } from "obsidian";
 import { MainView, VIEW_TYPE_MAIN } from "./MainView";
-import { checkRequiredPlugins } from "./utils/pluginCheck";
+import { logger } from "./utils/logger";
 
-/**
- * Main Plugin Class of the Shards Task UI Plugin
- * As defined by obsidian, this extends the generic Plugin class from obsidian.
- * This class is the entry point of the config.
- * @extends Plugin from "obsidian"
- */
-export class ShardsTaskUIPlugin extends Plugin {
-	/**
-	 * Initializes the plugin when it's loaded by Obsidian.
-	 * This method registers the main view and adds a ribbon icon to activate it.
-	 *
-	 * @remarks
-	 * This method is called automatically by Obsidian when the plugin is loaded.
-	 * It sets up the necessary components for the plugin to function within the Obsidian environment.
-	 *
-	 * @returns {Promise<void>} A promise that resolves when the plugin has finished loading.
-	 */
-	async onload(): Promise<void> {
+//TODO: Add plugin check and notice again.
+export default class ShardsTaskUIPlugin extends Plugin {
+	async onload() {
 		// Register the Main Tab View
 		this.registerView(VIEW_TYPE_MAIN, (leaf) => new MainView(leaf));
 
@@ -29,49 +14,32 @@ export class ShardsTaskUIPlugin extends Plugin {
 		});
 	}
 
-	/**
-	 * Detaches the Main Tab View from the Obsidian workspace.
-	 * This function is called when the plugin is unloaded.
-	 * @returns {Promise<void>} A promise that resolves when the Main Tab View is detached.
-	 */
-	async onunload(): Promise<void> {
+	async onunload() {
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_MAIN);
 	}
 
-	/**
-	 * Activates the Main Tab View in the Obsidian workspace.
-	 * This function checks for required plugins, creates or reveals the Main Tab View,
-	 * and provides notifications for missing required or optional plugins.
-	 * @returns {Promise<void>} A promise that resolves when the Main Tab View is activated or appropriate notifications are shown.
-	 */
-	async activateMainTabView(): Promise<void> {
+	// Method to activate the Main Tab View
+	async activateMainTabView() {
 		const { workspace } = this.app;
-		const requiredPluginIds = ["dataview"];
 
-		const {
-			requiredPluginsEnabled,
-			optionalPluginsEnabled,
-			missingRequiredPlugins,
-			missingOptionalPlugins,
-		} = checkRequiredPlugins(requiredPluginIds);
+		logger.info("Shards: Activating Main Tab View");
+		let leaf: WorkspaceLeaf | null = null;
+		const leaves = workspace.getLeavesOfType(VIEW_TYPE_MAIN);
 
-		if (requiredPluginsEnabled) {
-			let leaf: WorkspaceLeaf | null;
-			const leaves = workspace.getLeavesOfType(VIEW_TYPE_MAIN);
+		if (leaves.length > 0) {
+			leaf = leaves[0];
+			await workspace.revealLeaf(leaf);
+			logger.info("Shards: Switched to existing main tab leaf.");
+		} else {
+			leaf = workspace.getLeaf(false);
 
-			if (leaves.length > 0) {
-				leaf = leaves[0];
-				await workspace.revealLeaf(leaf);
-			} else {
-				leaf = workspace.getLeaf(false);
-
-				if (leaf) {
-					await leaf.setViewState({
-						type: VIEW_TYPE_MAIN,
-						active: true,
-					});
-				}
+			if (leaf) {
+				await leaf.setViewState({
+					type: VIEW_TYPE_MAIN,
+					active: true,
+				});
 			}
+			logger.info("Shards: Created new main tab leaf.");
 		}
 	}
 }
