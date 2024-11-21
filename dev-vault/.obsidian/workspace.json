@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "275bd0c4945948cf",
+        "id": "e47fbfce46528538",
         "type": "tabs",
         "children": [
           {
-            "id": "6c28e477024ede92",
+            "id": "ed0828ca0140e878",
             "type": "leaf",
             "state": {
               "type": "react-view",
@@ -16,23 +16,8 @@
               "icon": "lucide-file",
               "title": "TaskUI"
             }
-          },
-          {
-            "id": "918f298430a640bf",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Test Notes.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Test Notes"
-            }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -88,7 +73,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 200
   },
   "right": {
     "id": "a3f4394ff67c57e0",
@@ -174,7 +159,7 @@
       "taskui-plugin:Activate Main Tab View": false
     }
   },
-  "active": "918f298430a640bf",
+  "active": "ed0828ca0140e878",
   "lastOpenFiles": [
     "Test Notes.md",
     "Welcome.md"

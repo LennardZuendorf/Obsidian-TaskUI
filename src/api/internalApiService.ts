@@ -17,7 +17,7 @@ export class InternalApiService implements ApiService {
 
 	constructor(app: App) {
 		this.mdApi = new ObsidianApiProvider(app);
-		this.dvApi = new DataviewApiProvider();
+		this.dvApi = new DataviewApiProvider(app);
 		this.taskMapper = new TaskMapper();
 		this.eventEmitter = new EventEmitter();
 		this.initiatePeriodicTaskFetch().then((r) =>
