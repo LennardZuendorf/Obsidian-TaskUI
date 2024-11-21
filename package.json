@@ -8,7 +8,7 @@
 		"format": "prettier ./src --write",
 		"version": "node ./build/version-bump.mjs",
 		"dev": "npx cpy manifest.json build/taskui-plugin && node esbuild.config.mjs",
-		"build": "npm run format && node esbuild.config.mjs --production && npx cpy manifest.json build/taskui-plugin && rm build/taskui-plugin/main.css && rm build/taskui-plugin/styles.js",
+		"build": "npm run lint && npm run format && node esbuild.config.mjs --production && npx cpy manifest.json build/taskui-plugin && rm build/taskui-plugin/main.css && rm build/taskui-plugin/styles.js",
 		"build-release": "npm run build && npm run version",
 		"lint-staged": "lint-staged"
 	},
@@ -47,6 +47,7 @@
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
 		"esbuild-style-plugin": "^1.6.3",
+		"events": "^3.3.0",
 		"jotai": "^2.10.1",
 		"jotai-devtools": "^0.10.1",
 		"lodash": "^4.17.21",
