@@ -1,18 +1,15 @@
-import {
-	tasksTransferObject,
-	taskTransferObject,
-} from "../data/types/transferObjectTypes";
-import { taskType } from "../data/types/taskTypes";
+import { tasksObject, taskObject } from "../data/types/transferObjectTypes";
+import { task } from "../data/types/tasks";
 
 export interface ApiService {
-	getTasks(filePath?: string): Promise<tasksTransferObject>;
+	getTasks(filePath?: string): Promise<tasksObject>;
 	createTask(
-		task: taskType,
+		task: task,
 		filePath: string,
 		heading: string,
-	): Promise<taskTransferObject>;
-	editTask(newTask: taskType, oldTask: taskType): Promise<taskTransferObject>;
-	deleteTask(task: taskType): Promise<taskTransferObject>;
+	): Promise<taskObject>;
+	editTask(newTask: task, oldTask: task): Promise<taskObject>;
+	deleteTask(task: task): Promise<taskObject>;
 	on(event: string, callback: (data: any) => void): void;
 	emit(event: string, data: any): void;
 }

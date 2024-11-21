@@ -1,13 +1,13 @@
-import { taskType } from "./taskTypes";
+import { task } from "./tasks";
 
 /**
  * taskTransferObject interface for task operations, used to define the structure of a task transfer object used calls against the providers.
  * This object contains a single taskTypes object.
  * For error handling, the status field is used to indicate success or failure. If the status is false, an error occurred.
  */
-export type taskTransferObject = {
+export type taskObject = {
 	status: boolean;
-	task?: taskType;
+	task?: task;
 	lineString?: string;
 };
 
@@ -16,7 +16,7 @@ export type taskTransferObject = {
  * This object contains an array of taskTypes objects.
  * For error handling, the status field is used to indicate success or failure. If the status is false, an error occurred.
  */
-export type tasksTransferObject = {
+export type tasksObject = {
 	status: boolean;
-	tasks?: taskType[];
+	tasks?: task[];
 };

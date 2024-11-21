@@ -1,5 +1,5 @@
 import { App, TAbstractFile, TFile } from "obsidian";
-import { loggerUtil as logger } from "../../utils/loggerUtil";
+import { logger as logger } from "../../utils/logger";
 
 /**
  * ObsidianApiProvider class provides methods for creating, updating, and deleting tasks via the Obsidian API.

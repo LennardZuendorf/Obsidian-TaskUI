@@ -1,16 +1,16 @@
 import { atom } from "jotai";
-import { exampleTask, taskStatus, taskType } from "./types/taskTypes";
+import { exampleTask, taskStatus, task } from "./types/tasks";
 
 /**
  * The main atom to store all tasks, initialized with an example task. This atom is used to manage the state of all tasks in the application.
  */
-export const allTasksAtom = atom<taskType[]>([exampleTask]);
+export const allTasksAtom = atom<task[]>([exampleTask]);
 
 /**
  * Derived atom to filter tasks by source. This atom is used to filter tasks by source and basis for a listener to update the source.
  */
 export const mdTaskAtom = atom((get) => {
-	const allTasks: taskType[] = get(allTasksAtom);
+	const allTasks: task[] = get(allTasksAtom);
 	return allTasks.filter((item) => item.source === "obsidian");
 });
 // This is the spot for future atoms bound to external sources like Shards App or other task sources.

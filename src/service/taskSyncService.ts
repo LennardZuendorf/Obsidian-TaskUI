@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { taskType } from "../data/types/taskTypes";
+import { task } from "../data/types/tasks";
 import { InternalApiService } from "../api/internalApiService";
 import { App } from "obsidian";
 import _ from "lodash";
@@ -7,11 +7,11 @@ import _ from "lodash";
 export class TaskSyncService {
 	private eventEmitter = new EventEmitter();
 	private internalApiService;
-	private localTasks: taskType[] = [];
+	private localTasks: task[] = [];
 
-	constructor(app: App, initialTasks: taskType[]) {
+	constructor(app: App, initialTasks?: task[]) {
 		this.internalApiService = new InternalApiService(app);
-		this.localTasks = initialTasks;
+		if (initialTasks) this.localTasks = initialTasks;
 		this.setupListeners();
 	}
 
@@ -22,7 +22,7 @@ export class TaskSyncService {
 		);
 	}
 
-	private remoteUpdateHandler(remoteTasks: taskType[]) {
+	private remoteUpdateHandler(remoteTasks: task[]) {
 		const { mergedTasks } = this.mergeTasks(this.localTasks, remoteTasks);
 
 		if (!_.isEqual(this.localTasks, mergedTasks)) {
@@ -31,8 +31,8 @@ export class TaskSyncService {
 		}
 	}
 
-	private mergeTasks(localTasks: taskType[], remoteTasks: taskType[]) {
-		const conflicts: { localTask: taskType; remoteTask: taskType }[] = [];
+	private mergeTasks(localTasks: task[], remoteTasks: task[]) {
+		const conflicts: { localTask: task; remoteTask: task }[] = [];
 
 		const mergedTasks = _.unionBy(
 			localTasks,
@@ -56,7 +56,7 @@ export class TaskSyncService {
 		return { mergedTasks, conflicts };
 	}
 
-	public localUpdateHandler(localUpdates: taskType[]) {}
+	public localUpdateHandler(localUpdates: task[]) {}
 
 	public on(eventName: string, listener: (...args: any[]) => void) {
 		this.eventEmitter.on(eventName, listener);

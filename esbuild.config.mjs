@@ -46,7 +46,7 @@ const context = await esbuild.context({
 	logLevel: "info",
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
-    outdir: prod? './build/taskui-plugin/': './build/taskui-plugin-dev/',
+    outdir: './build/taskui-plugin',
     allowOverwrite: true,
 	minify: prod,
 	bundle: true,

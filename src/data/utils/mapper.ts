@@ -1,9 +1,4 @@
-import {
-	taskPriority,
-	taskSource,
-	taskStatus,
-	taskType,
-} from "../types/taskTypes";
+import { taskPriority, taskSource, taskStatus, task } from "../types/tasks";
 import { dvTaskType } from "../../api/internal/dataviewApi";
 import short from "short-uuid";
 import { parseDate } from "../../utils/dataUtils";
@@ -15,7 +10,7 @@ export class TaskMapper {
 	 * @param task - The taskTypes object to map.
 	 * @returns The string representation of the task for Dataview.
 	 */
-	public mapTaskToLineString(task: taskType): string {
+	public mapTaskToLineString(task: task): string {
 		const id = task.id ? `[id:: ${task.id}]` : "";
 		const dependsOn =
 			task.blocks && task.blocks.length > 0
@@ -44,7 +39,7 @@ export class TaskMapper {
 		return `- [${status}]${task.description} ${id} ${dependsOn} ${priority} ${recurs} ${created} ${start} ${scheduled} ${due} ${completion}\n	${subtaskStrings}`.trim();
 	}
 
-	public mapMdToTaskType(lineString: string): taskType {
+	public mapMdToTaskType(lineString: string): task {
 		const idMatch = lineString.match(/\[id:: ([^\]]+)\]/);
 		const dependsOnMatch = lineString.match(/\[dependsOn:: ([^\]]+)\]/);
 		const priorityMatch = lineString.match(/\[priority:: ([^\]]+)\]/);
@@ -90,8 +85,8 @@ export class TaskMapper {
 	 * @param dvTask - The dvTaskType object to map.
 	 * @returns The taskTypes object.
 	 */
-	public mapDvToTaskType(dvTask: dvTaskType): taskType {
-		const subtasks: taskType[] = [];
+	public mapDvToTaskType(dvTask: dvTaskType): task {
+		const subtasks: task[] = [];
 
 		// Map the task line string to a taskTypes object.
 		const mappedTask = this.mapMdToTaskType(dvTask.text);

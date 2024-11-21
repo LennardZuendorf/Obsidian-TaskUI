@@ -1,16 +1,13 @@
 import { DataviewApiProvider } from "./internal/dataviewApi";
 import { ObsidianApiProvider } from "./internal/obsidianApi";
 import { App } from "obsidian";
-import type { taskType } from "../data/types/taskTypes";
+import type { task } from "../data/types/tasks";
 import { defaultPath, defaultHeading } from "../config/settings";
-import { loggerUtil as logger } from "../utils/loggerUtil";
+import { logger as logger } from "../utils/logger";
 import { TaskMapper } from "../data/utils/mapper";
-import {
-	tasksTransferObject,
-	taskTransferObject,
-} from "../data/types/transferObjectTypes";
+import { tasksObject, taskObject } from "../data/types/transferObjectTypes";
 import { ApiService } from "./apiServiceInterface";
-import EventEmitter from "node:events";
+import EventEmitter from "events";
 
 export class InternalApiService implements ApiService {
 	private readonly mdApi: ObsidianApiProvider;
@@ -28,14 +25,14 @@ export class InternalApiService implements ApiService {
 		);
 	}
 
-	public async getTasks(filePath?: string): Promise<tasksTransferObject> {
+	public async getTasks(filePath?: string): Promise<tasksObject> {
 		try {
 			if (!this.dvApi.isDataviewApiAvailable()) {
 				logger.error("Dataview API is not available");
 				return { status: false };
 			}
 
-			let tasks: taskType[] = [];
+			let tasks: task[] = [];
 			if (filePath) {
 				const dvTasks = await this.dvApi.getTasksFromFile(filePath);
 				if (dvTasks) {
@@ -59,10 +56,7 @@ export class InternalApiService implements ApiService {
 		}
 	}
 
-	public async editTask(
-		newTask: taskType,
-		oldTask: taskType,
-	): Promise<taskTransferObject> {
+	public async editTask(newTask: task, oldTask: task): Promise<taskObject> {
 		try {
 			if (!this.dvApi.isDataviewApiAvailable()) {
 				logger.error("Dataview API is not available");
@@ -88,7 +82,7 @@ export class InternalApiService implements ApiService {
 		}
 	}
 
-	public async deleteTask(task: taskType): Promise<taskTransferObject> {
+	public async deleteTask(task: task): Promise<taskObject> {
 		try {
 			const deleted = await this.mdApi.deleteTask(
 				this.taskMapper.mapTaskToLineString(task),
@@ -113,10 +107,10 @@ export class InternalApiService implements ApiService {
 	}
 
 	public async createTask(
-		task: taskType,
+		task: task,
 		filePath: string = defaultPath,
 		heading: string = defaultHeading,
-	): Promise<taskTransferObject> {
+	): Promise<taskObject> {
 		try {
 			const lineString = this.taskMapper.mapTaskToLineString(task);
 			const response = await this.mdApi.createTask(
