@@ -32,3 +32,5 @@ data.json
 /build/taskui-plugin-dev/styles.css
 /build/taskui-plugin-dev/styles.js
 
+/build/taskui-plugin/
+/dev-vault/.obsidian/plugins/taskui-plugin/
