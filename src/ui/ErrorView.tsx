@@ -6,11 +6,21 @@ interface ErrorProps {
 	onRetry?: () => void;
 }
 
+/**
+ * A React functional component that displays an error message with optional details
+ * and a retry button.
+ *
+ * @param {ErrorProps} props - The properties for the ErrorView component.
+ * @param {string} props.message - The main error message to display.
+ * @param {string} [props.details] - Additional details about the error, if available.
+ * @param {() => void} [props.onRetry] - An optional callback function to be called when the retry button is clicked.
+ * @returns {JSX.Element} A JSX element representing the error view.
+ */
 export const ErrorView: React.FC<ErrorProps> = ({
 	message,
 	details,
 	onRetry,
-}) => {
+}: ErrorProps): JSX.Element => {
 	return (
 		<div className="flex items-center justify-center min-h-screen bg-gray-100">
 			<div className="max-w-md w-full bg-white shadow-md rounded-lg p-6">

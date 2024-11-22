@@ -21,7 +21,7 @@ import {
 	XCircle,
 } from "lucide-react";
 import { Button } from "@//base/Button";
-import { cn } from "../../utils/styleUtils";
+import { cn } from "../utils/cn";
 import {
 	DropdownMenu,
 	DropdownMenuContent,

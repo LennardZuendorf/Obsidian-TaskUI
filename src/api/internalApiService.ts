@@ -1,13 +1,14 @@
-import { DataviewApiProvider } from "./internal/dataviewApi";
-import { ObsidianApiProvider } from "./internal/obsidianApi";
 import { App } from "obsidian";
-import type { task } from "../data/types/tasks";
-import { defaultPath, defaultHeading } from "../config/settings";
-import { logger as logger } from "../utils/logger";
-import { TaskMapper } from "../data/utils/mapper";
-import { tasksObject, taskObject } from "../data/types/transferObjectTypes";
-import { ApiService } from "./apiServiceInterface";
+import { ObsidianApiProvider } from "./internalApi/obsidianApi";
 import EventEmitter from "events";
+import { TaskMapper } from "../data/utils/mapper";
+import { logger as logger } from "../utils/logger";
+import { DataviewApiProvider } from "./internalApi/dataviewApi";
+import { tasksObject, taskObject } from "../data/types/transferObjects";
+import { task } from "../data/types/tasks";
+import { InternalApiEvents } from "./types/events";
+import { ApiService } from "./types/apiService";
+import { defaultHeading, defaultPath } from "../config/settings";
 
 export class InternalApiService implements ApiService {
 	private readonly mdApi: ObsidianApiProvider;
@@ -17,11 +18,13 @@ export class InternalApiService implements ApiService {
 
 	constructor(app: App) {
 		this.mdApi = new ObsidianApiProvider(app);
-		this.dvApi = new DataviewApiProvider(app);
+		this.dvApi = new DataviewApiProvider();
 		this.taskMapper = new TaskMapper();
 		this.eventEmitter = new EventEmitter();
 		this.initiatePeriodicTaskFetch().then((r) =>
-			logger.debug("Periodic task fetch initiated for internal source."),
+			logger.info(
+				"TaskUI: Periodic task fetch initiated for internal source.",
+			),
 		);
 	}
 
@@ -144,11 +147,17 @@ export class InternalApiService implements ApiService {
 		}, 5000);
 	}
 
-	public on(event: string, callback: (data: any) => void): void {
+	public on<K extends keyof InternalApiEvents>(
+		event: K,
+		callback: (data: InternalApiEvents[K]) => void,
+	): void {
 		this.eventEmitter.on(event, callback);
 	}
 
-	public emit(event: string, data: any): void {
+	public emit<K extends keyof InternalApiEvents>(
+		event: K,
+		data: InternalApiEvents[K],
+	): void {
 		this.eventEmitter.emit(event, data);
 	}
 }

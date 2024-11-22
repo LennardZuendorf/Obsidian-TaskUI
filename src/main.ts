@@ -2,7 +2,6 @@ import { Plugin, WorkspaceLeaf } from "obsidian";
 import { MainView, VIEW_TYPE_MAIN } from "./MainView";
 import { logger } from "./utils/logger";
 
-//TODO: Add plugin check and notice again.
 export default class ShardsTaskUIPlugin extends Plugin {
 	async onload() {
 		// Register the Main Tab View

@@ -2,7 +2,7 @@ import { useAtom } from "jotai";
 import React from "react";
 import { TaskCard } from "./TaskCard";
 import { todoTasksAtom } from "../../data/atoms";
-import { cn } from "../../utils/styleUtils";
+import { cn } from "../utils/cn";
 import { BackgroundContainer } from "@//components/BackgroundContainer";
 
 /**

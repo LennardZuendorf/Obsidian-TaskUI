@@ -61,4 +61,8 @@ export class TaskSyncService {
 	public on(eventName: string, listener: (...args: any[]) => void) {
 		this.eventEmitter.on(eventName, listener);
 	}
+
+	public emit(eventName: string, ...args: any[]) {
+		this.eventEmitter.emit(eventName, ...args);
+	}
 }

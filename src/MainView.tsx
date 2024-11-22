@@ -14,7 +14,7 @@ import KanbanBoard from "@//BoardView";
 import TaskList from "@//ListView";
 import { logger as logger } from "./utils/logger";
 import { DevTools } from "jotai-devtools";
-import { ErrorView } from "@//Error";
+import { ErrorView } from "@//ErrorView";
 
 export const VIEW_TYPE_MAIN = "react-view";
 

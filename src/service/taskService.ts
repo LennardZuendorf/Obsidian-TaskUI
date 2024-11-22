@@ -1,6 +1,6 @@
 import { App } from "obsidian";
 import { taskSource, task } from "../data/types/tasks";
-import { tasksObject, taskObject } from "../data/types/transferObjectTypes";
+import { tasksObject, taskObject } from "../data/types/transferObjects";
 import { taskOperation } from "./types/operations";
 import { logger as logger } from "../utils/logger";
 import { InternalApiService } from "../api/internalApiService";
