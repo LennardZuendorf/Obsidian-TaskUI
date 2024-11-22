@@ -1,7 +1,7 @@
 import { taskPriority, taskSource, taskStatus, task } from "../types/tasks";
-import { dvTaskType } from "../../api/internal/dataviewApi";
+import { dvTaskType } from "../../api/internalApi/dataviewApi";
 import short from "short-uuid";
-import { parseDate } from "../../utils/dataUtils";
+import { parseDate } from "./dataUtils";
 import { defaultPath } from "../../config/settings";
 
 export class TaskMapper {

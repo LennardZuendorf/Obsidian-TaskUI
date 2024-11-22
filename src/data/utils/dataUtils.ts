@@ -1,5 +1,3 @@
-// Utility functions for data manipulation and validation.
-
 /**
  * Validate a value against a list of allowed values. If the value is not in the list, an error is thrown.
  * @param value

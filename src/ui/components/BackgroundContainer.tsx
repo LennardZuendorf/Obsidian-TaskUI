@@ -1,5 +1,5 @@
 import React from "react";
-import { cn } from "../../utils/styleUtils";
+import { cn } from "../utils/cn";
 
 /**
  * Background container component to display a background container.
