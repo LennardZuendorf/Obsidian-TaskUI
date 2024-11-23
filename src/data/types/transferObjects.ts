@@ -1,4 +1,4 @@
-import { task } from "./tasks";
+import { Task } from "./tasks";
 
 /**
  * taskTransferObject interface for task operations, used to define the structure of a task transfer object used calls against the providers.
@@ -7,7 +7,7 @@ import { task } from "./tasks";
  */
 export type taskObject = {
 	status: boolean;
-	task?: task;
+	task?: Task;
 	lineString?: string;
 };
 
@@ -18,5 +18,5 @@ export type taskObject = {
  */
 export type tasksObject = {
 	status: boolean;
-	tasks?: task[];
+	tasks?: Task[];
 };

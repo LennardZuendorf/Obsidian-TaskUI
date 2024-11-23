@@ -1,11 +1,11 @@
 import { App } from "obsidian";
 import { ObsidianApiProvider } from "./internalApi/obsidianApi";
 import EventEmitter from "events";
-import { TaskMapper } from "../data/utils/mapper";
+import { TaskMapper } from "../data/taskMapper";
 import { logger as logger } from "../utils/logger";
 import { DataviewApiProvider } from "./internalApi/dataviewApi";
 import { tasksObject, taskObject } from "../data/types/transferObjects";
-import { task } from "../data/types/tasks";
+import { Task } from "../data/types/tasks";
 import { InternalApiEvents } from "./types/events";
 import { ApiService } from "./types/apiService";
 import { defaultHeading, defaultPath } from "../config/settings";
@@ -35,7 +35,7 @@ export class InternalApiService implements ApiService {
 				return { status: false };
 			}
 
-			let tasks: task[] = [];
+			let tasks: Task[] = [];
 			if (filePath) {
 				const dvTasks = await this.dvApi.getTasksFromFile(filePath);
 				if (dvTasks) {
@@ -59,7 +59,7 @@ export class InternalApiService implements ApiService {
 		}
 	}
 
-	public async editTask(newTask: task, oldTask: task): Promise<taskObject> {
+	public async editTask(newTask: Task, oldTask: Task): Promise<taskObject> {
 		try {
 			if (!this.dvApi.isDataviewApiAvailable()) {
 				logger.error("Dataview API is not available");
@@ -85,7 +85,7 @@ export class InternalApiService implements ApiService {
 		}
 	}
 
-	public async deleteTask(task: task): Promise<taskObject> {
+	public async deleteTask(task: Task): Promise<taskObject> {
 		try {
 			const deleted = await this.mdApi.deleteTask(
 				this.taskMapper.mapTaskToLineString(task),
@@ -110,9 +110,9 @@ export class InternalApiService implements ApiService {
 	}
 
 	public async createTask(
-		task: task,
-		filePath: string = defaultPath,
-		heading: string = defaultHeading,
+		task: Task,
+		filePath: string = defaultSettings.defaultPath,
+		heading: string = defaultSettings.defaultHeading,
 	): Promise<taskObject> {
 		try {
 			const lineString = this.taskMapper.mapTaskToLineString(task);

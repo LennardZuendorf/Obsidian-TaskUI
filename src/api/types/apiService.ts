@@ -1,5 +1,5 @@
 import { tasksObject, taskObject } from "../../data/types/transferObjects";
-import { task } from "../../data/types/tasks";
+import { Task } from "../../data/types/tasks";
 
 export interface ApiService {
 	/**
@@ -19,7 +19,7 @@ export interface ApiService {
 	 * @returns A promise that resolves to a taskObject representing the created task.
 	 */
 	createTask(
-		task: task,
+		task: Task,
 		filePath: string,
 		heading: string,
 	): Promise<taskObject>;
@@ -31,7 +31,7 @@ export interface ApiService {
 	 * @param oldTask - The task object representing the task to be replaced.
 	 * @returns A promise that resolves to a taskObject representing the edited task.
 	 */
-	editTask(newTask: task, oldTask: task): Promise<taskObject>;
+	editTask(newTask: Task, oldTask: Task): Promise<taskObject>;
 
 	/**
 	 * Deletes a specified task.
@@ -39,7 +39,7 @@ export interface ApiService {
 	 * @param task - The task object representing the task to be deleted.
 	 * @returns A promise that resolves to a taskObject representing the deleted task.
 	 */
-	deleteTask(task: task): Promise<taskObject>;
+	deleteTask(task: Task): Promise<taskObject>;
 
 	/**
 	 * Registers an event listener for a specified event.

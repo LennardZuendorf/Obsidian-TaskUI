@@ -1,8 +1,8 @@
-import { taskPriority, taskSource, taskStatus, task } from "../types/tasks";
-import { dvTaskType } from "../../api/internalApi/dataviewApi";
+import { TaskPriority, TaskSource, TaskStatus, Task } from "./types/tasks";
+import { dvTaskType } from "../api/internalApi/dataviewApi";
 import short from "short-uuid";
-import { parseDate } from "./dataUtils";
-import { defaultPath } from "../../config/settings";
+import { parseDate } from "./utils/parseDate";
+import { defaultSettings } from "../config/settings";
 
 export class TaskMapper {
 	/**
@@ -10,7 +10,7 @@ export class TaskMapper {
 	 * @param task - The taskTypes object to map.
 	 * @returns The string representation of the task for Dataview.
 	 */
-	public mapTaskToLineString(task: task): string {
+	public mapTaskToLineString(task: Task): string {
 		const id = task.id ? `[id:: ${task.id}]` : "";
 		const dependsOn =
 			task.blocks && task.blocks.length > 0
@@ -39,7 +39,7 @@ export class TaskMapper {
 		return `- [${status}]${task.description} ${id} ${dependsOn} ${priority} ${recurs} ${created} ${start} ${scheduled} ${due} ${completion}\n	${subtaskStrings}`.trim();
 	}
 
-	public mapMdToTaskType(lineString: string): task {
+	public mapMdToTaskType(lineString: string): Task {
 		const idMatch = lineString.match(/\[id:: ([^\]]+)\]/);
 		const dependsOnMatch = lineString.match(/\[dependsOn:: ([^\]]+)\]/);
 		const priorityMatch = lineString.match(/\[priority:: ([^\]]+)\]/);
@@ -60,7 +60,7 @@ export class TaskMapper {
 			description: cleanDescriptionMatch,
 			priority: priorityMatch
 				? this.mapPriorityEnum(priorityMatch[1])
-				: taskPriority.MEDIUM,
+				: TaskPriority.MEDIUM,
 			recurs: recursMatch ? recursMatch[1] : null,
 			dueDate: parseDate(dueMatch ? dueMatch[1] : null),
 			scheduledDate: parseDate(scheduledMatch ? scheduledMatch[1] : null),
@@ -70,12 +70,12 @@ export class TaskMapper {
 				: [],
 			status: statusMatch
 				? this.mapStatusEnum(statusMatch)
-				: taskStatus.IN_PROGRESS,
+				: TaskStatus.IN_PROGRESS,
 			createdDate: parseDate(createdMatch ? createdMatch[1] : null),
 			doneDate: parseDate(completionMatch ? completionMatch[1] : null),
-			path: defaultPath,
+			path: defaultSettings.defaultPath,
 			symbol: "",
-			source: taskSource.OBSIDIAN,
+			source: TaskSource.OBSIDIAN,
 			lineDescription: lineString,
 		};
 	}
@@ -85,8 +85,8 @@ export class TaskMapper {
 	 * @param dvTask - The dvTaskType object to map.
 	 * @returns The taskTypes object.
 	 */
-	public mapDvToTaskType(dvTask: dvTaskType): task {
-		const subtasks: task[] = [];
+	public mapDvToTaskType(dvTask: dvTaskType): Task {
+		const subtasks: Task[] = [];
 
 		// Map the task line string to a taskTypes object.
 		const mappedTask = this.mapMdToTaskType(dvTask.text);
@@ -110,16 +110,16 @@ export class TaskMapper {
 	 * @param statusString - The status string to map.
 	 * @returns The taskStatus enum.
 	 */
-	private mapStatusEnum(statusString: string): taskStatus {
+	private mapStatusEnum(statusString: string): TaskStatus {
 		switch (statusString) {
 			case "/":
-				return taskStatus.IN_PROGRESS;
+				return TaskStatus.IN_PROGRESS;
 			case "-":
-				return taskStatus.CANCELLED;
+				return TaskStatus.CANCELLED;
 			case "x":
-				return taskStatus.DONE;
+				return TaskStatus.DONE;
 			default:
-				return taskStatus.TODO;
+				return TaskStatus.TODO;
 		}
 	}
 
@@ -128,20 +128,20 @@ export class TaskMapper {
 	 * @param priorityString - The priority string to map.
 	 * @returns The taskPriority enum.
 	 */
-	private mapPriorityEnum(priorityString: string): taskPriority {
+	private mapPriorityEnum(priorityString: string): TaskPriority {
 		switch (priorityString) {
 			case "high":
-				return taskPriority.HIGH;
+				return TaskPriority.HIGH;
 			case "highest":
-				return taskPriority.HIGHEST;
+				return TaskPriority.HIGHEST;
 			case "low":
-				return taskPriority.LOW;
+				return TaskPriority.LOW;
 			case "lowest":
-				return taskPriority.LOWEST;
+				return TaskPriority.LOWEST;
 			case "medium":
-				return taskPriority.MEDIUM;
+				return TaskPriority.MEDIUM;
 			default:
-				return taskPriority.MEDIUM;
+				return TaskPriority.MEDIUM;
 		}
 	}
 }

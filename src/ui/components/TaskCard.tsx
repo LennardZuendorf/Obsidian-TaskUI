@@ -1,5 +1,5 @@
 import { atom, useAtom } from "jotai";
-import { allTasksAtom } from "../../data/atoms";
+import { allTasksAtom } from "../../data/taskAtoms";
 import {
 	Card,
 	CardContent,
@@ -30,7 +30,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@//base/Dropdown";
-import { task, taskStatus } from "../../data/types/tasks";
+import { Task, TaskStatus } from "../../data/types/tasks";
 
 /**
  * TaskCard component to display a single task card.
@@ -48,7 +48,7 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 					const tasks = get(allTasksAtom);
 					return tasks.find((task) => task.id === taskId);
 				},
-				(get, set, update: Partial<task>) => {
+				(get, set, update: Partial<Task>) => {
 					set(allTasksAtom, (prevTasks) =>
 						prevTasks.map((task) =>
 							task.id === taskId ? { ...task, ...update } : task,
@@ -69,14 +69,14 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 		<Card
 			className={cn(
 				"w-full p-1 space-y-1 relative",
-				task.status === taskStatus.DONE ||
-					task.status === taskStatus.CANCELLED
+				task.status === TaskStatus.DONE ||
+					task.status === TaskStatus.CANCELLED
 					? "text-muted-foreground line-through"
 					: "",
 			)}
 			aria-label={
-				task.status === taskStatus.DONE ||
-				task.status === taskStatus.CANCELLED
+				task.status === TaskStatus.DONE ||
+				task.status === TaskStatus.CANCELLED
 					? "This Task is Completed"
 					: ""
 			}
@@ -98,12 +98,12 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
 							className={cn(
-								task.status === taskStatus.TODO &&
+								task.status === TaskStatus.TODO &&
 									"text-muted-foreground",
 							)}
-							disabled={task.status === taskStatus.TODO}
+							disabled={task.status === TaskStatus.TODO}
 							onClick={() =>
-								updateTask({ status: taskStatus.TODO })
+								updateTask({ status: TaskStatus.TODO })
 							}
 						>
 							<Circle className="mr-2 h-4 w-4" />
@@ -111,12 +111,12 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							className={cn(
-								task.status === taskStatus.IN_PROGRESS &&
+								task.status === TaskStatus.IN_PROGRESS &&
 									"text-muted-foreground",
 							)}
-							disabled={task.status === taskStatus.IN_PROGRESS}
+							disabled={task.status === TaskStatus.IN_PROGRESS}
 							onClick={() =>
-								updateTask({ status: taskStatus.IN_PROGRESS })
+								updateTask({ status: TaskStatus.IN_PROGRESS })
 							}
 						>
 							<PlayCircle className="mr-2 h-4 w-4" />
@@ -124,12 +124,12 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							className={cn(
-								task.status === taskStatus.DONE &&
+								task.status === TaskStatus.DONE &&
 									"text-muted-foreground",
 							)}
-							disabled={task.status === taskStatus.DONE}
+							disabled={task.status === TaskStatus.DONE}
 							onClick={() =>
-								updateTask({ status: taskStatus.DONE })
+								updateTask({ status: TaskStatus.DONE })
 							}
 						>
 							<CheckCircle2 className="mr-2 h-4 w-4" />
@@ -137,12 +137,12 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							className={cn(
-								task.status === taskStatus.CANCELLED &&
+								task.status === TaskStatus.CANCELLED &&
 									"text-muted-foreground",
 							)}
-							disabled={task.status === taskStatus.CANCELLED}
+							disabled={task.status === TaskStatus.CANCELLED}
 							onClick={() =>
-								updateTask({ status: taskStatus.CANCELLED })
+								updateTask({ status: TaskStatus.CANCELLED })
 							}
 						>
 							<XCircle className="mr-2 h-4 w-4" />
@@ -150,7 +150,7 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
-				{task.status != taskStatus.DONE && (
+				{task.status != TaskStatus.DONE && (
 					<Button
 						variant="ghost"
 						size="icon"

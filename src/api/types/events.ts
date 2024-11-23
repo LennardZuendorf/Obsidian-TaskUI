@@ -1,4 +1,4 @@
-import { task } from "../../data/types/tasks";
+import { Task } from "../../data/types/tasks";
 
 /**
  * Represents the internal API events and their associated data types.
@@ -7,5 +7,5 @@ import { task } from "../../data/types/tasks";
  *                          This event is triggered when tasks are successfully retrieved.
  */
 export type InternalApiEvents = {
-	tasksFetched: task[];
+	tasksFetched: Task[];
 };
