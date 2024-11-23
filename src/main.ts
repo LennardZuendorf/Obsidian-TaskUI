@@ -1,4 +1,4 @@
-import { Plugin, Setting, WorkspaceLeaf } from "obsidian";
+import { Plugin, WorkspaceLeaf } from "obsidian";
 import { MainView, VIEW_TYPE_MAIN } from "./MainView";
 import { logger } from "./utils/logger";
 import { defaultSettings, appSettings } from "./config/settings";
