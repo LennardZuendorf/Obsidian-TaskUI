@@ -5,7 +5,7 @@ import { AppContext, useApp } from "./utils/context";
 import "./styles.css";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@//base/Tabs";
 import { Button } from "@//base/Button";
-import { Bell, Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { KanbanSquare, List } from "lucide-react";
 import { useAtom } from "jotai";
 import { TaskService as CrudService } from "./service/taskService";

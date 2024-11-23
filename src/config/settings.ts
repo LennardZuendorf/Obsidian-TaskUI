@@ -1,5 +1,3 @@
-import React from "react";
-import { SettingsService } from "@ophidian/core";
 import { App, PluginSettingTab, Setting } from "obsidian";
 
 export type appSettings = {
