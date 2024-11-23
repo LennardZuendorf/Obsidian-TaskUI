@@ -3,7 +3,7 @@ import {
 	todoTasksAtom,
 	inProgressTasksAtom,
 	doneTasksAtom,
-} from "../data/atoms";
+} from "../data/taskAtoms";
 import { TaskColumn } from "./components/TaskColumn";
 
 /**
