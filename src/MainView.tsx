@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { ItemView, WorkspaceLeaf } from "obsidian";
+import { ItemView, Notice, WorkspaceLeaf } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { AppContext, useApp } from "./utils/context";
 import "./styles.css";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@//base/Tabs";
 import { Button } from "@//base/Button";
-import { Bell, RefreshCw, Settings } from "lucide-react";
+import { Bell, Plus, RefreshCw } from "lucide-react";
 import { KanbanSquare, List } from "lucide-react";
 import { useAtom } from "jotai";
 import { TaskService as CrudService } from "./service/taskService";
-import { allTasksAtom } from "./data/atoms";
+import { allTasksAtom } from "./data/taskAtoms";
 import KanbanBoard from "@//BoardView";
 import TaskList from "@//ListView";
 import { logger as logger } from "./utils/logger";
-import { DevTools } from "jotai-devtools";
 import { ErrorView } from "@//ErrorView";
+import { SettingsContext } from "./config/settings";
+import { showNotice } from "./ui/utils/notice";
+import { TaskModal } from "./ui/components/TaskModal";
 
 export const VIEW_TYPE_MAIN = "react-view";
 
@@ -48,6 +50,14 @@ const TaskUIApp: React.FC = () => {
 		} catch (error) {
 			logger.error(`Error fetching tasks: ${error.message}`);
 		}
+
+		showNotice("<span'>Tasks fetched successfully!</span>");
+	}
+
+	async function createTask() {
+		new TaskModal(this.app, (result) => {
+			new Notice(`Hello, ${result}!`);
+		}).open();
 	}
 
 	if (error) {
@@ -84,9 +94,13 @@ const TaskUIApp: React.FC = () => {
 							</Button>
 						</TabsTrigger>
 						<div className="flex items-center space-x-0.5">
-							<Button variant="ghost" size="icon">
-								<Bell className="h-5 w-5" />
-								<span className="sr-only">Notifications</span>
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={createTask}
+							>
+								<Plus className="h-5 w-5" />
+								<span className="sr-only">Add Task</span>
 							</Button>
 							<Button
 								variant="ghost"
@@ -96,16 +110,6 @@ const TaskUIApp: React.FC = () => {
 								<RefreshCw className="h-5 w-5" />
 								<span className="sr-only">Reload Tasks</span>
 							</Button>
-							<TabsTrigger
-								value="settings"
-								className="font-black grow"
-								asChild
-							>
-								<Button variant="ghost" size="icon">
-									<Settings className="h-5 w-5" />
-									<span className="sr-only">Settings</span>
-								</Button>
-							</TabsTrigger>
 						</div>
 					</TabsList>
 				</div>
@@ -115,9 +119,6 @@ const TaskUIApp: React.FC = () => {
 				<TabsContent value="board">
 					<KanbanBoard />
 				</TabsContent>
-				<TabsContent value="settings">
-					<DevTools />
-				</TabsContent>
 			</Tabs>
 		</div>
 	);
@@ -125,9 +126,13 @@ const TaskUIApp: React.FC = () => {
 
 export class MainView extends ItemView {
 	root: Root | null = null;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	settings: any;
 
-	constructor(leaf: WorkspaceLeaf) {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	constructor(leaf: WorkspaceLeaf, settings: any) {
 		super(leaf);
+		this.settings = settings;
 	}
 
 	getViewType() {
@@ -141,11 +146,13 @@ export class MainView extends ItemView {
 	async onOpen() {
 		this.root = createRoot(this.containerEl.children[1]);
 		this.root.render(
-			<AppContext.Provider value={this.app}>
-				<React.StrictMode>
-					<TaskUIApp />
-				</React.StrictMode>
-			</AppContext.Provider>,
+			<SettingsContext.Provider value={this.settings}>
+				<AppContext.Provider value={this.app}>
+					<React.StrictMode>
+						<TaskUIApp />
+					</React.StrictMode>
+				</AppContext.Provider>
+			</SettingsContext.Provider>,
 		);
 	}
 

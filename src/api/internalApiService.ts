@@ -8,7 +8,7 @@ import { tasksObject, taskObject } from "../data/types/transferObjects";
 import { Task } from "../data/types/tasks";
 import { InternalApiEvents } from "./types/events";
 import { ApiService } from "./types/apiService";
-import { defaultHeading, defaultPath } from "../config/settings";
+import { defaultSettings } from "../config/settings";
 
 export class InternalApiService implements ApiService {
 	private readonly mdApi: ObsidianApiProvider;

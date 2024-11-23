@@ -9,7 +9,7 @@ import { Notice } from "obsidian";
 export function showNotice(
 	message: string,
 	persistent = false,
-	duration = 10,
+	duration = 5,
 ): void {
 	// Create a temporary container to parse the HTML string
 	const tempContainer = document.createElement("div");
