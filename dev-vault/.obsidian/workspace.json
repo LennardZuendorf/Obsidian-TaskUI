@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "5b4b8092d278ca81",
+        "id": "52374c615321f83d",
         "type": "tabs",
         "children": [
           {
-            "id": "f97ecacab6490370",
+            "id": "bb4f8e1e3faae57a",
             "type": "leaf",
             "state": {
               "type": "react-view",
@@ -159,7 +159,7 @@
       "taskui-plugin:Activate Main Tab View": false
     }
   },
-  "active": "f97ecacab6490370",
+  "active": "bb4f8e1e3faae57a",
   "lastOpenFiles": [
     "Test Notes.md",
     "Welcome.md"

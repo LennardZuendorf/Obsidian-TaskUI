@@ -1,20 +1,19 @@
 import { App } from "obsidian";
-import { taskSource, task } from "../data/types/tasks";
+import { TaskSource, Task } from "../data/types/tasks";
 import { tasksObject, taskObject } from "../data/types/transferObjects";
 import { taskOperation } from "./types/operations";
 import { logger as logger } from "../utils/logger";
 import { InternalApiService } from "../api/internalApiService";
-import { defaultHeading, defaultPath } from "../config/settings";
 
 export interface ApiService {
 	getTasks(filePath?: string): Promise<tasksObject>;
 	createTask(
-		task: task,
+		task: Task,
 		filePath: string,
 		heading: string,
 	): Promise<taskObject>;
-	editTask(newTask: task, oldTask: task): Promise<taskObject>;
-	deleteTask(task: task): Promise<taskObject>;
+	editTask(newTask: Task, oldTask: Task): Promise<taskObject>;
+	deleteTask(task: Task): Promise<taskObject>;
 }
 
 export class TaskService {
@@ -24,11 +23,11 @@ export class TaskService {
 		this.app = app;
 	}
 
-	private getApiService(source: taskSource): ApiService {
+	private getApiService(source: TaskSource): ApiService {
 		switch (source) {
-			case taskSource.OBSIDIAN:
+			case TaskSource.OBSIDIAN:
 				return new InternalApiService(this.app);
-			case taskSource.TODOIST:
+			case TaskSource.TODOIST:
 				logger.error(`Unsupported task source: ${source}`);
 				throw new Error(`Unsupported task source: ${source}`);
 			default:
@@ -38,10 +37,10 @@ export class TaskService {
 	}
 
 	public async loadTasks(): Promise<tasksObject> {
-		const taskList: task[] = [];
+		const taskList: Task[] = [];
 
 		try {
-			const mdResponse = await this.getAllTasks(taskSource.OBSIDIAN);
+			const mdResponse = await this.getAllTasks(TaskSource.OBSIDIAN);
 
 			if (mdResponse.status && mdResponse.tasks) {
 				taskList.push(...mdResponse.tasks);
@@ -57,7 +56,7 @@ export class TaskService {
 	}
 
 	public async getAllTasks(
-		source: taskSource,
+		source: TaskSource,
 		filePath?: string,
 	): Promise<tasksObject> {
 		const apiService = this.getApiService(source);
@@ -66,27 +65,23 @@ export class TaskService {
 	}
 
 	public async createTask(
-		source: taskSource,
-		task: task,
-		filePath?: string,
-		heading?: string,
+		source: TaskSource,
+		task: Task,
+		filePath: string,
+		heading: string,
 	): Promise<taskObject> {
 		const apiService = this.getApiService(source);
 		if (!task)
 			throw new Error(
 				`Operation ${taskOperation.CREATE} requires a task.`,
 			);
-		return apiService.createTask(
-			task,
-			filePath ? filePath : defaultPath,
-			heading ? heading : defaultHeading,
-		);
+		return apiService.createTask(task, filePath, heading);
 	}
 
 	public async updateTask(
-		source: taskSource,
-		newTask: task,
-		oldTask: task,
+		source: TaskSource,
+		newTask: Task,
+		oldTask: Task,
 	): Promise<taskObject> {
 		const apiService = this.getApiService(source);
 		if (!newTask || !oldTask)
@@ -97,8 +92,8 @@ export class TaskService {
 	}
 
 	public async deleteTask(
-		source: taskSource,
-		task: task,
+		source: TaskSource,
+		task: Task,
 	): Promise<taskObject> {
 		const apiService = this.getApiService(source);
 		if (!task)
