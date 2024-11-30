@@ -17,6 +17,8 @@ import { ErrorView } from "@//ErrorView";
 import { SettingsContext } from "./config/settings";
 import { showNotice } from "./ui/utils/notice";
 import { TaskModal } from "./ui/components/TaskModal";
+import { Task } from "svelte/internal";
+import { useSettings } from "./config/settings";
 
 export const VIEW_TYPE_MAIN = "react-view";
 
@@ -24,8 +26,8 @@ const TaskUIApp: React.FC = () => {
 	const [error, setError] = useState<string | null>(null); // State for error message
 	const [crudService, setCrudService] = useState<CrudService | null>(null);
 	const [, setTasks] = useAtom(allTasksAtom);
-
 	const app = useApp();
+	const settings = useSettings();
 
 	useEffect(() => {
 		try {
@@ -55,8 +57,16 @@ const TaskUIApp: React.FC = () => {
 	}
 
 	async function createTask() {
-		new TaskModal(this.app, (result) => {
-			new Notice(`Hello, ${result}!`);
+		new TaskModal(this.app, (task) => {
+			if (task) {
+				crudService?.createTask(
+					task,
+					settings?.defaultHeading || "# Tasks",
+				);
+				new Notice(`Task updated successfully!`);
+			} else {
+				new Notice(`Task update was unsuccessful!`);
+			}
 		}).open();
 	}
 

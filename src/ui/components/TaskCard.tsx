@@ -31,6 +31,9 @@ import {
 	DropdownMenuTrigger,
 } from "@//base/Dropdown";
 import { Task, TaskStatus } from "../../data/types/tasks";
+import { TaskModal } from "@//components/TaskModal";
+import { App, Notice } from "obsidian";
+import { useApp } from "../../utils/context";
 
 /**
  * TaskCard component to display a single task card.
@@ -38,6 +41,8 @@ import { Task, TaskStatus } from "../../data/types/tasks";
  * It uses a derived atom to get a single task by taskId. This means it's reactive and will update when the task is updated.
  */
 export const TaskCard = ({ taskId }: { taskId: string }) => {
+	const app = useApp();
+
 	// Create a derived atom to get the single task by taskId.
 	// Means updates to this atom will update the task and all the other components using an atom that encapsulates this specific task.
 	const taskAtom = useMemo(
@@ -63,7 +68,22 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 	const [task, updateTask] = useAtom(taskAtom);
 
 	// Conditional rendering for null task
-	if (!task) return null;
+	if (!task || !app) return null;
+
+	async function editTask() {
+		new TaskModal(
+			app as App,
+			(updatedTask: Task) => {
+				if (updatedTask) {
+					updateTask(updatedTask);
+					new Notice(`Task updated successfully!`);
+				} else {
+					new Notice(`Task update was unsuccessful!`);
+				}
+			},
+			task,
+		).open();
+	}
 
 	return (
 		<Card
@@ -156,6 +176,7 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 						size="icon"
 						className="h-6 w-6"
 						aria-label="Edit task"
+						onClick={editTask}
 					>
 						<Edit2Icon className="h-4 w-4" />
 					</Button>

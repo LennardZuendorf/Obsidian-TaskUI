@@ -1,8 +1,9 @@
 import { TaskPriority, TaskSource, TaskStatus, Task } from "./types/tasks";
 import { dvTaskType } from "../api/internalApi/dataviewApi";
-import short from "short-uuid";
 import { parseDate } from "./utils/parseDate";
 import { defaultSettings } from "../config/settings";
+import { TaskBuilder } from "./taskBuilder";
+import { format } from "date-fns";
 
 export class TaskMapper {
 	/**
@@ -19,24 +20,24 @@ export class TaskMapper {
 		const priority = task.priority ? `[priority:: ${task.priority}]` : "";
 		const recurs = task.recurs ? `[repeat:: ${task.recurs}]` : "";
 		const created = task.createdDate
-			? `[created:: ${task.createdDate}]`
+			? `[created:: ${this.formatDate(task.createdDate)}]`
 			: "";
 		const start = task.startDate ? `[start:: ${task.startDate}]` : "";
 		const scheduled = task.scheduledDate
-			? `[scheduled:: ${task.scheduledDate}]`
+			? `[scheduled:: ${this.formatDate(task.scheduledDate)}]`
 			: "";
-		const due = task.dueDate ? `[due:: ${task.dueDate}]` : "";
+		const due = task.dueDate ? `[due:: ${this.formatDate(task.dueDate)}]` : "";
 		const completion = task.doneDate
-			? `[completion:: ${task.doneDate}]`
+			? `[completion:: ${this.formatDate(task.doneDate)}]`
 			: "";
 
-		const subtaskStrings = task.subtasks
+		const subtaskStrings = task.subtasks? task.subtasks
 			?.map(this.mapTaskToLineString)
-			.join("\n");
+			.join("\n	"):"";
 
 		const status = this.mapStatusEnum(task.status);
 
-		return `- [${status}]${task.description} ${id} ${dependsOn} ${priority} ${recurs} ${created} ${start} ${scheduled} ${due} ${completion}\n	${subtaskStrings}`.trim();
+		return `- [${this.reverseMapStatus(status)}] ${task.description} ${id} ${dependsOn} ${priority} ${recurs} ${created} ${start} ${scheduled} ${due} ${completion} ${subtaskStrings? `\n	${subtaskStrings}`: ""}`.trim();
 	}
 
 	public mapMdToTaskType(lineString: string): Task {
@@ -55,29 +56,31 @@ export class TaskMapper {
 			.join(" ")
 			.trim();
 
-		return {
-			id: idMatch ? idMatch[1] : short.uuid(),
-			description: cleanDescriptionMatch,
-			priority: priorityMatch
-				? this.mapPriorityEnum(priorityMatch[1])
-				: TaskPriority.MEDIUM,
-			recurs: recursMatch ? recursMatch[1] : null,
-			dueDate: parseDate(dueMatch ? dueMatch[1] : null),
-			scheduledDate: parseDate(scheduledMatch ? scheduledMatch[1] : null),
-			startDate: parseDate(startMatch ? startMatch[1] : null),
-			blocks: dependsOnMatch
-				? dependsOnMatch.toString().split(/(\s+)/)
-				: [],
-			status: statusMatch
-				? this.mapStatusEnum(statusMatch)
-				: TaskStatus.IN_PROGRESS,
-			createdDate: parseDate(createdMatch ? createdMatch[1] : null),
-			doneDate: parseDate(completionMatch ? completionMatch[1] : null),
-			path: defaultSettings.defaultPath,
-			symbol: "",
-			source: TaskSource.OBSIDIAN,
-			lineDescription: lineString,
-		};
+		return TaskBuilder.create()
+			.setDescription(cleanDescriptionMatch)
+			.setPriority(
+				priorityMatch
+					? this.mapPriorityEnum(priorityMatch[1])
+					: TaskPriority.MEDIUM,
+			)
+			.setStatus(
+				statusMatch
+					? this.mapStatusEnum(statusMatch)
+					: TaskStatus.IN_PROGRESS,
+			)
+			.setPath(defaultSettings.defaultPath)
+			.setSource(TaskSource.OBSIDIAN)
+			.setRecurs(recursMatch ? recursMatch[1] : null)
+			.setDueDate(parseDate(dueMatch ? dueMatch[1] : null))
+			.setScheduledDate(
+				parseDate(scheduledMatch ? scheduledMatch[1] : null),
+			)
+			.setStartDate(parseDate(startMatch ? startMatch[1] : null))
+			.setBlocks(
+				dependsOnMatch ? dependsOnMatch.toString().split(/(\s+)/) : [],
+			)
+			.setDoneDate(parseDate(completionMatch ? completionMatch[1] : null))
+			.build();
 	}
 
 	/**
@@ -143,5 +146,22 @@ export class TaskMapper {
 			default:
 				return TaskPriority.MEDIUM;
 		}
+	}
+
+	private reverseMapStatus(taskStatus: TaskStatus): string {
+		switch (taskStatus) {
+            case TaskStatus.IN_PROGRESS:
+                return "/";
+            case TaskStatus.CANCELLED:
+                return "-";
+            case TaskStatus.DONE:
+                return "x";
+            default:
+                return " ";
+        }
+	}
+
+	private formatDate(date: Date): string {
+		return format(date, "MM/dd/yyyy");
 	}
 }

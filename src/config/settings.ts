@@ -25,9 +25,6 @@ export class AppSettingsTab extends PluginSettingTab {
 		// Clear previous elements
 		containerEl.empty();
 
-		// Add a header
-		containerEl.createEl("h2", { text: "TaskUI Plugin Settings" });
-
 		// Default Path Setting
 		new Setting(containerEl)
 			.setName("Default Path")

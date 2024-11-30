@@ -111,15 +111,14 @@ export class InternalApiService implements ApiService {
 
 	public async createTask(
 		task: Task,
-		filePath: string = defaultSettings.defaultPath,
-		heading: string = defaultSettings.defaultHeading,
+		heading: string
 	): Promise<taskObject> {
 		try {
-			const lineString = this.taskMapper.mapTaskToLineString(task);
+			task.lineDescription = this.taskMapper.mapTaskToLineString(task);
 			const response = await this.mdApi.createTask(
-				lineString,
-				filePath,
-				heading,
+				task.lineDescription,
+				task.path,
+				heading
 			);
 
 			if (response) {

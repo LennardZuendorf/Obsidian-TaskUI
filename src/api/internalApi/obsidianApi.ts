@@ -38,7 +38,7 @@ export class ObsidianApiProvider {
 		mdHeading: string,
 	): Promise<string | null> {
 		try {
-			const fileExists = await this.checkFileExists(filePath);
+			const fileExists = await this.checkFileExists(filePath.toString());
 
 			if (!fileExists) {
 				const initialContent = `${mdHeading}\n${lineString}`;
@@ -75,7 +75,7 @@ export class ObsidianApiProvider {
 					}
 
 					// Add the task line after the heading
-					lines.splice(headingIndex + 1, 0, mdHeading);
+					lines.splice(headingIndex + 1, 0, lineString);
 					await this.obsidianApp.vault.modify(file, lines.join("\n"));
 
 					return lineString;
@@ -178,7 +178,6 @@ export class ObsidianApiProvider {
 				lines.splice(taskLineIndex, 1);
 				await this.obsidianApp.vault.modify(file, lines.join("\n"));
 
-				// Optionally, return the deleted task's line string
 				return true;
 			}
 		} catch (error) {
@@ -222,7 +221,7 @@ export class ObsidianApiProvider {
 			return true;
 		} catch (error) {
 			logger.error(
-				`Error while trying to create a file at path: ${path} - ${error.message}`,
+				`Error while trying to create a file at path: ${path} with error ${error.message}`,
 			);
 			return false;
 		}

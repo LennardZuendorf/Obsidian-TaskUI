@@ -6,13 +6,9 @@ export class TaskModal extends Modal {
 	private task: Task | null;
 	private onSubmit: (task: Task) => void;
 
-	constructor(
-		app: App,
-		onSubmit: (task: Task) => void,
-		task: Task | null = null,
-	) {
+	constructor(app: App, onSubmit: (task: Task) => void, task?: Task) {
 		super(app);
-		this.task = task;
+		this.task = task ? task : null;
 		this.onSubmit = onSubmit;
 		this.setTitle(task ? "Edit Task" : "Create Task");
 		this.buildForm();
@@ -61,12 +57,11 @@ export class TaskModal extends Modal {
 						return;
 					}
 
-					const taskBuilder = new TaskBuilder(this.task || undefined)
+					const updatedTask = TaskBuilder.create(this.task || undefined)
 						.setDescription(description)
 						.setPriority(priority)
-						.setStatus(status);
-
-					const updatedTask = taskBuilder.build();
+						.setStatus(status)
+						.build();
 
 					this.close();
 					this.onSubmit(updatedTask);

@@ -9,8 +9,7 @@ export interface ApiService {
 	getTasks(filePath?: string): Promise<tasksObject>;
 	createTask(
 		task: Task,
-		filePath: string,
-		heading: string,
+		heading: string
 	): Promise<taskObject>;
 	editTask(newTask: Task, oldTask: Task): Promise<taskObject>;
 	deleteTask(task: Task): Promise<taskObject>;
@@ -64,18 +63,9 @@ export class TaskService {
 		return apiService.getTasks(filePath);
 	}
 
-	public async createTask(
-		source: TaskSource,
-		task: Task,
-		filePath: string,
-		heading: string,
-	): Promise<taskObject> {
-		const apiService = this.getApiService(source);
-		if (!task)
-			throw new Error(
-				`Operation ${taskOperation.CREATE} requires a task.`,
-			);
-		return apiService.createTask(task, filePath, heading);
+	public async createTask(task: Task, heading: string): Promise<taskObject> {
+		const apiService = this.getApiService(task.source);
+		return apiService.createTask(task, heading);
 	}
 
 	public async updateTask(
