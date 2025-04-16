@@ -5,55 +5,87 @@ import { AppContext, useApp } from "./utils/context";
 import "./styles.css";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@//base/Tabs";
 import { Button } from "@//base/Button";
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw, Bug } from "lucide-react";
 import { KanbanSquare, List } from "lucide-react";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { TaskService as CrudService } from "./service/taskService";
-import { allTasksAtom } from "./data/taskAtoms";
+import {
+	changeTasksAtom,
+	debugStateAtom,
+	resetStateAtom,
+} from "./data/taskAtoms";
 import KanbanBoard from "@//BoardView";
 import TaskList from "@//ListView";
-import { logger as logger } from "./utils/logger";
 import { ErrorView } from "@//ErrorView";
+import { logger as logger } from "./utils/logger";
 import { SettingsContext } from "./config/settings";
 import { showNotice } from "./ui/utils/notice";
 import { TaskModal } from "./ui/components/TaskModal";
-import { Task } from "svelte/internal";
 import { useSettings } from "./config/settings";
+import { storeOperation as str } from "./data/types/operations";
 
 export const VIEW_TYPE_MAIN = "react-view";
+
+const DebugView: React.FC = () => {
+	const debugState = useAtomValue(debugStateAtom);
+	const resetState = useSetAtom(resetStateAtom);
+
+	return (
+		<div className="p-4 space-y-4">
+			<div className="flex items-center justify-between">
+				<h3 className="text-lg font-semibold">Jotai Debug View</h3>
+				<Button
+					variant="destructive"
+					onClick={() => {
+						resetState();
+						showNotice("State reset successful!");
+					}}
+				>
+					Reset State
+				</Button>
+			</div>
+
+			{Object.entries(debugState).map(([key, value]) => (
+				<div key={key} className="space-y-2">
+					<h4 className="font-medium text-sm text-muted-foreground">
+						{key}
+					</h4>
+					<div className="bg-secondary p-4 rounded-md">
+						<pre className="whitespace-pre-wrap overflow-x-auto">
+							{JSON.stringify(value, null, 2)}
+						</pre>
+					</div>
+				</div>
+			))}
+		</div>
+	);
+};
 
 const TaskUIApp: React.FC = () => {
 	const [error, setError] = useState<string | null>(null); // State for error message
 	const [crudService, setCrudService] = useState<CrudService | null>(null);
-	const [, setTasks] = useAtom(allTasksAtom);
+	const [, changeTasks] = useAtom(changeTasksAtom);
 	const app = useApp();
 	const settings = useSettings();
 
-	useEffect(() => {
-		try {
-			if (!app) throw new Error("App context is not available");
-			const service = new CrudService(app);
-			setCrudService(service);
-			logger.info("TaskUI: Loaded app and CRUD service successfully.");
-		} catch (err) {
-			setError(err.message);
-		}
-	}, [app]); // Add app as a dependency
-
 	async function fetchTasks() {
 		try {
-			const response = await crudService?.loadTasks();
-			if (response?.status && response.tasks) {
-				setTasks(response.tasks);
+			if (!crudService) {
+				throw new Error("CRUD service is not initialized");
+			}
+			const response = await crudService.loadTasks();
+			if (response.status && response.tasks) {
+				changeTasks({ operation: str.REPLACE, tasks: response.tasks });
 				logger.info("Tasks fetched and state updated successfully.");
 			} else {
 				logger.error("Error fetching tasks from the API.");
 			}
 		} catch (error) {
 			logger.error(`Error fetching tasks: ${error.message}`);
+			setError(error.message);
 		}
 
-		showNotice("<span'>Tasks fetched successfully!</span>");
+		showNotice("<span>Tasks fetched successfully!</span>");
 	}
 
 	async function createTask() {
@@ -63,12 +95,31 @@ const TaskUIApp: React.FC = () => {
 					task,
 					settings?.defaultHeading || "# Tasks",
 				);
+				changeTasks({ operation: str.ADD, tasks: [task] });
 				new Notice(`Task updated successfully!`);
 			} else {
 				new Notice(`Task update was unsuccessful!`);
 			}
 		}).open();
 	}
+
+	useEffect(() => {
+		try {
+			if (!app) throw new Error("App context is not available");
+			const service = new CrudService(app);
+			setCrudService(service);
+			logger.info("TaskUI: Loaded app and CRUD service successfully.");
+		} catch (err) {
+			setError(err.message);
+			logger.error(`Error initializing CRUD service: ${err.message}`);
+		}
+	}, []); // Add app as a dependency
+
+	useEffect(() => {
+		if (crudService) {
+			fetchTasks();
+		}
+	}, [crudService]);
 
 	if (error) {
 		return (
@@ -80,7 +131,7 @@ const TaskUIApp: React.FC = () => {
 
 	return (
 		<div>
-			<Tabs defaultValue="all" className="w-full h-full">
+			<Tabs defaultValue="list" className="w-full h-full">
 				<div className="flex items-center max-w-full justify-between bg-transparent">
 					<TabsList className="flex grow max-w-full space-x-2 bg-transparent">
 						<TabsTrigger
@@ -101,6 +152,16 @@ const TaskUIApp: React.FC = () => {
 							<Button variant="outline">
 								<KanbanSquare />
 								Board
+							</Button>
+						</TabsTrigger>
+						<TabsTrigger
+							value="debug"
+							className="font-black grow"
+							asChild
+						>
+							<Button variant="outline">
+								<Bug />
+								Debug
 							</Button>
 						</TabsTrigger>
 						<div className="flex items-center space-x-0.5">
@@ -128,6 +189,9 @@ const TaskUIApp: React.FC = () => {
 				</TabsContent>
 				<TabsContent value="board">
 					<KanbanBoard />
+				</TabsContent>
+				<TabsContent value="debug">
+					<DebugView />
 				</TabsContent>
 			</Tabs>
 		</div>

@@ -1,16 +1,13 @@
 import { App } from "obsidian";
 import { TaskSource, Task } from "../data/types/tasks";
 import { tasksObject, taskObject } from "../data/types/transferObjects";
-import { taskOperation } from "./types/operations";
+import { serviceOperation } from "./types/operations";
 import { logger as logger } from "../utils/logger";
 import { InternalApiService } from "../api/internalApiService";
 
 export interface ApiService {
 	getTasks(filePath?: string): Promise<tasksObject>;
-	createTask(
-		task: Task,
-		heading: string
-	): Promise<taskObject>;
+	createTask(task: Task, heading: string): Promise<taskObject>;
 	editTask(newTask: Task, oldTask: Task): Promise<taskObject>;
 	deleteTask(task: Task): Promise<taskObject>;
 }
@@ -76,7 +73,7 @@ export class TaskService {
 		const apiService = this.getApiService(source);
 		if (!newTask || !oldTask)
 			throw new Error(
-				`Operation ${taskOperation.UPDATE} requires both newTask and oldTask.`,
+				`Operation ${serviceOperation.UPDATE} requires both newTask and oldTask.`,
 			);
 		return apiService.editTask(newTask, oldTask);
 	}
@@ -88,7 +85,7 @@ export class TaskService {
 		const apiService = this.getApiService(source);
 		if (!task)
 			throw new Error(
-				`Operation ${taskOperation.DELETE} requires a task.`,
+				`Operation ${serviceOperation.DELETE} requires a task.`,
 			);
 		return apiService.deleteTask(task);
 	}

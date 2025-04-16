@@ -57,7 +57,9 @@ export class TaskModal extends Modal {
 						return;
 					}
 
-					const updatedTask = TaskBuilder.create(this.task || undefined)
+					const updatedTask = TaskBuilder.create(
+						this.task || undefined,
+					)
 						.setDescription(description)
 						.setPriority(priority)
 						.setStatus(status)

@@ -8,7 +8,6 @@ import { tasksObject, taskObject } from "../data/types/transferObjects";
 import { Task } from "../data/types/tasks";
 import { InternalApiEvents } from "./types/events";
 import { ApiService } from "./types/apiService";
-import { defaultSettings } from "../config/settings";
 
 export class InternalApiService implements ApiService {
 	private readonly mdApi: ObsidianApiProvider;
@@ -109,16 +108,13 @@ export class InternalApiService implements ApiService {
 		}
 	}
 
-	public async createTask(
-		task: Task,
-		heading: string
-	): Promise<taskObject> {
+	public async createTask(task: Task, heading: string): Promise<taskObject> {
 		try {
 			task.lineDescription = this.taskMapper.mapTaskToLineString(task);
 			const response = await this.mdApi.createTask(
 				task.lineDescription,
 				task.path,
-				heading
+				heading,
 			);
 
 			if (response) {

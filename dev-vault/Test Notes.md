@@ -1,1 +1,1 @@
-- [ ] Tasks Test Task  [priority:: medium]  [due:: 2024-12-02]
+- [ ] Tasks Test Task  [dependsOn:: gzfmve]  [priority:: medium]  [due:: 2024-12-02] 

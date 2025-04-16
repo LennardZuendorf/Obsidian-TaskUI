@@ -40,7 +40,7 @@ export type Task = {
 	startDate?: Date | null; // Date object for the start date (null if no start date)
 	blocks?: string[]; // Array of task IDs or task references that this task is dependent on
 	status: TaskStatus; // Status of the task
-	createdDate: Date | null; // Date object for when the task was created
+	createdDate?: Date | null; // Date object for when the task was created
 	doneDate?: Date | null; // Date object for when the task was completed
 	path: string; // Path of the task in your notes or system
 	symbol?: string; // Symbol associated with the task (for visual identification)

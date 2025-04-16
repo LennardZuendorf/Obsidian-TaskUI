@@ -22,7 +22,6 @@ export function validateTask(partialTask: Partial<Task>): {
 		"description",
 		"priority",
 		"status",
-		"createdDate",
 		"path",
 		"source",
 	];

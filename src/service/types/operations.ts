@@ -1,4 +1,4 @@
-export enum taskOperation {
+export enum serviceOperation {
 	GET = "getTask",
 	GET_ALL = "getTasks",
 	UPDATE = "updateTask",

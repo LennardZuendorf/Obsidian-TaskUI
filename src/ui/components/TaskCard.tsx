@@ -1,5 +1,5 @@
 import { atom, useAtom } from "jotai";
-import { allTasksAtom } from "../../data/taskAtoms";
+import { changeTasksAtom } from "../../data/taskAtoms";
 import {
 	Card,
 	CardContent,
@@ -34,6 +34,7 @@ import { Task, TaskStatus } from "../../data/types/tasks";
 import { TaskModal } from "@//components/TaskModal";
 import { App, Notice } from "obsidian";
 import { useApp } from "../../utils/context";
+import { storeOperation } from "../../data/types/operations";
 
 /**
  * TaskCard component to display a single task card.
@@ -42,23 +43,22 @@ import { useApp } from "../../utils/context";
  */
 export const TaskCard = ({ taskId }: { taskId: string }) => {
 	const app = useApp();
-
-	// Create a derived atom to get the single task by taskId.
-	// Means updates to this atom will update the task and all the other components using an atom that encapsulates this specific task.
 	const taskAtom = useMemo(
 		() =>
 			atom(
-				// Getter: Find the task by taskId
 				(get) => {
-					const tasks = get(allTasksAtom);
+					const tasks = get(changeTasksAtom);
 					return tasks.find((task) => task.id === taskId);
 				},
 				(get, set, update: Partial<Task>) => {
-					set(allTasksAtom, (prevTasks) =>
-						prevTasks.map((task) =>
-							task.id === taskId ? { ...task, ...update } : task,
-						),
+					const task = get(changeTasksAtom).find(
+						(task) => task.id === taskId,
 					);
+					const newTask = { ...task, ...update };
+					set(changeTasksAtom, {
+						operation: storeOperation.UPDATE,
+						tasks: [newTask],
+					});
 				},
 			),
 		[taskId],

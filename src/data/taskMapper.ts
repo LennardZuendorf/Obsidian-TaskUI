@@ -26,18 +26,20 @@ export class TaskMapper {
 		const scheduled = task.scheduledDate
 			? `[scheduled:: ${this.formatDate(task.scheduledDate)}]`
 			: "";
-		const due = task.dueDate ? `[due:: ${this.formatDate(task.dueDate)}]` : "";
+		const due = task.dueDate
+			? `[due:: ${this.formatDate(task.dueDate)}]`
+			: "";
 		const completion = task.doneDate
 			? `[completion:: ${this.formatDate(task.doneDate)}]`
 			: "";
 
-		const subtaskStrings = task.subtasks? task.subtasks
-			?.map(this.mapTaskToLineString)
-			.join("\n	"):"";
+		const subtaskStrings = task.subtasks
+			? task.subtasks?.map(this.mapTaskToLineString).join("\n	")
+			: "";
 
 		const status = this.mapStatusEnum(task.status);
 
-		return `- [${this.reverseMapStatus(status)}] ${task.description} ${id} ${dependsOn} ${priority} ${recurs} ${created} ${start} ${scheduled} ${due} ${completion} ${subtaskStrings? `\n	${subtaskStrings}`: ""}`.trim();
+		return `- [${this.reverseMapStatus(status)}] ${task.description} ${id} ${dependsOn} ${priority} ${recurs} ${created} ${start} ${scheduled} ${due} ${completion} ${subtaskStrings ? `\n	${subtaskStrings}` : ""}`;
 	}
 
 	public mapMdToTaskType(lineString: string): Task {
@@ -56,7 +58,19 @@ export class TaskMapper {
 			.join(" ")
 			.trim();
 
-		return TaskBuilder.create()
+		let taskBase: Partial<Task> | undefined = undefined;
+
+		if (idMatch) {
+			const id = idMatch[1];
+			taskBase = {
+				id: id,
+				path: "Tasks.md",
+				source: TaskSource.OBSIDIAN,
+				status: TaskStatus.TODO,
+			};
+		}
+
+		return TaskBuilder.create(taskBase)
 			.setDescription(cleanDescriptionMatch)
 			.setPriority(
 				priorityMatch
@@ -71,6 +85,7 @@ export class TaskMapper {
 			.setPath(defaultSettings.defaultPath)
 			.setSource(TaskSource.OBSIDIAN)
 			.setRecurs(recursMatch ? recursMatch[1] : null)
+			.setCreatedDate(parseDate(createdMatch ? createdMatch[1] : null))
 			.setDueDate(parseDate(dueMatch ? dueMatch[1] : null))
 			.setScheduledDate(
 				parseDate(scheduledMatch ? scheduledMatch[1] : null),
@@ -150,18 +165,18 @@ export class TaskMapper {
 
 	private reverseMapStatus(taskStatus: TaskStatus): string {
 		switch (taskStatus) {
-            case TaskStatus.IN_PROGRESS:
-                return "/";
-            case TaskStatus.CANCELLED:
-                return "-";
-            case TaskStatus.DONE:
-                return "x";
-            default:
-                return " ";
-        }
+			case TaskStatus.IN_PROGRESS:
+				return "/";
+			case TaskStatus.CANCELLED:
+				return "-";
+			case TaskStatus.DONE:
+				return "x";
+			default:
+				return " ";
+		}
 	}
 
 	private formatDate(date: Date): string {
-		return format(date, "MM/dd/yyyy");
+		return format(date, "yyyy-mm-dd");
 	}
 }
