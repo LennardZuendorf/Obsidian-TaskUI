@@ -60,7 +60,8 @@
 		"react-label": "^0.0.6",
 		"tailwind-merge": "^2.5.4",
 		"tailwindcss-animate": "^1.0.7",
-		"ts-randomstring": "^1.0.8"
+		"ts-randomstring": "^1.0.8",
+		"zod": "^3.24.3"
 	},
 	"husky": {
 		"hooks": {

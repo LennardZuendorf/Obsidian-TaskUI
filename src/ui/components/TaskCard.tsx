@@ -1,5 +1,4 @@
-import { atom, useAtom } from "jotai";
-import { changeTasksAtom } from "../../data/taskAtoms";
+import { Button } from "@//base/Button";
 import {
 	Card,
 	CardContent,
@@ -7,21 +6,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@//base/Card";
-import React, { useMemo } from "react";
-import {
-	CalendarIcon,
-	Edit2Icon,
-	TagIcon,
-	FlagIcon,
-	FolderIcon,
-	ArrowLeftRight,
-	Circle,
-	PlayCircle,
-	CheckCircle2,
-	XCircle,
-} from "lucide-react";
-import { Button } from "@//base/Button";
-import { cn } from "../utils/cn";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -30,11 +14,27 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@//base/Dropdown";
-import { Task, TaskStatus } from "../../data/types/tasks";
 import { TaskModal } from "@//components/TaskModal";
+import { atom, useAtom } from "jotai";
+import {
+	ArrowLeftRight,
+	CalendarIcon,
+	CheckCircle2,
+	Circle,
+	Edit2Icon,
+	FlagIcon,
+	FolderIcon,
+	PlayCircle,
+	TagIcon,
+	XCircle,
+} from "lucide-react";
 import { App, Notice } from "obsidian";
-import { useApp } from "../../utils/context";
+import { useMemo } from "react";
+import { changeTasksAtom } from "../../data/taskAtoms";
 import { storeOperation } from "../../data/types/operations";
+import { Task, TaskStatus } from "../../data/types/tasks";
+import { useApp } from "../../utils/context";
+import { cn } from "../utils/cn";
 
 /**
  * TaskCard component to display a single task card.
@@ -242,7 +242,7 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 				<CardFooter className="pt-1 pb-1">
 					<div className="flex flex-wrap gap-1 ">
 						<TagIcon className="h-3 w-3 text-gray-500" />
-						{task.tags.map((tag) => (
+						{task.tags.map((tag: string) => (
 							<span
 								key={tag}
 								className="text-xs text-accent-background"

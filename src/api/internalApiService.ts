@@ -1,13 +1,14 @@
-import { App } from "obsidian";
-import { ObsidianApiProvider } from "./internalApi/obsidianApi";
 import EventEmitter from "events";
+import { App } from "obsidian";
 import { TaskMapper } from "../data/taskMapper";
-import { logger as logger } from "../utils/logger";
-import { DataviewApiProvider } from "./internalApi/dataviewApi";
-import { tasksObject, taskObject } from "../data/types/transferObjects";
 import { Task } from "../data/types/tasks";
-import { InternalApiEvents } from "./types/events";
+import { taskObject, tasksObject } from "../data/types/transferObjects";
+import { validateTasks } from "../data/utils/validateTask";
+import { logger } from "../utils/logger";
+import { DataviewApiProvider } from "./internalApi/dataviewApi";
+import { ObsidianApiProvider } from "./internalApi/obsidianApi";
 import { ApiService } from "./types/apiService";
+import { InternalApiEvents } from "./types/events";
 
 export class InternalApiService implements ApiService {
 	private readonly mdApi: ObsidianApiProvider;
@@ -51,7 +52,14 @@ export class InternalApiService implements ApiService {
 				}
 			}
 
-			return { status: true, tasks };
+			// Validate tasks before returning
+			try {
+				validateTasks(tasks);
+				return { status: true, tasks };
+			} catch (error) {
+				logger.error(`Invalid tasks after mapping: ${error.message}`);
+				return { status: false };
+			}
 		} catch (error) {
 			logger.error(error.message);
 			return { status: false };
@@ -77,7 +85,17 @@ export class InternalApiService implements ApiService {
 			}
 
 			const mappedTask = this.taskMapper.mapDvToTaskType(updatedDvTask);
-			return { status: true, task: mappedTask };
+
+			// Validate mapped task before returning
+			try {
+				validateTasks([mappedTask]);
+				return { status: true, task: mappedTask };
+			} catch (error) {
+				logger.error(
+					`Invalid task after mapping in editTask: ${error.message}`,
+				);
+				return { status: false };
+			}
 		} catch (error) {
 			logger.error(error.message);
 			return { status: false };
@@ -110,6 +128,14 @@ export class InternalApiService implements ApiService {
 
 	public async createTask(task: Task, heading: string): Promise<taskObject> {
 		try {
+			// Validate task before proceeding
+			try {
+				validateTasks([task]);
+			} catch (error) {
+				logger.error(`Invalid task in createTask: ${error.message}`);
+				return { status: false };
+			}
+
 			task.lineDescription = this.taskMapper.mapTaskToLineString(task);
 			const response = await this.mdApi.createTask(
 				task.lineDescription,
@@ -137,8 +163,24 @@ export class InternalApiService implements ApiService {
 
 	private async initiatePeriodicTaskFetch() {
 		setInterval(async () => {
-			const tasks = await this.dvApi.getAllTasks();
-			this.eventEmitter.emit("tasksFetched", tasks);
+			const allDvTasks = await this.dvApi.getAllTasks();
+			if (allDvTasks) {
+				try {
+					const mappedTasks = allDvTasks.map((dvTask) =>
+						this.taskMapper.mapDvToTaskType(dvTask),
+					);
+
+					// Validate tasks before emitting
+					validateTasks(mappedTasks);
+					this.eventEmitter.emit("tasksFetched", mappedTasks);
+					logger.info("Periodic task fetch completed successfully");
+				} catch (error) {
+					logger.error(
+						`Invalid tasks in periodic fetch: ${error.message}`,
+					);
+					// Don't emit invalid tasks
+				}
+			}
 		}, 5000);
 	}
 
@@ -153,6 +195,15 @@ export class InternalApiService implements ApiService {
 		event: K,
 		data: InternalApiEvents[K],
 	): void {
+		// Validate tasks before emitting if this is a tasksFetched event
+		if (event === "tasksFetched") {
+			try {
+				validateTasks(data);
+			} catch (error) {
+				logger.error(`Cannot emit invalid tasks: ${error.message}`);
+				return;
+			}
+		}
 		this.eventEmitter.emit(event, data);
 	}
 }

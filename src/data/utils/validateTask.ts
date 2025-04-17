@@ -1,50 +1,44 @@
-import { Task, TaskPriority, TaskStatus, TaskSource } from "../types/tasks";
-import { validateValue } from "./validateValue";
+import { Task, TaskSchema } from "../types/tasks";
 
 /**
- * Validates a partial task object to ensure it contains all required fields
- * and that these fields have valid values.
- *
- * @param partialTask - A partial representation of a Task object. This object
- * may not contain all fields of a Task, but the function will check for the
- * presence and validity of required fields.
- *
- * @returns An object containing a boolean indicating whether the partial task is valid
- * and a message indicating which field is invalid if any. Returns `true` and an empty
- * message if all required fields are present and valid.
+ * Validates a single task object against the schema
+ * @returns Result object with validation status and error message if any
  */
-export function validateTask(partialTask: Partial<Task>): {
+export function validateTask(task: unknown): {
 	isValid: boolean;
 	message: string;
 } {
-	const requiredFields: (keyof Task)[] = [
-		"id",
-		"description",
-		"priority",
-		"status",
-		"path",
-		"source",
-	];
+	const result = TaskSchema.safeParse(task);
 
-	try {
-		for (const field of requiredFields) {
-			if (
-				partialTask[field] === undefined ||
-				partialTask[field] === null
-			) {
-				return {
-					isValid: false,
-					message: `Field ${field} is missing or null`,
-				};
-			}
-		}
+	if (!result.success) {
+		return {
+			isValid: false,
+			message: result.error.errors
+				.map((err) => `${err.path.join(".")}: ${err.message}`)
+				.join(", "),
+		};
+	}
 
-		validateValue(partialTask.priority, Object.values(TaskPriority));
-		validateValue(partialTask.status, Object.values(TaskStatus));
-		validateValue(partialTask.source, Object.values(TaskSource));
+	return { isValid: true, message: "" };
+}
 
-		return { isValid: true, message: "" };
-	} catch (error) {
-		return { isValid: false, message: (error as Error).message };
+/**
+ * Validates an array of tasks
+ * @throws Error if any task in the array is invalid
+ */
+export function validateTasks(tasks: unknown[]): asserts tasks is Task[] {
+	if (!Array.isArray(tasks)) {
+		throw new Error("Expected an array of tasks");
+	}
+
+	const arraySchema = TaskSchema.array();
+	const result = arraySchema.safeParse(tasks);
+
+	if (!result.success) {
+		throw new Error(
+			`Invalid tasks: ${result.error.errors
+				.map((err) => `${err.path.join(".")}: ${err.message}`)
+				.join(", ")}`,
+		);
 	}
 }

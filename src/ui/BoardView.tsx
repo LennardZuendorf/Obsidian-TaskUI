@@ -6,11 +6,6 @@ import {
 } from "../data/taskAtoms";
 import { TaskColumn } from "./components/TaskColumn";
 
-/**
- * Kanban board component to display tasks in a kanban board view.
- * This component is used to display tasks in a kanban board view with columns for to do, in progress, and done tasks.
- * Which are filtered based on the task status and the atoms provided.
- */
 export default function KanbanBoard() {
 	return (
 		<div className="kanban-board">

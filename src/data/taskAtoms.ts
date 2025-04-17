@@ -1,6 +1,6 @@
 import { atom } from "jotai";
-import { TaskStatus, Task } from "./types/tasks";
 import { storeOperation } from "./types/operations";
+import { Task, TaskStatus } from "./types/tasks";
 
 /**
  * The main atom to store all tasks, initialized with an example task. This atom is used to manage the state of all tasks in the application.

@@ -1,28 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { ItemView, Notice, WorkspaceLeaf } from "obsidian";
-import { Root, createRoot } from "react-dom/client";
-import { AppContext, useApp } from "./utils/context";
-import "./styles.css";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@//base/Tabs";
 import { Button } from "@//base/Button";
-import { Plus, RefreshCw, Bug } from "lucide-react";
-import { KanbanSquare, List } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@//base/Tabs";
+import KanbanBoard from "@//BoardView";
+import { ErrorView } from "@//ErrorView";
+import TaskList from "@//ListView";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { TaskService as CrudService } from "./service/taskService";
+import { Bug, KanbanSquare, List, Plus, RefreshCw } from "lucide-react";
+import { ItemView, Notice, WorkspaceLeaf } from "obsidian";
+import React, { useEffect, useState } from "react";
+import { Root, createRoot } from "react-dom/client";
+import { SettingsContext, useSettings } from "./config/settings";
 import {
 	changeTasksAtom,
 	debugStateAtom,
 	resetStateAtom,
 } from "./data/taskAtoms";
-import KanbanBoard from "@//BoardView";
-import TaskList from "@//ListView";
-import { ErrorView } from "@//ErrorView";
-import { logger as logger } from "./utils/logger";
-import { SettingsContext } from "./config/settings";
-import { showNotice } from "./ui/utils/notice";
-import { TaskModal } from "./ui/components/TaskModal";
-import { useSettings } from "./config/settings";
 import { storeOperation as str } from "./data/types/operations";
+import { TaskService as CrudService } from "./service/taskService";
+import { TaskSyncService, TaskUpdate } from "./service/taskSyncService";
+import "./styles.css";
+import { TaskModal } from "./ui/components/TaskModal";
+import { showNotice } from "./ui/utils/notice";
+import { AppContext, useApp } from "./utils/context";
+import { logger } from "./utils/logger";
 
 export const VIEW_TYPE_MAIN = "react-view";
 
@@ -61,12 +60,38 @@ const DebugView: React.FC = () => {
 	);
 };
 
-const TaskUIApp: React.FC = () => {
-	const [error, setError] = useState<string | null>(null); // State for error message
+interface TaskUIAppProps {
+	onTasksUpdate: (update: any) => void;
+}
+
+const TaskUIApp: React.FC<TaskUIAppProps> = ({ onTasksUpdate }) => {
+	const [error, setError] = useState<string | null>(null);
 	const [crudService, setCrudService] = useState<CrudService | null>(null);
 	const [, changeTasks] = useAtom(changeTasksAtom);
 	const app = useApp();
 	const settings = useSettings();
+
+	useEffect(() => {
+		// Listen for updates from the sync service
+		const handleTasksUpdate = (event: CustomEvent) => {
+			const update = event.detail;
+			changeTasks(update);
+		};
+
+		// Use the container element from the Obsidian view
+		const container = document.querySelector(".workspace-leaf-content");
+		container?.addEventListener(
+			"tasksUpdated",
+			handleTasksUpdate as EventListener,
+		);
+
+		return () => {
+			container?.removeEventListener(
+				"tasksUpdated",
+				handleTasksUpdate as EventListener,
+			);
+		};
+	}, [changeTasks]);
 
 	async function fetchTasks() {
 		try {
@@ -75,7 +100,12 @@ const TaskUIApp: React.FC = () => {
 			}
 			const response = await crudService.loadTasks();
 			if (response.status && response.tasks) {
-				changeTasks({ operation: str.REPLACE, tasks: response.tasks });
+				const update = {
+					operation: str.REPLACE,
+					tasks: response.tasks,
+				};
+				changeTasks(update);
+				onTasksUpdate(update);
 				logger.info("Tasks fetched and state updated successfully.");
 			} else {
 				logger.error("Error fetching tasks from the API.");
@@ -89,16 +119,23 @@ const TaskUIApp: React.FC = () => {
 	}
 
 	async function createTask() {
-		new TaskModal(this.app, (task) => {
+		if (!app) {
+			throw new Error("App is not available");
+		}
+		new TaskModal(app, (task) => {
 			if (task) {
 				crudService?.createTask(
 					task,
 					settings?.defaultHeading || "# Tasks",
 				);
-				changeTasks({ operation: str.ADD, tasks: [task] });
-				new Notice(`Task updated successfully!`);
+				const update: TaskUpdate = {
+					operation: str.ADD,
+					tasks: [task],
+				};
+				changeTasks(update);
+				new Notice(`Task created successfully!`);
 			} else {
-				new Notice(`Task update was unsuccessful!`);
+				new Notice(`Task creation was unsuccessful!`);
 			}
 		}).open();
 	}
@@ -113,7 +150,7 @@ const TaskUIApp: React.FC = () => {
 			setError(err.message);
 			logger.error(`Error initializing CRUD service: ${err.message}`);
 		}
-	}, []); // Add app as a dependency
+	}, [app]);
 
 	useEffect(() => {
 		if (crudService) {
@@ -200,10 +237,9 @@ const TaskUIApp: React.FC = () => {
 
 export class MainView extends ItemView {
 	root: Root | null = null;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	settings: any;
+	private taskSync: TaskSyncService | null = null;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	constructor(leaf: WorkspaceLeaf, settings: any) {
 		super(leaf);
 		this.settings = settings;
@@ -218,19 +254,41 @@ export class MainView extends ItemView {
 	}
 
 	async onOpen() {
-		this.root = createRoot(this.containerEl.children[1]);
-		this.root.render(
-			<SettingsContext.Provider value={this.settings}>
-				<AppContext.Provider value={this.app}>
-					<React.StrictMode>
-						<TaskUIApp />
-					</React.StrictMode>
-				</AppContext.Provider>
-			</SettingsContext.Provider>,
-		);
+		try {
+			if (!this.app) {
+				throw new Error("App is not available");
+			}
+
+			// Initialize TaskSyncService first
+			this.taskSync = new TaskSyncService(this.app);
+
+			// Create root and render the app once
+			this.root = createRoot(this.containerEl.children[1]);
+			this.root.render(
+				<React.StrictMode>
+					<AppContext.Provider value={this.app}>
+						<SettingsContext.Provider value={this.settings}>
+							<TaskUIApp
+								onTasksUpdate={(update) => {
+									// Only sync to storage for local updates
+									this.taskSync?.localUpdateHandler(
+										update.tasks,
+									);
+								}}
+							/>
+						</SettingsContext.Provider>
+					</AppContext.Provider>
+				</React.StrictMode>,
+			);
+
+			logger.info("MainView: Rendered successfully.");
+		} catch (error) {
+			logger.error(`Error in onOpen: ${error.message}`);
+		}
 	}
 
 	async onClose() {
+		this.taskSync = null;
 		this.root?.unmount();
 	}
 

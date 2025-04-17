@@ -1,9 +1,9 @@
-import { TaskPriority, TaskSource, TaskStatus, Task } from "./types/tasks";
+import { format } from "date-fns";
 import { dvTaskType } from "../api/internalApi/dataviewApi";
-import { parseDate } from "./utils/parseDate";
 import { defaultSettings } from "../config/settings";
 import { TaskBuilder } from "./taskBuilder";
-import { format } from "date-fns";
+import { Task, TaskPriority, TaskSource, TaskStatus } from "./types/tasks";
+import { parseDate } from "./utils/parseDate";
 
 export class TaskMapper {
 	/**

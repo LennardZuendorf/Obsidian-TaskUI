@@ -1,6 +1,6 @@
-import { App, Modal, Setting, Notice } from "obsidian";
-import { Task, TaskPriority, TaskStatus } from "../../data/types/tasks";
+import { App, Modal, Notice, Setting } from "obsidian";
 import { TaskBuilder } from "../../data/taskBuilder";
+import { Task, TaskPriority, TaskStatus } from "../../data/types/tasks";
 
 export class TaskModal extends Modal {
 	private task: Task | null;

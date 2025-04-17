@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /**
  * Enum for task source, which can be either "obsidian" or "shards-app".
  */
@@ -28,33 +30,38 @@ export enum TaskStatus {
 }
 
 /**
- * main taskTypes interface for tasks, used to define the structure of a task object.
+ * Zod schema for Task validation
  */
-export type Task = {
-	id: string; // Unique identifier for the task
-	description: string; // Text input for task description
-	priority: TaskPriority; // Priority levels
-	recurs?: string | null; // Recurrence rule, if any (e.g., "every day when done", null if no recurrence)
-	dueDate?: Date | null; // Date object for the due date (null if no due date)
-	scheduledDate?: Date | null; // Date object for the scheduled date (null if no scheduled date)
-	startDate?: Date | null; // Date object for the start date (null if no start date)
-	blocks?: string[]; // Array of task IDs or task references that this task is dependent on
-	status: TaskStatus; // Status of the task
-	createdDate?: Date | null; // Date object for when the task was created
-	doneDate?: Date | null; // Date object for when the task was completed
-	path: string; // Path of the task in your notes or system
-	symbol?: string; // Symbol associated with the task (for visual identification)
-	source: TaskSource; // Enum for the task's source
-	line?: number; // Line number in the source file
-	subtasks?: Task[]; // Array of subtasks
-	lineDescription: string; // Raw description from the source
-	tags?: string[]; // Array of tags associated with the task
-};
+export const TaskSchema: z.ZodType<any> = z.object({
+	id: z.string(),
+	description: z.string(),
+	priority: z.nativeEnum(TaskPriority),
+	recurs: z.string().nullable().optional(),
+	dueDate: z.date().nullable().optional(),
+	scheduledDate: z.date().nullable().optional(),
+	startDate: z.date().nullable().optional(),
+	blocks: z.array(z.string()).optional(),
+	status: z.nativeEnum(TaskStatus),
+	createdDate: z.date().nullable().optional(),
+	doneDate: z.date().nullable().optional(),
+	path: z.string(),
+	symbol: z.string().optional(),
+	source: z.nativeEnum(TaskSource),
+	line: z.number().optional(),
+	subtasks: z.lazy((): z.ZodType<any> => z.array(TaskSchema)).optional(),
+	lineDescription: z.string(),
+	tags: z.array(z.string()).optional(),
+});
+
+/**
+ * Task type inferred from the Zod schema
+ */
+export type Task = z.infer<typeof TaskSchema>;
 
 /**
  * Example task object for reference.
  */
-export const exampleTask: Task = {
+export const exampleTask = {
 	id: "1",
 	description: "Take out the trash",
 	priority: TaskPriority.MEDIUM,
@@ -68,8 +75,8 @@ export const exampleTask: Task = {
 	doneDate: null,
 	path: "/tasks/home/chores",
 	symbol: "🗑️",
-	source: TaskSource.OBSIDIAN, // Using enum for source
+	source: TaskSource.OBSIDIAN,
 	line: 12,
 	subtasks: [],
 	lineDescription: "Take out the trash",
-};
+} as const;
