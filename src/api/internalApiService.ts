@@ -5,18 +5,21 @@ import { Task } from "../data/types/tasks";
 import { taskObject, tasksObject } from "../data/types/transferObjects";
 import { validateTasks } from "../data/utils/validateTask";
 import { logger } from "../utils/logger";
-import { DataviewApiProvider } from "./internalApi/dataviewApi";
+import { DataviewApiProvider, dvTaskType } from "./internalApi/dataviewApi";
 import { ObsidianApiProvider } from "./internalApi/obsidianApi";
 import { ApiService } from "./types/apiService";
 import { InternalApiEvents } from "./types/events";
 
+// Export the class!
 export class InternalApiService implements ApiService {
 	private readonly mdApi: ObsidianApiProvider;
 	private readonly dvApi: DataviewApiProvider;
 	private readonly taskMapper: TaskMapper;
 	private readonly eventEmitter: EventEmitter;
+	private readonly app: App;
 
 	constructor(app: App) {
+		this.app = app;
 		this.mdApi = new ObsidianApiProvider(app);
 		this.dvApi = new DataviewApiProvider();
 		this.taskMapper = new TaskMapper();
@@ -36,23 +39,20 @@ export class InternalApiService implements ApiService {
 			}
 
 			let tasks: Task[] = [];
+			let dvTasks: dvTaskType[] | null = null;
+
 			if (filePath) {
-				const dvTasks = await this.dvApi.getTasksFromFile(filePath);
-				if (dvTasks) {
-					tasks = dvTasks.map((dvTask) =>
-						this.taskMapper.mapDvToTaskType(dvTask),
-					);
-				}
+				dvTasks = await this.dvApi.getTasksFromFile(filePath);
 			} else {
-				const allDvTasks = await this.dvApi.getAllTasks();
-				if (allDvTasks) {
-					tasks = allDvTasks.map((dvTask) =>
-						this.taskMapper.mapDvToTaskType(dvTask),
-					);
-				}
+				dvTasks = await this.dvApi.getAllTasks();
 			}
 
-			// Validate tasks before returning
+			if (dvTasks) {
+				tasks = dvTasks.map((dvTask) =>
+					this.taskMapper.mapDvToTaskType(dvTask),
+				);
+			}
+
 			try {
 				validateTasks(tasks);
 				return { status: true, tasks };
@@ -68,59 +68,90 @@ export class InternalApiService implements ApiService {
 
 	public async editTask(newTask: Task, oldTask: Task): Promise<taskObject> {
 		try {
-			if (!this.dvApi.isDataviewApiAvailable()) {
-				logger.error("Dataview API is not available");
+			// Use the non-nullable rawTaskLine from the previous version for lookup
+			const lineToLookup = oldTask.rawTaskLine;
+
+			// Generate the final desired line string using the merge logic
+			const finalLineToWrite = this.taskMapper.mergeTaskOntoRawLine(
+				newTask,
+				oldTask.rawTaskLine,
+			);
+
+			if (!oldTask.path) {
+				logger.error(
+					`Old task (ID: ${oldTask.id}) is missing path information.`,
+				);
 				return { status: false };
 			}
 
-			const updatedDvTask = await this.mdApi.editTask(
-				this.taskMapper.mapTaskToLineString(newTask),
-				this.taskMapper.mapTaskToLineString(oldTask),
+			// Call the simplified mdApi.editTask
+			const updatedLine = await this.mdApi.editTask(
+				finalLineToWrite, // The merged line to write
+				lineToLookup, // The raw line from the old task to find
 				oldTask.path,
 			);
 
-			if (!updatedDvTask) {
-				logger.error(`Updating task with path ${oldTask.path} failed`);
+			if (updatedLine !== finalLineToWrite) {
+				// Check if write was successful
+				logger.error(
+					`Updating task with path ${oldTask.path} failed in mdApi or returned unexpected line.`,
+				);
 				return { status: false };
 			}
 
-			const mappedTask = this.taskMapper.mapDvToTaskType(updatedDvTask);
+			// Update the task object with the actual line written
+			const returnedTask = {
+				...newTask,
+				lineDescription: finalLineToWrite, // Reflects the actual content written
+				rawTaskLine: finalLineToWrite, // Update raw line to match what was written
+			};
 
-			// Validate mapped task before returning
+			// Validate the updated task object
 			try {
-				validateTasks([mappedTask]);
-				return { status: true, task: mappedTask };
+				validateTasks([returnedTask]);
+				return { status: true, task: returnedTask };
 			} catch (error) {
 				logger.error(
-					`Invalid task after mapping in editTask: ${error.message}`,
+					`Invalid task after merge/update: ${error.message}`,
 				);
 				return { status: false };
 			}
 		} catch (error) {
-			logger.error(error.message);
+			logger.error(
+				`Error in InternalApiService.editTask: ${error.message}`,
+			);
 			return { status: false };
 		}
 	}
 
 	public async deleteTask(task: Task): Promise<taskObject> {
 		try {
+			// Use the non-nullable rawTaskLine for lookup
+			const lineToLookup = task.rawTaskLine;
+
+			if (!task.path) {
+				logger.error(
+					`Task (ID: ${task.id}) is missing path information for deletion.`,
+				);
+				return { status: false };
+			}
+
 			const deleted = await this.mdApi.deleteTask(
-				this.taskMapper.mapTaskToLineString(task),
+				lineToLookup, // The raw line to find and delete
 				task.path,
 			);
 
 			if (deleted) {
-				return { status: true, task };
+				return { status: true, task }; // Return original task data on success
 			} else {
-				logger.error(`Deleting task with path ${task.path} failed.`);
+				logger.error(
+					`Deleting task with path ${task.path} failed in mdApi.`,
+				);
 				return { status: false };
 			}
 		} catch (error) {
 			logger.error(
-				"Error deleting task with path " +
-					task.path +
-					": " +
-					error.message,
+				`Error in InternalApiService.deleteTask for path ${task.path}: ${error.message}`,
 			);
 			return { status: false };
 		}
@@ -128,39 +159,52 @@ export class InternalApiService implements ApiService {
 
 	public async createTask(task: Task, heading: string): Promise<taskObject> {
 		try {
+			// Task object from TaskBuilder now includes rawTaskLine
+			const lineToWrite = task.rawTaskLine; // Use the pre-generated raw line
+
 			// Validate task before proceeding
 			try {
-				validateTasks([task]);
+				validateTasks([task]); // Task already includes generated lines
 			} catch (error) {
-				logger.error(`Invalid task in createTask: ${error.message}`);
+				logger.error(
+					`Invalid task provided to createTask: ${error.message}`,
+				);
 				return { status: false };
 			}
 
-			task.lineDescription = this.taskMapper.mapTaskToLineString(task);
-			const response = await this.mdApi.createTask(
-				task.lineDescription,
+			if (!task.path) {
+				logger.error(
+					`Task (ID: ${task.id}) is missing path information for creation.`,
+				);
+				return { status: false };
+			}
+
+			// Call the simplified mdApi.createTask
+			const responseLine = await this.mdApi.createTask(
+				lineToWrite, // Use the raw line from the builder
 				task.path,
 				heading,
 			);
 
-			if (response) {
-				return {
-					status: true,
-					task: task,
-					lineString: response,
-				};
+			if (responseLine === lineToWrite) {
+				// Check if write was successful
+				// Return the already complete task object from the builder
+				return { status: true, task: task };
 			} else {
-				logger.error("Creating task via Obsidian API failed.");
+				logger.error(
+					`Creating task via mdApi failed or returned unexpected line for path ${task.path}.`,
+				);
 				return { status: false };
 			}
 		} catch (error) {
 			logger.error(
-				"Error creating task via Obsidian API: " + error.message,
+				`Error in InternalApiService.createTask for path ${task.path}: ${error.message}`,
 			);
 			return { status: false };
 		}
 	}
 
+	// --- Event Handling & Periodic Fetch --- (Keep existing logic) ...
 	private async initiatePeriodicTaskFetch() {
 		setInterval(async () => {
 			const allDvTasks = await this.dvApi.getAllTasks();
@@ -170,7 +214,6 @@ export class InternalApiService implements ApiService {
 						this.taskMapper.mapDvToTaskType(dvTask),
 					);
 
-					// Validate tasks before emitting
 					validateTasks(mappedTasks);
 					this.eventEmitter.emit("tasksFetched", mappedTasks);
 					logger.info("Periodic task fetch completed successfully");
@@ -178,7 +221,6 @@ export class InternalApiService implements ApiService {
 					logger.error(
 						`Invalid tasks in periodic fetch: ${error.message}`,
 					);
-					// Don't emit invalid tasks
 				}
 			}
 		}, 5000);
@@ -191,11 +233,17 @@ export class InternalApiService implements ApiService {
 		this.eventEmitter.on(event, callback);
 	}
 
+	public off<K extends keyof InternalApiEvents>(
+		event: K,
+		callback: (data: InternalApiEvents[K]) => void,
+	): void {
+		this.eventEmitter.off(event, callback);
+	}
+
 	public emit<K extends keyof InternalApiEvents>(
 		event: K,
 		data: InternalApiEvents[K],
 	): void {
-		// Validate tasks before emitting if this is a tasksFetched event
 		if (event === "tasksFetched") {
 			try {
 				validateTasks(data);

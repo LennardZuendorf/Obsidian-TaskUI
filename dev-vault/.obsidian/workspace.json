@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "fba57c91dc3d6ffa",
+        "id": "d955436d4b3aa693",
         "type": "tabs",
         "children": [
           {
-            "id": "ecd22aa9215a4680",
+            "id": "93e6761fb7cdb44f",
             "type": "leaf",
             "state": {
               "type": "react-view",
@@ -18,31 +18,17 @@
             }
           },
           {
-            "id": "afac4eab76576b70",
+            "id": "6c5e4ee3a8bbdf96",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Tasks.md",
+                "file": "Test Notes.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Tasks"
-            }
-          },
-          {
-            "id": "f63212e1de82d70a",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Tasks.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Tasks"
+              "title": "Test Notes"
             }
           }
         ]
@@ -118,7 +104,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Welcome.md",
+                "file": "Tasks.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -128,7 +114,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Welcome"
+              "title": "Backlinks for Tasks"
             }
           },
           {
@@ -137,12 +123,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Welcome.md",
+                "file": "Tasks.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Welcome"
+              "title": "Outgoing links from Tasks"
             }
           },
           {
@@ -152,7 +138,9 @@
               "type": "tag",
               "state": {
                 "sortOrder": "frequency",
-                "useHierarchy": true
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-tags",
               "title": "Tags"
@@ -164,10 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Welcome.md"
+                "file": "Tasks.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Welcome"
+              "title": "Outline of Tasks"
             }
           }
         ]
@@ -188,11 +179,12 @@
       "taskui-plugin:Activate Main Tab View": false
     }
   },
-  "active": "ecd22aa9215a4680",
+  "active": "93e6761fb7cdb44f",
   "lastOpenFiles": [
-    "Test Notes.md",
     "Tasks.md",
+    "Test Notes.md",
     "Untitled.canvas",
+    "Untitled.md",
     "2025-03-22.md",
     "2025-04-15.md",
     "Untitled 1.canvas",

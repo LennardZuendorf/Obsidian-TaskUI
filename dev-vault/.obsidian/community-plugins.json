@@ -2,5 +2,6 @@
   "hot-reload",
   "dataview",
   "obsidian-tasks-plugin",
-  "taskui-plugin"
+  "taskui-plugin",
+  "obsidian-style-settings"
 ]

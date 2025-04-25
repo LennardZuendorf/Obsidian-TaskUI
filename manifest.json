@@ -1,9 +1,9 @@
 {
 	"id": "taskui-plugin",
-	"name": "TaskUI",
+	"name": "Shards ToDo",
 	"version": "0.0.1",
 	"minAppVersion": "0.0.1",
-	"description": "TaskUI enables simple visual management of tasks based on the popular tasks plugin for obsidian.",
+	"description": "Shards ToDo enables comprehensive visual task management inside your vault, powered by the tasks and dataview plugins for Obsidian.",
 	"author": "Lennard Zündorf",
 	"authorUrl": "https://zuendorf.me",
 	"isDesktopOnly": true

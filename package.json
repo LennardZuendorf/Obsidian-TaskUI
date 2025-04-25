@@ -52,6 +52,7 @@
 		"events": "^3.3.0",
 		"jotai": "^2.10.1",
 		"jotai-devtools": "^0.10.1",
+		"jotai-effect": "^2.0.2",
 		"lodash": "^4.17.21",
 		"lucide-react": "^0.453.0",
 		"pino": "^9.5.0",

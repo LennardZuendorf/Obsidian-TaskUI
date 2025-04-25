@@ -1,8 +1,40 @@
 # Project Brief
 
+This project aims to build a task management application with seamless synchronization capabilities between a local datastore and a remote backend. The core goal is to ensure data consistency and provide a reliable user experience across different sessions and potentially devices.
+
+## Key Objectives
+
+-   Implement CRUD operations for tasks locally.
+-   Implement synchronization logic to push local changes to the remote.
+-   Implement synchronization logic to pull remote changes to the local store.
+-   Ensure conflict resolution mechanisms are in place (details TBD).
+-   Provide a clear and intuitive user interface.
+
 ## Overview
 
-TaskUI is a React-based task management plugin for Obsidian, providing a modern and intuitive interface for managing tasks within Obsidian vaults.
+Shards MD is a task management plugin for Obsidian that provides a modern UI for managing tasks within markdown files. It synchronizes tasks between the UI and markdown files while maintaining data integrity.
+
+## Core Goals
+
+1. Provide a modern, intuitive UI for task management in Obsidian
+2. Maintain bidirectional sync between UI and markdown files
+3. Support rich task metadata and status tracking
+4. Ensure data integrity and prevent sync conflicts
+
+## Key Features
+
+-   Task creation, editing, and deletion with real-time sync
+-   Status tracking (todo, in-progress, done, cancelled)
+-   Priority levels support
+-   Kanban board and list views
+-   Metadata tracking for sync state
+-   Robust error handling and logging
+
+## Target Users
+
+-   Obsidian users who want a more structured task management experience
+-   Users who prefer visual task management but want to keep data in markdown
+-   Teams or individuals who need reliable task tracking with markdown compatibility
 
 ## Core Principles
 
@@ -19,27 +51,6 @@ TaskUI is a React-based task management plugin for Obsidian, providing a modern 
 -   Real-time updates through TaskSyncService
 -   Proper cleanup and resource management
 -   Error handling and recovery
-
-## Key Features
-
-1. Task Management
-
-    - Create, edit, delete tasks
-    - Kanban board view
-    - List view
-    - Debug view for state inspection
-
-2. Integration
-
-    - Seamless Obsidian integration
-    - Markdown file synchronization
-    - Dataview API support
-
-3. User Experience
-    - Modern UI components
-    - Responsive design
-    - Immediate feedback
-    - Error handling
 
 ## Technical Stack
 
@@ -124,16 +135,6 @@ A task management application that integrates with Obsidian and potentially othe
 -   Enable task breakdown into smaller, manageable pieces (shards)
 -   Maintain desktop-only support
 
-## Target Users
-
-Obsidian users who:
-
--   Need advanced task visualization options
--   Want to maintain Markdown compatibility
--   Use the Tasks plugin and/or Dataview
--   Prefer visual task management
--   Want to break down complex tasks into smaller pieces
-
 ## Success Criteria
 
 -   Seamless integration with Obsidian's ecosystem
@@ -151,3 +152,32 @@ Obsidian users who:
 ## Project Status
 
 In development - Manual installation only (not yet available in Obsidian community plugin browser)
+
+## Sync System Goals
+
+The sync system aims to provide a robust, reliable, and efficient mechanism for synchronizing tasks between the local UI and remote vault storage. Key objectives include:
+
+1. **Reliability**
+
+    - Ensure no data loss during sync operations
+    - Implement robust error handling and retry mechanisms
+    - Provide clear feedback on sync status to users
+
+2. **Performance**
+
+    - Minimize sync latency
+    - Optimize network usage through batch processing
+    - Maintain responsive UI during sync operations
+
+3. **User Experience**
+
+    - Provide seamless sync experience
+    - Clear indication of sync status
+    - Graceful handling of offline operations
+
+4. **Data Integrity**
+    - Proper conflict resolution
+    - Version tracking for changes
+    - Ability to recover from sync failures
+
+These goals guide our implementation decisions and prioritization of improvements to ensure a high-quality sync system that meets user needs while maintaining data integrity and performance.

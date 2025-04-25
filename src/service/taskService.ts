@@ -23,7 +23,7 @@ export class TaskService {
 		switch (source) {
 			case TaskSource.OBSIDIAN:
 				return new InternalApiService(this.app);
-			case TaskSource.TODOIST:
+			case TaskSource.SHARDS:
 				logger.error(`Unsupported task source: ${source}`);
 				throw new Error(`Unsupported task source: ${source}`);
 			default:

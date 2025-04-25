@@ -2,30 +2,24 @@
 
 ## Tech Stack
 
-### Core Technologies
+-   **Language:** (Please specify - e.g., Python, TypeScript, Go)
+-   **Local Storage:** (Please specify - e.g., SQLite, IndexedDB, Filesystem)
+-   **Remote Backend:** (Please specify - e.g., Custom API, Firebase, Supabase)
+-   **Frameworks/Libraries:** (Please specify any relevant frameworks or major libraries)
 
--   TypeScript
--   React
--   TailwindCSS
--   Obsidian API
+## Architecture
 
-### UI Components
+(Describe the high-level architecture, e.g., MVC, MVVM, Layered)
 
--   shadcn/ui as base component library
--   Custom components built on top of shadcn/ui
--   Obsidian CSS variables integration for theme consistency
+-   **Data Synchronization:** (Describe the current sync mechanism, e.g., polling, websockets, manual triggers). The `REMOTE_UPDATE` operation handles incoming tasks, updating local ones if `needsSync` is false, adding new ones, and deleting local tasks that are absent from the remote update _unless_ the local task has `needsSync=true`.
 
-### Development Tools
+## Patterns
 
--   ESBuild (bundler)
--   ESLint (linting)
--   Prettier (code formatting)
--   Husky (git hooks)
+-   (List any key design patterns used, e.g., Repository, Observer)
 
-### Dependencies
+## Planned Enhancements
 
--   Tasks Plugin (Obsidian)
--   Dataview Plugin (compatibility)
+-   Two-way synchronization logic refinement.
 
 ## Project Structure
 
@@ -155,6 +149,75 @@ graph LR
     - Received by TaskSyncService
     - Update Jotai state directly
     - UI automatically updates through state subscription
+
+## Sync System Technical Implementation
+
+### Current Architecture
+
+-   Local state management using React state/context
+-   Direct sync operations with Obsidian vault
+-   Basic error handling and retries
+
+### Planned Improvements
+
+#### High Priority
+
+1. **Retry Mechanism**
+
+    - Implementation: Exponential backoff strategy
+    - State tracking for failed operations
+    - Maximum retry attempts configuration
+    - Persistent retry queue
+
+2. **Batch Processing**
+
+    - Queue system for sync operations
+    - Configurable batch size and timing
+    - Priority-based processing
+    - Transaction-like handling for batches
+
+3. **Conflict Resolution**
+    - Timestamp-based version tracking
+    - Merge strategy for concurrent changes
+    - User resolution interface for conflicts
+    - Change history tracking
+
+#### Medium Priority
+
+1. **Sync Queue**
+
+    - Persistent queue storage
+    - Background processing
+    - Queue state management
+    - Operation prioritization
+
+2. **Version Control**
+    - Change tracking system
+    - Version numbering scheme
+    - Rollback capabilities
+    - Diff generation for changes
+
+#### Low Priority
+
+1. **Performance Optimizations**
+
+    - Network request batching
+    - Local caching improvements
+    - Background sync scheduling
+    - Resource usage optimization
+
+2. **Error Reporting**
+    - Detailed error logging
+    - User-friendly error messages
+    - Error analytics and tracking
+    - Recovery suggestions
+
+### Implementation Dependencies
+
+-   React state management library (TBD)
+-   Local storage solution
+-   Network request handling library
+-   Background processing capabilities
 
 ## Implementation Details
 
@@ -286,3 +349,60 @@ const TaskList: React.FC = () => {
 -   Schema definition kept with type definitions for better cohesion
 -   Validation functions separated to maintain single responsibility
 -   Using Zod for both runtime validation and TypeScript type inference
+
+## Validation Strategy
+
+### Task Validation
+
+The `InternalApiService` consistently uses `validateTasks` for all task validation, even for single tasks. This is intentional because:
+
+1. It provides a single consistent validation interface throughout the service
+2. `validateTasks` internally uses `validateTask`, ensuring consistent validation logic
+3. For single task validation, the task is wrapped in an array: `validateTasks([task])`
+4. The performance overhead is negligible
+
+While direct use of `validateTask` for single tasks would also work, the current approach maintains consistency and correctness.
+
+## Architecture
+
+### State Management
+
+The application uses Jotai for state management with the following key atoms:
+
+1. **baseTasksAtom**
+
+    - Core atom storing tasks with metadata
+    - Type: `TaskWithMetadata[]`
+
+### Task Comparison Logic
+
+The system uses a two-tier comparison strategy for matching remote tasks with local tasks:
+
+1. **Primary Matching**
+
+    - Based on task ID
+    - Direct equality comparison
+    - Most reliable for tracking task identity
+
+2. **Secondary Matching**
+
+    - Used when ID matching fails
+    - Matches on both description AND status
+    - Helps identify same tasks with different IDs
+    - Useful for handling tasks created in different contexts
+
+3. **Update Rules**
+    - Local changes (needsSync=true) are protected from remote updates
+    - Remote tasks with no matches are added as new
+    - Matches trigger an update unless protected by needsSync
+
+This approach provides flexibility in task identification while maintaining data integrity and preventing unwanted overwrites of local changes.
+
+### Task Synchronization (Obsidian API)
+
+-   The `ObsidianApiProvider` class (`src/api/internalApi/obsidianApi.ts`) handles CRUD operations for tasks within Obsidian markdown files.
+-   **Task Line Matching (`findTaskLineIndex`):** To locate existing tasks for updates or deletions, the system uses a multi-stage approach:
+    1.  **Exact Match:** Compares the full raw line string.
+    2.  **ID Match:** Looks for an explicit `[id::...]` tag within the line and uses that for matching.
+    3.  **Content Match (Ignoring Prefix):** If no ID is found, it compares the trimmed content of the line _after_ stripping any leading task marker patterns (like `- [ ]`, `- [/]`, etc.) using the regex `/^\\s*-\\s*\\[.?\\]\\s*/`. This ensures matching even if the status marker differs or is absent in the lookup string.
+-   Tasks are typically added under a specified markdown heading within the target file.

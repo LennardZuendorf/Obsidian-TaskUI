@@ -50,14 +50,18 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 					const tasks = get(changeTasksAtom);
 					return tasks.find((task) => task.id === taskId);
 				},
-				(get, set, update: Partial<Task>) => {
+				(get, set, update: Partial<Task> | Task) => {
 					const task = get(changeTasksAtom).find(
 						(task) => task.id === taskId,
 					);
-					const newTask = { ...task, ...update };
+					const newTask =
+						"id" in update ? update : { ...task, ...update };
+					console.log("taskAtom setter called with update:", update);
 					set(changeTasksAtom, {
-						operation: storeOperation.UPDATE,
+						operation: storeOperation.LOCAL_UPDATE,
 						tasks: [newTask],
+						source: "local",
+						timestamp: Date.now(),
 					});
 				},
 			),
@@ -71,10 +75,14 @@ export const TaskCard = ({ taskId }: { taskId: string }) => {
 	if (!task || !app) return null;
 
 	async function editTask() {
+		console.log("Opening edit modal for task:", task);
 		new TaskModal(
 			app as App,
 			(updatedTask: Task) => {
+				console.log("TaskModal returned updatedTask:", updatedTask);
 				if (updatedTask) {
+					// Update task with the LOCAL_UPDATE operation to track sync state
+					console.log("Calling updateTask with:", updatedTask);
 					updateTask(updatedTask);
 					new Notice(`Task updated successfully!`);
 				} else {

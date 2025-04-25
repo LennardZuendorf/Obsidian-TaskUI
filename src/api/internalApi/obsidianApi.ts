@@ -1,5 +1,36 @@
 import { App, TAbstractFile, TFile } from "obsidian";
-import { logger as logger } from "../../utils/logger";
+import { logger } from "../../utils/logger";
+
+/**
+ * Helper function for multi-stage line lookup.
+ */
+function findTaskLineIndex(lines: string[], lineToFind: string): number {
+	let taskLineIndex = -1;
+
+	// Attempt 1: Exact match (useful if raw line was passed)
+	taskLineIndex = lines.findIndex((line) => line === lineToFind);
+	if (taskLineIndex !== -1) return taskLineIndex; // Found!
+
+	// Attempt 2: Regex ID match
+	const idMatch = lineToFind.match(/\[id::\s*([\w-]+)\]/);
+	if (idMatch && idMatch[1]) {
+		const taskId = idMatch[1];
+		// Correct escaping for RegExp constructor string
+		const idRegex = new RegExp(`\\[id::\\s*${taskId}\\]`);
+		taskLineIndex = lines.findIndex((line) => idRegex.test(line));
+		if (taskLineIndex !== -1) return taskLineIndex; // Found!
+	}
+
+	// Attempt 3: Full string trimmed match, ignoring leading task markers
+	const taskMarkerRegex = /^\\s*-\\s*\\[.?\\]\\s*/;
+	taskLineIndex = lines.findIndex((line) => {
+		const cleanLine = line.replace(taskMarkerRegex, "").trim();
+		const cleanLineToFind = lineToFind.replace(taskMarkerRegex, "").trim();
+		return cleanLine === cleanLineToFind;
+	});
+	// Return index (or -1 if not found)
+	return taskLineIndex;
+}
 
 /**
  * ObsidianApiProvider class provides methods for creating, updating, and deleting tasks via the Obsidian API.
@@ -94,46 +125,44 @@ export class ObsidianApiProvider {
 	}
 
 	/**
-	 * Edits an existing task in a markdown file at the specified path.
-	 *
-	 *
-	 * @returns A promise that resolves to a taskTransferObject indicating the success or failure of the operation.
-	 * @param newLineString
-	 * @param oldLineString
-	 * @param path
+	 * Edits an existing task line in a markdown file.
+	 * @param newLineString The full string for the replacement line.
+	 * @param oldLookupString The string used to find the line (raw line preferred, fallback to mapped).
+	 * @param path The file path.
+	 * @returns The newLineString if successful, null otherwise.
 	 */
 	public async editTask(
 		newLineString: string,
-		oldLineString: string,
+		oldLookupString: string,
 		path: string,
 	): Promise<string | null> {
 		try {
 			const file = this.obsidianApp.vault.getFileByPath(path) as TFile;
-
 			if (!file) {
-				const errorMsg = `Could not find file at path: ${path}`;
-				logger.error(errorMsg);
+				logger.error(`Could not find file at path: ${path}`);
 				return null;
-			} else {
-				const content = await this.obsidianApp.vault.read(file);
-				const lines = content.split("\n");
-
-				const taskLineIndex: number | undefined = lines.findIndex(
-					(line) => line.includes(oldLineString),
-				);
-
-				if (taskLineIndex === -1 || taskLineIndex === undefined) {
-					const errorMsg = `Could not find task line in file: ${path}`;
-					logger.error(errorMsg);
-					return null;
-				}
-
-				lines.splice(taskLineIndex, 1, newLineString);
-				await this.obsidianApp.vault.modify(file, lines.join("\n"));
-
-				// Optionally, return the updated task
-				return newLineString;
 			}
+
+			const content = await this.obsidianApp.vault.read(file);
+			const lines = content.split("\n");
+
+			// Use helper for lookup
+			const taskLineIndex = findTaskLineIndex(lines, oldLookupString);
+
+			if (taskLineIndex === -1) {
+				logger.error(
+					`Could not find task line in file: ${path} using string: "${oldLookupString}" (tried exact, regex ID, and trimmed match).`,
+				);
+				return null;
+			}
+
+			logger.debug(
+				`Found task line at index ${taskLineIndex} in ${path}. Replacing with: "${newLineString}"`,
+			);
+			lines.splice(taskLineIndex, 1, newLineString);
+			await this.obsidianApp.vault.modify(file, lines.join("\n"));
+
+			return newLineString; // Return the string that was written
 		} catch (error) {
 			logger.error(
 				`Error editing task via Obsidian API: ${error.message}`,
@@ -143,43 +172,42 @@ export class ObsidianApiProvider {
 	}
 
 	/**
-	 * Deletes a task line string from a markdown file under the given path.
-	 *
-	 * @param lineString
-	 * @param path - The file path from which the task should be deleted.
-	 *
-	 * @returns A promise that resolves to a taskTransferObject indicating the success or failure of the operation.
+	 * Deletes a task line string from a markdown file.
+	 * @param lineToLookup The string used to find the line to delete.
+	 * @param path The file path.
+	 * @returns True if successful, false otherwise.
 	 */
 	public async deleteTask(
-		lineString: string,
+		lineToLookup: string,
 		path: string,
 	): Promise<boolean> {
 		try {
 			const file = this.obsidianApp.vault.getFileByPath(path);
-
 			if (!file) {
-				const errorMsg = `Could not find file at path: ${path}`;
-				logger.error(errorMsg);
+				logger.error(`Could not find file at path: ${path}`);
 				return false;
-			} else {
-				const content = await this.obsidianApp.vault.read(file);
-				const lines = content.split("\n");
-
-				const taskLineIndex = lines.findIndex((line) =>
-					line.includes(lineString),
-				);
-
-				if (taskLineIndex === -1) {
-					const errorMsg = `Could not find task line: ${lineString} in file: ${path}`;
-					logger.error(errorMsg);
-					return false;
-				}
-
-				lines.splice(taskLineIndex, 1);
-				await this.obsidianApp.vault.modify(file, lines.join("\n"));
-
-				return true;
 			}
+
+			const content = await this.obsidianApp.vault.read(file);
+			const lines = content.split("\n");
+
+			// Use helper for lookup
+			const taskLineIndex = findTaskLineIndex(lines, lineToLookup);
+
+			if (taskLineIndex === -1) {
+				logger.error(
+					`Could not find task line to delete in file: ${path} using string: "${lineToLookup}" (tried exact, regex ID, and trimmed match).`,
+				);
+				return false;
+			}
+
+			logger.debug(
+				`Found task line to delete at index ${taskLineIndex} in ${path}.`,
+			);
+			lines.splice(taskLineIndex, 1);
+			await this.obsidianApp.vault.modify(file, lines.join("\n"));
+
+			return true;
 		} catch (error) {
 			logger.error(
 				`Error while trying to delete a task: ${error.message}`,

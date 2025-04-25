@@ -1,7 +1,7 @@
-import { Task, TaskPriority, TaskStatus, TaskSource } from "./types/tasks";
-import { validateTask } from "./utils/validateTask";
 import { generateRandomString as newId } from "ts-randomstring/lib";
 import { TaskMapper } from "./taskMapper";
+import { Task, TaskPriority, TaskSource, TaskStatus } from "./types/tasks";
+import { validateTask } from "./utils/validateTask";
 
 export class TaskBuilder {
 	private readonly mapper: TaskMapper;
@@ -187,6 +187,17 @@ export class TaskBuilder {
 	}
 
 	/**
+	 * Sets the raw task line for the task being built.
+	 *
+	 * @param rawTaskLine - A string representing the raw task line.
+	 * @returns The current instance of TaskBuilder for method chaining.
+	 */
+	setRawTaskLine(rawTaskLine: string): TaskBuilder {
+		this.partialTask.rawTaskLine = rawTaskLine;
+		return this;
+	}
+
+	/**
 	 * Finalizes the task building process by validating the partial task and mapping it to a line description.
 	 *
 	 * @param partialTask - A partial representation of a task that needs to be validated and finalized.
@@ -200,14 +211,34 @@ export class TaskBuilder {
 		message: string;
 		task?: Task;
 	} {
-		this.partialTask.lineDescription = "";
+		// Generate the line string based on current partial data
+		// Need to ensure enough data is present for the mapper to not throw error
+		// Temporarily assign default values if necessary for string generation
+		const tempTaskForString = {
+			...this.partialTask,
+			description: this.partialTask.description ?? "", // Ensure required fields exist
+			priority: this.partialTask.priority ?? TaskPriority.MEDIUM,
+			status: this.partialTask.status ?? TaskStatus.TODO,
+			path: this.partialTask.path ?? "",
+			source: this.partialTask.source ?? TaskSource.OBSIDIAN,
+			id: this.partialTask.id ?? "temp-id",
+			rawTaskLine: "", // Placeholder for type check
+		} as Task;
+		const generatedLine =
+			this.mapper.mapTaskToLineString(tempTaskForString);
+
+		// Assign to rawTaskLine before validation
+		this.partialTask.rawTaskLine = generatedLine;
+
+		// Now validate the complete partialTask (which includes the generated lines)
 		const { isValid, message } = validateTask(partialTask);
 		if (!isValid) {
+			// Consider if we should clear the generated lines if invalid?
+			// this.partialTask.lineDescription = undefined;
+			// this.partialTask.rawTaskLine = undefined; // Not possible if non-nullable
 			return { isValid, message };
 		} else {
-			this.partialTask.lineDescription = this.mapper.mapTaskToLineString(
-				this.partialTask as Task,
-			);
+			// Task is valid, return it (already has lines set)
 			return { isValid, message, task: this.partialTask as Task };
 		}
 	}

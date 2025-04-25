@@ -5,7 +5,7 @@ import { z } from "zod";
  */
 export enum TaskSource {
 	OBSIDIAN = "obsidian",
-	TODOIST = "todoist",
+	SHARDS = "shards",
 }
 
 /**
@@ -49,14 +49,33 @@ export const TaskSchema: z.ZodType<any> = z.object({
 	source: z.nativeEnum(TaskSource),
 	line: z.number().optional(),
 	subtasks: z.lazy((): z.ZodType<any> => z.array(TaskSchema)).optional(),
-	lineDescription: z.string(),
 	tags: z.array(z.string()).optional(),
+	rawTaskLine: z.string(),
 });
 
 /**
  * Task type inferred from the Zod schema
  */
 export type Task = z.infer<typeof TaskSchema>;
+
+/**
+ * Task metadata for sync state tracking
+ */
+export interface TaskMetadata {
+	lastUpdated?: number; // When the task was last modified locally
+	lastSynced?: number; // When the task was last synced with vault
+	needsSync?: boolean; // Whether the task needs to be synced
+	toBeSyncedAction?: TaskSyncAction;
+	previousVersion?: Task;
+}
+
+/**
+ * Task with its metadata for internal state management
+ */
+export interface TaskWithMetadata {
+	task: Task;
+	metadata: TaskMetadata;
+}
 
 /**
  * Example task object for reference.
@@ -78,5 +97,7 @@ export const exampleTask = {
 	source: TaskSource.OBSIDIAN,
 	line: 12,
 	subtasks: [],
-	lineDescription: "Take out the trash",
+	rawTaskLine: "- [ ] Take out the trash",
 } as const;
+
+export type TaskSyncAction = "add" | "edit" | "delete" | null;
