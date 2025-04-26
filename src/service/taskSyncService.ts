@@ -4,8 +4,8 @@ import { InternalApiService } from "../api/internalApiService";
 import {
 	baseTasksAtom,
 	changeTasksAtom,
-	markTasksSyncedAtom,
 	unsyncedTasksAtom,
+	updateTaskMetadataAtom,
 } from "../data/taskAtoms";
 import { storeOperation } from "../data/types/operations";
 import { Task, TaskWithMetadata } from "../data/types/tasks";
@@ -53,6 +53,14 @@ export class TaskSyncService {
 	 */
 	private updateState(update: TaskUpdate) {
 		if (!this.isActive) return;
+
+		// This method is now only used for REMOTE_UPDATE
+		if (update.operation !== storeOperation.REMOTE_UPDATE) {
+			logger.warn(
+				`[TaskSyncService] updateState called with unexpected operation: ${update.operation}`,
+			);
+			return;
+		}
 
 		try {
 			// Validate tasks before updating state
@@ -137,19 +145,27 @@ export class TaskSyncService {
 						"# Tasks",
 					);
 					if (result.status && result.task) {
-						// Use SYNC_CONFIRMED to update state with final task data
-						this.store.set(changeTasksAtom, {
-							operation: storeOperation.SYNC_CONFIRMED,
-							tasks: [result.task],
+						// Update metadata using the new atom
+						this.store.set(updateTaskMetadataAtom, {
+							taskId: result.task.id,
+							metadataUpdates: {
+								lastSynced: Date.now(),
+								needsSync: false,
+								toBeSyncedAction: null,
+							},
+							// We might also want to update the task data itself if the API returned modified data
+							// If the API guarantees returning the exact same task data, this isn't needed
+							// taskData: result.task // Optional: Update task data too
 						});
+
 						logger.debug(
-							`TaskSyncService: Task ${result.task.id} created and confirmed in state`,
+							`TaskSyncService: Task ${result.task.id} created and sync status updated in state`,
 						);
 					} else {
 						logger.error(
 							`Failed to create task ${task.id} via API.`,
 						);
-						// Handle failure? Maybe reset needsSync?
+						// Handle failure? Maybe reset needsSync via updateTaskMetadataAtom?
 					}
 					break;
 				}
@@ -170,13 +186,20 @@ export class TaskSyncService {
 						previousVersion,
 					);
 					if (result.status && result.task) {
-						// Use SYNC_CONFIRMED to update state with final task data
-						this.store.set(changeTasksAtom, {
-							operation: storeOperation.SYNC_CONFIRMED,
-							tasks: [result.task],
+						// Update metadata using the new atom
+						this.store.set(updateTaskMetadataAtom, {
+							taskId: result.task.id,
+							metadataUpdates: {
+								lastSynced: Date.now(),
+								needsSync: false,
+								toBeSyncedAction: null,
+							},
+							// Potentially update task data if API returned modified data
+							// taskData: result.task
 						});
+
 						logger.debug(
-							`TaskSyncService: Task ${result.task.id} updated and confirmed in state`,
+							`TaskSyncService: Task ${result.task.id} updated and sync status updated in state`,
 						);
 					} else {
 						logger.error(
@@ -192,7 +215,7 @@ export class TaskSyncService {
 					const result =
 						await this.internalApiService.deleteTask(task);
 					if (result.status) {
-						// Remove from baseTasksAtom completely
+						// Remove from baseTasksAtom completely (this is not just metadata)
 						const tasksWithMeta = this.store.get(baseTasksAtom);
 						const updatedTasks = tasksWithMeta.filter(
 							(t) => t.task.id !== task.id,
@@ -217,28 +240,6 @@ export class TaskSyncService {
 			);
 			// We might want to implement retry logic here in the future
 			throw error;
-		}
-	}
-
-	public localUpdateHandler(localUpdates: Task[]) {
-		try {
-			// Validate local updates
-			validateTasks(localUpdates);
-
-			// Mark the tasks as successfully persisted
-			const taskIds = localUpdates.map((task) => task.id);
-			this.store.set(markTasksSyncedAtom, taskIds);
-
-			logger.info(
-				"TaskSyncService: Local update acknowledged and marked as synced",
-			);
-		} catch (error) {
-			logger.error(
-				`TaskSyncService: Invalid local task data received: ${error.message}`,
-			);
-			throw new Error(
-				`Cannot process local update with invalid task data: ${error.message}`,
-			);
 		}
 	}
 

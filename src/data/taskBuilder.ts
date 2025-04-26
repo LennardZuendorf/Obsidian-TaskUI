@@ -187,17 +187,6 @@ export class TaskBuilder {
 	}
 
 	/**
-	 * Sets the raw task line for the task being built.
-	 *
-	 * @param rawTaskLine - A string representing the raw task line.
-	 * @returns The current instance of TaskBuilder for method chaining.
-	 */
-	setRawTaskLine(rawTaskLine: string): TaskBuilder {
-		this.partialTask.rawTaskLine = rawTaskLine;
-		return this;
-	}
-
-	/**
 	 * Finalizes the task building process by validating the partial task and mapping it to a line description.
 	 *
 	 * @param partialTask - A partial representation of a task that needs to be validated and finalized.
@@ -211,9 +200,6 @@ export class TaskBuilder {
 		message: string;
 		task?: Task;
 	} {
-		// Generate the line string based on current partial data
-		// Need to ensure enough data is present for the mapper to not throw error
-		// Temporarily assign default values if necessary for string generation
 		const tempTaskForString = {
 			...this.partialTask,
 			description: this.partialTask.description ?? "", // Ensure required fields exist
@@ -221,21 +207,14 @@ export class TaskBuilder {
 			status: this.partialTask.status ?? TaskStatus.TODO,
 			path: this.partialTask.path ?? "",
 			source: this.partialTask.source ?? TaskSource.OBSIDIAN,
-			id: this.partialTask.id ?? "temp-id",
+			id: this.partialTask.id,
 			rawTaskLine: "", // Placeholder for type check
 		} as Task;
 		const generatedLine =
 			this.mapper.mapTaskToLineString(tempTaskForString);
-
-		// Assign to rawTaskLine before validation
 		this.partialTask.rawTaskLine = generatedLine;
-
-		// Now validate the complete partialTask (which includes the generated lines)
-		const { isValid, message } = validateTask(partialTask);
+		const { isValid, message } = validateTask(tempTaskForString);
 		if (!isValid) {
-			// Consider if we should clear the generated lines if invalid?
-			// this.partialTask.lineDescription = undefined;
-			// this.partialTask.rawTaskLine = undefined; // Not possible if non-nullable
 			return { isValid, message };
 		} else {
 			// Task is valid, return it (already has lines set)

@@ -16,7 +16,7 @@ import {
 import { ItemView, Notice, WorkspaceLeaf } from "obsidian";
 import React, { useEffect, useState } from "react";
 import { Root, createRoot } from "react-dom/client";
-import { SettingsContext, useSettings } from "./config/settings";
+import { SettingsContext, appSettings, useSettings } from "./config/settings";
 import {
 	baseTasksAtom,
 	changeTasksAtom,
@@ -36,15 +36,15 @@ import { logger } from "./utils/logger";
 export const VIEW_TYPE_MAIN = "react-view";
 
 interface TaskUIAppProps {
-	onTasksUpdate: (update: any) => void;
+	onTasksUpdate: (update: TaskUpdate) => void;
 }
 
 const LoadingScreen: React.FC = () => (
 	<div className="flex items-center justify-center min-h-screen">
 		<div className="flex flex-col items-center space-y-4">
-			<Loader2 className="h-8 w-8 animate-spin text-primary" />
+			<Loader2 className="h-8 w-8 animate-spin text-accent" />
 			<p className="text-sm text-muted-foreground">
-				Initializing tasks...
+				Initializing App - Loading Tasks...
 			</p>
 		</div>
 	</div>
@@ -300,11 +300,11 @@ const TaskUIApp: React.FC<TaskUIAppProps> = ({ onTasksUpdate }) => {
  */
 export class MainView extends ItemView {
 	root: Root | null = null;
-	settings: any;
+	settings: appSettings;
 	private taskSync: TaskSyncService | null = null;
 	private cleanup: (() => void) | null = null;
 
-	constructor(leaf: WorkspaceLeaf, settings: any) {
+	constructor(leaf: WorkspaceLeaf, settings: appSettings) {
 		super(leaf);
 		this.settings = settings;
 	}

@@ -6,10 +6,19 @@ import { logger } from "../../utils/logger";
  */
 function findTaskLineIndex(lines: string[], lineToFind: string): number {
 	let taskLineIndex = -1;
+	logger.debug(
+		`[findTaskLineIndex] Attempting to find line: "${lineToFind}"`,
+	);
 
 	// Attempt 1: Exact match (useful if raw line was passed)
 	taskLineIndex = lines.findIndex((line) => line === lineToFind);
-	if (taskLineIndex !== -1) return taskLineIndex; // Found!
+	if (taskLineIndex !== -1) {
+		logger.debug(
+			`[findTaskLineIndex] Found via exact match at index: ${taskLineIndex}`,
+		);
+		return taskLineIndex; // Found!
+	}
+	logger.debug(`[findTaskLineIndex] Exact match failed.`);
 
 	// Attempt 2: Regex ID match
 	const idMatch = lineToFind.match(/\[id::\s*([\w-]+)\]/);
@@ -18,16 +27,37 @@ function findTaskLineIndex(lines: string[], lineToFind: string): number {
 		// Correct escaping for RegExp constructor string
 		const idRegex = new RegExp(`\\[id::\\s*${taskId}\\]`);
 		taskLineIndex = lines.findIndex((line) => idRegex.test(line));
-		if (taskLineIndex !== -1) return taskLineIndex; // Found!
+		if (taskLineIndex !== -1) {
+			logger.debug(
+				`[findTaskLineIndex] Found via ID match (${taskId}) at index: ${taskLineIndex}`,
+			);
+			return taskLineIndex; // Found!
+		}
+		logger.debug(`[findTaskLineIndex] ID match failed for ID: ${taskId}`);
+	} else {
+		logger.debug(
+			`[findTaskLineIndex] ID match failed (no ID found in lineToFind).`,
+		);
 	}
 
 	// Attempt 3: Full string trimmed match, ignoring leading task markers
-	const taskMarkerRegex = /^\\s*-\\s*\\[.?\\]\\s*/;
+	const taskMarkerRegex = /^\s*-\s*\[.?\]\s*/;
 	taskLineIndex = lines.findIndex((line) => {
 		const cleanLine = line.replace(taskMarkerRegex, "").trim();
 		const cleanLineToFind = lineToFind.replace(taskMarkerRegex, "").trim();
 		return cleanLine === cleanLineToFind;
 	});
+
+	if (taskLineIndex !== -1) {
+		logger.debug(
+			`[findTaskLineIndex] Found via trimmed match at index: ${taskLineIndex}`,
+		);
+	} else {
+		logger.debug(
+			`[findTaskLineIndex] Trimmed match failed. Line not found.`,
+		);
+	}
+
 	// Return index (or -1 if not found)
 	return taskLineIndex;
 }

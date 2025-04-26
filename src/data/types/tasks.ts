@@ -29,10 +29,8 @@ export enum TaskStatus {
 	CANCELLED = "cancelled",
 }
 
-/**
- * Zod schema for Task validation
- */
-export const TaskSchema: z.ZodType<any> = z.object({
+// Base schema without recursion
+const BaseTaskSchema = z.object({
 	id: z.string(),
 	description: z.string(),
 	priority: z.nativeEnum(TaskPriority),
@@ -44,36 +42,43 @@ export const TaskSchema: z.ZodType<any> = z.object({
 	status: z.nativeEnum(TaskStatus),
 	createdDate: z.date().nullable().optional(),
 	doneDate: z.date().nullable().optional(),
-	path: z.string(),
+	path: z.string().optional(),
 	symbol: z.string().optional(),
 	source: z.nativeEnum(TaskSource),
-	line: z.number().optional(),
-	subtasks: z.lazy((): z.ZodType<any> => z.array(TaskSchema)).optional(),
 	tags: z.array(z.string()).optional(),
 	rawTaskLine: z.string(),
 });
 
+// Define the recursive Task type using an interface
+export interface Task extends z.infer<typeof BaseTaskSchema> {
+	subtasks?: Task[];
+}
+
 /**
- * Task type inferred from the Zod schema
+ * Zod schema for Task validation, including recursion
+ * Explicit type annotation is needed for recursion
  */
-export type Task = z.infer<typeof TaskSchema>;
+export const TaskSchema: z.ZodType<Task> = BaseTaskSchema.extend({
+	subtasks: z.lazy(() => z.array(TaskSchema)).optional(),
+});
 
 /**
  * Task metadata for sync state tracking
  */
 export interface TaskMetadata {
-	lastUpdated?: number; // When the task was last modified locally
-	lastSynced?: number; // When the task was last synced with vault
-	needsSync?: boolean; // Whether the task needs to be synced
+	lastUpdated?: number;
+	lastSynced?: number;
+	needsSync?: boolean;
 	toBeSyncedAction?: TaskSyncAction;
-	previousVersion?: Task;
+	previousVersion?: Task; // Use Task interface
+	isEditing?: boolean; // Flag to indicate if the task is being edited in the UI
 }
 
 /**
  * Task with its metadata for internal state management
  */
 export interface TaskWithMetadata {
-	task: Task;
+	task: Task; // Use Task interface
 	metadata: TaskMetadata;
 }
 
@@ -96,7 +101,7 @@ export const exampleTask = {
 	symbol: "🗑️",
 	source: TaskSource.OBSIDIAN,
 	line: 12,
-	subtasks: [],
+	subtasks: [], // Example doesn't need recursion here
 	rawTaskLine: "- [ ] Take out the trash",
 } as const;
 

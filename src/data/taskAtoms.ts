@@ -1,7 +1,29 @@
 import { atom } from "jotai";
 import { logger } from "../utils/logger";
-import { storeOperation } from "./types/operations";
-import { Task, TaskStatus, TaskWithMetadata } from "./types/tasks";
+import { storeOperation, UpdateMetadataPayload } from "./types/operations";
+import {
+	Task,
+	TaskMetadata,
+	TaskStatus,
+	TaskWithMetadata,
+} from "./types/tasks";
+
+// Define the structure for tags used in the UI selector
+export type TaskTag = {
+	value: string; // e.g., "#work"
+	label: string; // e.g., "Work"
+};
+
+// Helper function to create TaskTag from string (used in derived atom)
+const createTagFromString = (tagValue: string): TaskTag => {
+	const label = tagValue.startsWith("#") ? tagValue.substring(1) : tagValue;
+	// Capitalize first letter for label, ensure value has #
+	const formattedLabel = label.charAt(0).toUpperCase() + label.slice(1);
+	const formattedValue = tagValue.startsWith("#") ? tagValue : `#${tagValue}`;
+	// Ensure value is lowercase and replaces spaces for consistency
+	const finalValue = formattedValue.toLowerCase().replace(/\s+/g, "-");
+	return { value: finalValue, label: formattedLabel };
+};
 
 /**
  * The main atom to store all tasks with their metadata. This is the internal store
@@ -186,37 +208,6 @@ export const changeTasksAtom = atom(
 				break;
 			}
 
-			// Add new case for sync confirmation
-			case storeOperation.SYNC_CONFIRMED: {
-				// Should only receive one confirmed task at a time from TaskSyncService
-				if (change.tasks.length !== 1) {
-					logger.warn("SYNC_CONFIRMED operation received != 1 task.");
-					break;
-				}
-				const confirmedTask = change.tasks[0];
-
-				const updatedTasks = tasksWithMeta.map((taskWithMeta) => {
-					if (taskWithMeta.task.id !== confirmedTask.id) {
-						return taskWithMeta; // Not the task we're confirming
-					}
-
-					// Replace the task data, keep existing metadata but reset sync flags
-					return {
-						task: confirmedTask, // Use the confirmed task data
-						metadata: {
-							...taskWithMeta.metadata,
-							lastSynced: now,
-							needsSync: false,
-							toBeSyncedAction: null,
-							// Keep previousVersion if it exists, might be useful? Or clear it?
-							// previousVersion: taskWithMeta.metadata.previousVersion
-						},
-					};
-				});
-				set(baseTasksAtom, updatedTasks);
-				break;
-			}
-
 			case storeOperation.RESET: {
 				set(baseTasksAtom, []);
 				break;
@@ -226,33 +217,44 @@ export const changeTasksAtom = atom(
 );
 
 /**
- * Helper atom to mark tasks as successfully synced with the vault.
- * Updates metadata to reflect sync status:
- * - Sets lastSynced to current timestamp
- * - Sets needsSync to false
- * - Clears toBeSyncedAction
+ * Generic atom to update metadata for a specific task.
  */
-export const markTasksSyncedAtom = atom(null, (get, set, taskIds: string[]) => {
-	const tasksWithMeta = get(baseTasksAtom);
-	const now = Date.now();
+export const updateTaskMetadataAtom = atom(
+	null, // write-only atom
+	(get, set, payload: UpdateMetadataPayload) => {
+		const currentTasksWithMeta = get(baseTasksAtom);
+		const taskIndex = currentTasksWithMeta.findIndex(
+			(t) => t.task.id === payload.taskId,
+		);
 
-	// Update metadata for synced tasks
-	const updatedTasks = tasksWithMeta.map(({ task, metadata }) =>
-		taskIds.includes(task.id)
-			? {
-					task,
-					metadata: {
-						...metadata,
-						lastSynced: now,
-						needsSync: false,
-						toBeSyncedAction: null,
-					},
-				}
-			: { task, metadata },
-	);
+		if (taskIndex === -1) {
+			logger.warn(
+				`[updateTaskMetadataAtom] Task ID ${payload.taskId} not found.`,
+			);
+			return;
+		}
 
-	set(baseTasksAtom, updatedTasks);
-});
+		const updatedTasks = [...currentTasksWithMeta];
+		const taskToUpdate = updatedTasks[taskIndex];
+
+		// Merge existing metadata with the updates
+		const mergedMetadata: TaskMetadata = {
+			...(taskToUpdate.metadata || {}), // Handle case where metadata might be initially undefined
+			...payload.metadataUpdates,
+		};
+
+		updatedTasks[taskIndex] = {
+			...taskToUpdate,
+			metadata: mergedMetadata,
+		};
+
+		logger.debug(
+			`[updateTaskMetadataAtom] Updating metadata for task ${payload.taskId}:`,
+			payload.metadataUpdates,
+		);
+		set(baseTasksAtom, updatedTasks);
+	},
+);
 
 /**
  * Derived atom that returns tasks requiring synchronization.
@@ -296,6 +298,26 @@ export const doneTasksAtom = atom((get) =>
 );
 
 /**
+ * Derived atom that aggregates all unique tags from all tasks.
+ */
+export const availableTagsAtom = atom<TaskTag[]>((get) => {
+	const allTasks = get(baseTasksAtom); // Read from baseTasksAtom
+	const allTagStrings = allTasks.flatMap(
+		(taskWithMeta) => taskWithMeta.task.tags || [],
+	);
+	const uniqueTagStrings = new Set(allTagStrings);
+
+	// Convert unique tag strings to TaskTag objects
+	const tags = Array.from(uniqueTagStrings).map(createTagFromString);
+
+	// Sort alphabetically by label for consistent display
+	tags.sort((a, b) => a.label.localeCompare(b.label));
+
+	logger.trace(`Available Tags Recalculated: ${JSON.stringify(tags)}`);
+	return tags;
+});
+
+/**
  * Debug atom to expose internal state
  */
 export const debugStateAtom = atom((get) => ({
@@ -314,5 +336,5 @@ if (process.env.NODE_ENV !== "production") {
 	doneTasksAtom.debugLabel = "doneTasksAtom";
 	debugStateAtom.debugLabel = "debugStateAtom";
 	unsyncedTasksAtom.debugLabel = "unsyncedTasksAtom";
-	markTasksSyncedAtom.debugLabel = "markTasksSyncedAtom";
+	availableTagsAtom.debugLabel = "availableTagsAtom"; // Add label for the new atom
 }

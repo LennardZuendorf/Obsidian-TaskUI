@@ -1,5 +1,5 @@
-import { tasksObject, taskObject } from "../../data/types/transferObjects";
 import { Task } from "../../data/types/tasks";
+import { taskObject, tasksObject } from "../../data/types/transferObjects";
 
 export interface ApiService {
 	/**
@@ -47,7 +47,7 @@ export interface ApiService {
 	 * @param event - The name of the event to listen for.
 	 * @param callback - The function to be called when the event is emitted, receiving the event data as an argument.
 	 */
-	on(event: string, callback: (data: any) => void): void;
+	on(event: string, callback: (data: unknown) => void): void;
 
 	/**
 	 * Emits a specified event with associated data.
@@ -55,5 +55,5 @@ export interface ApiService {
 	 * @param event - The name of the event to emit.
 	 * @param data - The data to be passed along with the event.
 	 */
-	emit(event: string, data: any): void;
+	emit(event: string, data: unknown): void;
 }

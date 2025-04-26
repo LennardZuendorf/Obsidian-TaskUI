@@ -39,15 +39,25 @@
 	},
 	"dependencies": {
 		"@headlessui/react": "^2.1.10",
+		"@hookform/resolvers": "^5.0.1",
 		"@ophidian/core": "0.0.24",
+		"@radix-ui/react-collapsible": "^1.1.8",
+		"@radix-ui/react-dialog": "^1.1.11",
 		"@radix-ui/react-dropdown-menu": "^2.1.2",
 		"@radix-ui/react-icons": "^1.3.0",
 		"@radix-ui/react-label": "^2.1.0",
+		"@radix-ui/react-popover": "^1.1.11",
+		"@radix-ui/react-select": "^2.2.2",
+		"@radix-ui/react-separator": "^1.1.4",
 		"@radix-ui/react-slot": "^1.1.0",
 		"@radix-ui/react-tabs": "^1.1.1",
+		"@tanstack/react-form": "^1.7.0",
+		"@tanstack/zod-form-adapter": "^0.42.1",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
+		"cmdk": "^1.1.1",
 		"date-fns": "^4.1.0",
+		"emblor": "^1.4.8",
 		"esbuild-style-plugin": "^1.6.3",
 		"events": "^3.3.0",
 		"jotai": "^2.10.1",
@@ -57,7 +67,9 @@
 		"lucide-react": "^0.453.0",
 		"pino": "^9.5.0",
 		"react": "^18.3.1",
+		"react-day-picker": "^9.4.3",
 		"react-dom": "^18.3.1",
+		"react-hook-form": "^7.56.1",
 		"react-label": "^0.0.6",
 		"tailwind-merge": "^2.5.4",
 		"tailwindcss-animate": "^1.0.7",
@@ -82,5 +94,6 @@
 			"eslint --fix",
 			"prettier --write"
 		]
-	}
+	},
+	"packageManager": "pnpm@9.15.2+sha512.93e57b0126f0df74ce6bff29680394c0ba54ec47246b9cf321f0121d8d9bb03f750a705f24edc3c1180853afd7c2c3b94196d0a3d53d3e069d9e2793ef11f321"
 }

@@ -23,7 +23,9 @@ export class TaskMapper {
 		const created = task.createdDate
 			? `[created:: ${this.formatDate(task.createdDate)}]`
 			: "";
-		const start = task.startDate ? `[start:: ${task.startDate}]` : "";
+		const start = task.startDate
+			? `[start:: ${this.formatDate(task.startDate)}]`
+			: "";
 		const scheduled = task.scheduledDate
 			? `[scheduled:: ${this.formatDate(task.scheduledDate)}]`
 			: "";
@@ -33,29 +35,53 @@ export class TaskMapper {
 		const completion = task.doneDate
 			? `[completion:: ${this.formatDate(task.doneDate)}]`
 			: "";
+		const tagsString =
+			task.tags && task.tags.length > 0 ? task.tags.join(" ") : "";
 		const subtaskStrings = task.subtasks
-			? task.subtasks?.map(this.mapTaskToLineString).join("\n	")
+			? task.subtasks
+					?.map((sub) => this.mapTaskToLineString(sub))
+					.join("\n\t")
 			: "";
 
-		return `- [${this.reverseMapStatus(task.status)}] ${task.description} ${id} ${dependsOn} ${priority} ${recurs} ${created} ${start} ${scheduled} ${due} ${completion} ${subtaskStrings ? `\n	${subtaskStrings}` : ""}`;
+		return `- [${this.reverseMapStatus(task.status)}] ${task.description}${tagsString ? " " + tagsString : ""} ${id} ${dependsOn} ${priority} ${recurs} ${created} ${start} ${scheduled} ${due} ${completion}${subtaskStrings ? `\n\t${subtaskStrings}` : ""}`
+			.replace(/\s+/g, " ")
+			.trim();
 	}
 
 	public mapMdToTaskType(lineString: string): Task {
 		// --- Extract Status ---
 		const statusMarkerRegex = /^\s*-\s*\[(.)\]/;
 		const statusMarkerMatch = lineString.match(statusMarkerRegex);
-		const statusChar = statusMarkerMatch ? statusMarkerMatch[1] : " "; // Default to space if no match
+		const statusChar = statusMarkerMatch ? statusMarkerMatch[1] : " ";
 
-		// --- Extract Description ---
-		// Remove status marker and then remove attribute blocks
+		// --- Extract Description, Tags, and Attributes ---
 		const lineWithoutStatus = statusMarkerMatch
-			? lineString.substring(statusMarkerMatch[0].length)
-			: lineString; // Use original if no status marker found
-		const description = lineWithoutStatus
-			.replace(new RegExp("\\[([a-zA-Z0-9_-]+)::\\s*[^\\]]+\\]", "g"), "") // Use RegExp constructor
+			? lineString.substring(statusMarkerMatch[0].length).trim()
+			: lineString.trim();
+
+		// Regex to find tags (# followed by non-whitespace)
+		const tagRegex = /(?:^|\s)(#\S+)/g;
+		const tags: string[] = [];
+		let lineWithoutTags = lineWithoutStatus;
+		let tagMatch;
+		while ((tagMatch = tagRegex.exec(lineWithoutStatus)) !== null) {
+			// Store the full tag including '#' e.g., "#test"
+			tags.push(tagMatch[1]);
+			// Replace the matched tag (including potential leading space) with a single space
+			lineWithoutTags = lineWithoutTags.replace(tagMatch[0], " ");
+		}
+		lineWithoutTags = lineWithoutTags.trim(); // Clean up spaces
+
+		// Extract description from the remaining string (after tags and attributes removed)
+		const attributeBlockRegex = new RegExp(
+			"\\[([a-zA-Z0-9_-]+)::\\s*[^\\]]+\\]", // Corrected regex escaping
+			"g",
+		);
+		const description = lineWithoutTags
+			.replace(attributeBlockRegex, "")
 			.trim();
 
-		// --- Extract Attributes ---
+		// --- Extract Attributes (from original lineString, includes tags if they were there) ---
 		const idMatch = lineString.match("\\[id:: ([^\\]]+)\\]");
 		const dependsOnMatch = lineString.match("\\[dependsOn:: ([^\\]]+)\\]");
 		const priorityMatch = lineString.match("\\[priority:: ([^\\]]+)\\]");
@@ -67,7 +93,6 @@ export class TaskMapper {
 		const completionMatch = lineString.match(
 			"\\[completion:: ([^\\]]+)\\]",
 		);
-		// Note: We no longer need the old `statusMatch` regex here
 
 		let taskBase: Partial<Task> | undefined = undefined;
 
@@ -75,20 +100,19 @@ export class TaskMapper {
 			const id = idMatch[1];
 			taskBase = {
 				id: id,
-				path: "Tasks.md", // Consider making this dynamic or removing if always set later
+				path: "Tasks.md",
 				source: TaskSource.OBSIDIAN,
-				// status: TaskStatus.TODO, // Status is now set below based on parsed char
 			};
 		}
 
 		return TaskBuilder.create(taskBase)
-			.setDescription(description) // Use the newly extracted description
+			.setDescription(description) // Use cleaned description
 			.setPriority(
 				priorityMatch
 					? this.mapPriorityEnum(priorityMatch[1])
 					: TaskPriority.MEDIUM,
 			)
-			.setStatus(this.mapStatusEnum(statusChar)) // Use the character from the specific regex
+			.setStatus(this.mapStatusEnum(statusChar))
 			.setPath(defaultSettings.defaultPath)
 			.setSource(TaskSource.OBSIDIAN)
 			.setRecurs(recursMatch ? recursMatch[1] : null)
@@ -98,11 +122,9 @@ export class TaskMapper {
 				parseDate(scheduledMatch ? scheduledMatch[1] : null),
 			)
 			.setStartDate(parseDate(startMatch ? startMatch[1] : null))
-			.setBlocks(
-				dependsOnMatch ? dependsOnMatch[1].split("\\s+") : [], // Corrected dependsOn split regex
-			)
+			.setBlocks(dependsOnMatch ? dependsOnMatch[1].split(" ") : []) // Simplified split
 			.setDoneDate(parseDate(completionMatch ? completionMatch[1] : null))
-			.setRawTaskLine(lineString)
+			.setTags(tags) // Set extracted tags (now including '#')
 			.build();
 	}
 
@@ -112,33 +134,36 @@ export class TaskMapper {
 	 * @returns The taskTypes object.
 	 */
 	public mapDvToTaskType(dvTask: dvTaskType): Task {
-		const subtasks: Task[] = [];
-
-		// Map the task line string (description + attributes) to a task object.
-		// Note: This call won't correctly parse the status as dvTask.text lacks the prefix.
+		// Map the Dataview task text (description + inline fields/tags) to a Task object
 		const mappedTask = this.mapMdToTaskType(dvTask.text);
 
-		// --- Set reliable data from dvTask ---
-		// Set status based on dvTask.status (reliable source)
+		// --- Override/Set reliable data from dvTask properties ---
 		mappedTask.status = this.mapStatusEnum(dvTask.status);
-		logger.info(
-			`DV Status: ${dvTask.status} -> Mapped Status: ${mappedTask.status}`,
-		);
-
-		mappedTask.line = dvTask.line ? dvTask.line : 0;
 		mappedTask.path = dvTask.path;
+
+		// Combine tags: ensure all tags start with '#'
+		const dvTags =
+			dvTask.tags?.map((t: string) =>
+				t.startsWith("#") ? t : `#${t}`,
+			) || [];
+		const textTags = mappedTask.tags || []; // Already have '#' from mapMdToTaskType
+		const combinedTags = Array.from(new Set([...textTags, ...dvTags]));
+		mappedTask.tags = combinedTags;
+
+		// Map subtasks recursively
 		mappedTask.subtasks =
 			dvTask.subtasks && dvTask.subtasks.length > 0
 				? dvTask.subtasks.map((subtask: dvTaskType) =>
 						this.mapDvToTaskType(subtask),
 					)
-				: subtasks;
+				: [];
 
 		// --- Reconstruct and store the correct raw line ---
 		const statusChar = this.reverseMapStatus(mappedTask.status);
+		// Use the text from dvTask as it contains inline fields correctly parsed by dataview
 		const reconstructedLine = `- [${statusChar}] ${dvTask.text}`;
 		mappedTask.rawTaskLine = reconstructedLine;
-		logger.info(`Reconstructed rawTaskLine: ${mappedTask.rawTaskLine}`);
+		logger.debug(`DV Mapped Task (final): ${JSON.stringify(mappedTask)}`);
 
 		return mappedTask;
 	}
@@ -196,8 +221,8 @@ export class TaskMapper {
 		}
 	}
 
-	private formatDate(date: Date): string {
-		return format(date, "yyyy-MM-dd");
+	private formatDate(date: Date | null): string | null {
+		return date ? format(date, "yyyy-MM-dd") : null;
 	}
 
 	/**
@@ -211,61 +236,92 @@ export class TaskMapper {
 		newTask: Task,
 		originalRawLine: string,
 	): string {
-		// Generate the ideal string based on the newTask data
-		const idealNewLineString = this.mapTaskToLineString(newTask);
+		// --- Extract components from originalRawLine ---
+		const statusMarkerRegex = /^\s*-\s*\[(.)\]\s*/;
+		const statusMarkerMatch = originalRawLine.match(statusMarkerRegex);
+		const lineWithoutStatus = statusMarkerMatch
+			? originalRawLine.substring(statusMarkerMatch[0].length)
+			: originalRawLine;
 
-		// --- Start Merge Logic (based on previous discussion) ---
-		const attributeRegex = /\[([a-zA-Z0-9_-]+)::\s*([^\]]+?)\s*\]/g;
-		const currentAttributes = new Map<string, string>();
-		const updatedKnownAttributes = new Map<string, string>();
-		let match;
-
-		// Extract current attributes from originalRawLine
-		while ((match = attributeRegex.exec(originalRawLine)) !== null) {
-			currentAttributes.set(match[1], match[2]);
-		}
-
-		// Extract updated known attributes from idealNewLineString
-		attributeRegex.lastIndex = 0; // Reset regex state
-		while ((match = attributeRegex.exec(idealNewLineString)) !== null) {
-			updatedKnownAttributes.set(match[1], match[2]);
-		}
-
-		// Merge - Start with current, overwrite with updated known values
-		const finalAttributes = new Map<string, string>(currentAttributes);
-		for (const [key, updatedValue] of updatedKnownAttributes.entries()) {
-			// Special handling for ID: ensure it's always present from newTask if possible
-			if (key === "id" && newTask.id) {
-				finalAttributes.set(key, newTask.id);
-			} else {
-				finalAttributes.set(key, updatedValue);
-			}
-		}
-		// Ensure ID attribute exists if task has an ID, even if it wasn't in ideal string (shouldn't happen often)
-		if (newTask.id && !finalAttributes.has("id")) {
-			finalAttributes.set("id", newTask.id);
-		}
-
-		// Extract base string (checkbox + description) from idealNewLineString
-		let baseString = idealNewLineString;
-		const firstAttrMatch = idealNewLineString.match(/\[([a-zA-Z0-9_-]+)::/);
-		if (firstAttrMatch && firstAttrMatch.index !== undefined) {
-			baseString = idealNewLineString
-				.substring(0, firstAttrMatch.index)
-				.trimEnd();
-		} else {
-			baseString = idealNewLineString.trimEnd();
-		}
-		// Handle edge case: Line might just be checkbox if description is empty
-		if (!baseString.includes("- [")) {
-			const checkboxMatch = originalRawLine.match(
-				/^(\s*-\s*\\[.?\\]\\s*)/,
+		const attributeRegex = /\s*\[([a-zA-Z0-9_-]+)::\s*([^\\]]+?)\s*\]/g;
+		const originalAttributes = new Map<string, string>();
+		let lineWithoutAttrsOrStatus = lineWithoutStatus;
+		let attrMatch;
+		while (
+			(attrMatch = attributeRegex.exec(lineWithoutAttrsOrStatus)) !== null
+		) {
+			originalAttributes.set(attrMatch[1], attrMatch[2]);
+			lineWithoutAttrsOrStatus = lineWithoutAttrsOrStatus.replace(
+				attrMatch[0],
+				"",
 			);
-			baseString = checkboxMatch ? checkboxMatch[1].trimEnd() : "- [ ]"; // Default fallback
 		}
+		lineWithoutAttrsOrStatus = lineWithoutAttrsOrStatus.trim();
 
-		// Reconstruct the final line
-		let reconstructedLine = baseString;
+		const tagEndingRegex = /(\s+#\S+)+$/;
+		const tagEndingMatch = lineWithoutAttrsOrStatus.match(tagEndingRegex);
+
+		// --- Get desired components from newTask ---
+		const newStatusChar = this.reverseMapStatus(newTask.status);
+		const newDescription = newTask.description;
+		const newTagsString =
+			newTask.tags && newTask.tags.length > 0
+				? " " + newTask.tags.join(" ")
+				: "";
+
+		// --- Directly build the map of attributes from newTask ---
+		const newAttributes = new Map<string, string>();
+		if (newTask.id) newAttributes.set("id", newTask.id);
+		if (newTask.priority) newAttributes.set("priority", newTask.priority);
+		if (newTask.dueDate) {
+			const formatted = this.formatDate(newTask.dueDate);
+			if (formatted) newAttributes.set("due", formatted);
+		}
+		if (newTask.scheduledDate) {
+			const formatted = this.formatDate(newTask.scheduledDate);
+			if (formatted) newAttributes.set("scheduled", formatted);
+		}
+		if (newTask.startDate) {
+			const formatted = this.formatDate(newTask.startDate);
+			if (formatted) newAttributes.set("start", formatted);
+		}
+		if (newTask.createdDate) {
+			const formatted = this.formatDate(newTask.createdDate);
+			if (formatted) newAttributes.set("created", formatted);
+		}
+		if (newTask.doneDate) {
+			const formatted = this.formatDate(newTask.doneDate);
+			if (formatted) newAttributes.set("completion", formatted); // Use 'completion' key
+		}
+		if (newTask.recurs) newAttributes.set("repeat", newTask.recurs);
+		if (newTask.blocks && newTask.blocks.length > 0) {
+			newAttributes.set("dependsOn", newTask.blocks.join(" "));
+		}
+		// Note: We intentionally don't add attributes if their value in newTask is null/undefined
+
+		// --- Merge attributes: newAttributes override originalAttributes ---
+		const finalAttributes = new Map<string, string>(originalAttributes);
+		for (const [key, updatedValue] of newAttributes.entries()) {
+			finalAttributes.set(key, updatedValue);
+		}
+		// Remove attributes if the corresponding newTask property is explicitly null/undefined
+		if (newTask.dueDate === null && finalAttributes.has("due"))
+			finalAttributes.delete("due");
+		if (newTask.scheduledDate === null && finalAttributes.has("scheduled"))
+			finalAttributes.delete("scheduled");
+		if (newTask.startDate === null && finalAttributes.has("start"))
+			finalAttributes.delete("start");
+		// createdDate usually shouldn't be nullified
+		if (newTask.doneDate === null && finalAttributes.has("completion"))
+			finalAttributes.delete("completion");
+		if (newTask.recurs === null && finalAttributes.has("repeat"))
+			finalAttributes.delete("repeat");
+		if (newTask.blocks === null && finalAttributes.has("dependsOn"))
+			finalAttributes.delete("dependsOn");
+
+		// --- Reconstruct the final line --- (Description + Tags + Attributes)
+		let reconstructedLine = `- [${newStatusChar}] ${newDescription}${newTagsString}`;
+
 		const attributeOrder = [
 			"id",
 			"priority",
@@ -276,23 +332,20 @@ export class TaskMapper {
 			"done",
 			"repeat",
 			"dependsOn",
-		]; // Define preferred order
+		];
 		const writtenKeys = new Set<string>();
-
 		for (const key of attributeOrder) {
 			if (finalAttributes.has(key)) {
 				reconstructedLine += ` [${key}:: ${finalAttributes.get(key)}]`;
 				writtenKeys.add(key);
 			}
 		}
-
 		for (const [key, value] of finalAttributes.entries()) {
 			if (!writtenKeys.has(key)) {
-				reconstructedLine += ` [${key}:: ${value}]`; // Append unknown/other attributes
+				reconstructedLine += ` [${key}:: ${value}]`;
 			}
 		}
-		// --- End Merge Logic ---
 
-		return reconstructedLine.trim(); // Trim final result just in case
+		return reconstructedLine.trim();
 	}
 }

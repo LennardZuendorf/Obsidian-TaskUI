@@ -34,15 +34,15 @@ module.exports = {
 				},
 				accent: {
 					DEFAULT: "var(--text-accent)",
-					foreground: "var(--text-accent)",
+					foreground: "var(--text-on-accent)",
 				},
 				success: {
 					DEFAULT: "var(--interactive-success)",
-					foreground: "var(--interactive-success)",
+					foreground: "var(--text-on-accent)",
 				},
 				popover: {
-					DEFAULT: "var(--popover)",
-					foreground: "var(--popover-foreground)",
+					DEFAULT: "var(--modal-background)",
+					foreground: "var(--text-on-accent)",
 				},
 				card: {
 					DEFAULT: "var(--modal-background)",

@@ -67,6 +67,10 @@ export class InternalApiService implements ApiService {
 	}
 
 	public async editTask(newTask: Task, oldTask: Task): Promise<taskObject> {
+		logger.debug("[InternalApiService.editTask] Called", {
+			newTask: JSON.stringify(newTask, null, 2),
+			oldTask: JSON.stringify(oldTask, null, 2),
+		});
 		try {
 			// Use the non-nullable rawTaskLine from the previous version for lookup
 			const lineToLookup = oldTask.rawTaskLine;
@@ -77,6 +81,11 @@ export class InternalApiService implements ApiService {
 				oldTask.rawTaskLine,
 			);
 
+			logger.debug("[InternalApiService.editTask] Merge result", {
+				lineToLookup,
+				finalLineToWrite,
+			});
+
 			if (!oldTask.path) {
 				logger.error(
 					`Old task (ID: ${oldTask.id}) is missing path information.`,
@@ -84,6 +93,9 @@ export class InternalApiService implements ApiService {
 				return { status: false };
 			}
 
+			logger.debug(
+				`[InternalApiService.editTask] Calling mdApi.editTask with path: ${oldTask.path}`,
+			);
 			// Call the simplified mdApi.editTask
 			const updatedLine = await this.mdApi.editTask(
 				finalLineToWrite, // The merged line to write
@@ -94,12 +106,14 @@ export class InternalApiService implements ApiService {
 			if (updatedLine !== finalLineToWrite) {
 				// Check if write was successful
 				logger.error(
-					`Updating task with path ${oldTask.path} failed in mdApi or returned unexpected line.`,
+					`Updating task with path ${oldTask.path} failed in mdApi. Expected line: "${finalLineToWrite}", Got: "${updatedLine}"`,
 				);
 				return { status: false };
 			}
 
-			// Update the task object with the actual line written
+			logger.debug(
+				`[InternalApiService.editTask] mdApi.editTask successful. Returning task ID: ${newTask.id}`,
+			);
 			const returnedTask = {
 				...newTask,
 				lineDescription: finalLineToWrite, // Reflects the actual content written

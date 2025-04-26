@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
 
 export type appSettings = {
 	defaultPath: string;
@@ -11,10 +11,17 @@ export const defaultSettings: appSettings = {
 	defaultHeading: "# Tasks",
 };
 
-export class AppSettingsTab extends PluginSettingTab {
-	plugin: any;
+// Interface describing the main plugin class with settings and save method
+interface PluginWithSettings extends Plugin {
+	settings: appSettings;
+	saveSettings(): Promise<void>;
+}
 
-	constructor(app: App, plugin: any) {
+export class AppSettingsTab extends PluginSettingTab {
+	plugin: PluginWithSettings; // Use the extended interface
+
+	constructor(app: App, plugin: PluginWithSettings) {
+		// Use the extended interface
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -55,7 +62,7 @@ export class AppSettingsTab extends PluginSettingTab {
 	}
 }
 
-import { useContext, createContext } from "react";
+import { createContext, useContext } from "react";
 
 /**
  * Context to provide the Obsidian App to all components. This is necessary so the obsidian API can be used in the components easily.
