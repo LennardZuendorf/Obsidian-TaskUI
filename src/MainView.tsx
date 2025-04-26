@@ -16,7 +16,7 @@ import {
 import { ItemView, Notice, WorkspaceLeaf } from "obsidian";
 import React, { useEffect, useState } from "react";
 import { Root, createRoot } from "react-dom/client";
-import { SettingsContext, appSettings, useSettings } from "./config/settings";
+import { SettingsContext, appSettings } from "./config/settings";
 import {
 	baseTasksAtom,
 	changeTasksAtom,
@@ -24,7 +24,7 @@ import {
 	unsyncedTasksAtom,
 } from "./data/taskAtoms";
 import { storeOperation as str } from "./data/types/operations";
-import { TaskWithMetadata } from "./data/types/tasks";
+import { Task, TaskWithMetadata } from "./data/types/tasks";
 import { TaskService as CrudService } from "./service/taskService";
 import { TaskSyncService, TaskUpdate } from "./service/taskSyncService";
 import "./styles.css";
@@ -56,7 +56,6 @@ const TaskUIApp: React.FC<TaskUIAppProps> = ({ onTasksUpdate }) => {
 	const [, changeTasks] = useAtom(changeTasksAtom);
 	const debugState = useAtomValue(debugStateAtom);
 	const app = useApp();
-	const settings = useSettings();
 	const [isLoading, setIsLoading] = useState(true);
 
 	async function reloadTasks() {
@@ -107,38 +106,46 @@ const TaskUIApp: React.FC<TaskUIAppProps> = ({ onTasksUpdate }) => {
 
 	async function createTask() {
 		if (!app) {
-			throw new Error("App is not available");
+			logger.error(
+				"[MainView] App context not available for createTask.",
+			);
+			new Notice("Cannot create task: App context unavailable.");
+			return;
 		}
-		new TaskModal(app, (task) => {
-			if (task) {
-				// First update local state with LOCAL_ADD
-				const update: TaskUpdate = {
-					operation: str.LOCAL_ADD,
-					tasks: [task],
-					source: "local" as const,
-					timestamp: Date.now(),
-				};
-				changeTasks(update);
 
-				// Then persist to vault
-				crudService
-					?.createTask(task, settings?.defaultHeading || "# Tasks")
-					.then((result) => {
-						if (result.status) {
-							// Notify the sync service that tasks were persisted
-							onTasksUpdate({
-								operation: str.LOCAL_ADD,
-								tasks: [task],
-							});
-							new Notice(`Task created successfully!`);
-						} else {
-							new Notice(`Task creation was unsuccessful!`);
-						}
+		// Open the TaskModal for creating a new task (pass null as initialTask)
+		// Constructor: (app, onSubmitCallback, initialTask?)
+		new TaskModal(
+			app,
+			(newTask: Task | null) => {
+				// This callback receives the fully built Task object from TaskForm/TaskModal
+				if (newTask) {
+					logger.info(
+						"[MainView] TaskModal closed with new task:",
+						newTask,
+					);
+					// Dispatch LOCAL_ADD to update UI state immediately
+					// The effect observer will handle calling the sync service.
+					changeTasks({
+						operation: str.LOCAL_ADD,
+						tasks: [newTask],
+						source: "local" as const,
+						timestamp: Date.now(),
 					});
-			} else {
-				new Notice(`Task creation was unsuccessful!`);
-			}
-		}).open();
+					// Optional notice
+					new Notice(
+						`Task "${newTask.description.substring(0, 20)}..." added.`,
+					);
+				} else {
+					logger.info(
+						"[MainView] TaskModal closed without creating a task.",
+					);
+					// new Notice(`Task creation cancelled.`); // Optional notice
+				}
+			},
+			undefined,
+		) // Pass undefined for optional initialTask
+			.open(); // Call open() to display the modal
 	}
 
 	useEffect(() => {

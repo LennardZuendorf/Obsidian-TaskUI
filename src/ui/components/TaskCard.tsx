@@ -14,7 +14,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@//base/Dropdown";
-import { TaskModal } from "@//components/TaskModal";
+import { TaskModal } from "./TaskModal";
 import { atom, useAtom } from "jotai";
 import {
 	ArrowLeftRight,
