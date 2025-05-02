@@ -1,17 +1,14 @@
-import { Button } from "@//base/Button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@//base/Tabs";
-import KanbanBoard from "@//BoardView";
-import { ErrorView } from "@//ErrorView";
-import TaskList from "@//ListView";
-import { getDefaultStore, useAtom, useAtomValue } from "jotai";
+import { getDefaultStore, useAtom } from "jotai";
 import { observe } from "jotai-effect";
 import {
-	Bug,
+	Calendar,
+	ChevronDownIcon,
+	Filter,
 	KanbanSquare,
-	List,
+	LayoutGrid,
+	ListCollapseIcon,
 	Loader2,
 	Plus,
-	RefreshCw,
 } from "lucide-react";
 import { ItemView, Notice, WorkspaceLeaf } from "obsidian";
 import React, { useEffect, useState } from "react";
@@ -20,7 +17,6 @@ import { SettingsContext, appSettings } from "./config/settings";
 import {
 	baseTasksAtom,
 	changeTasksAtom,
-	debugStateAtom,
 	unsyncedTasksAtom,
 } from "./data/taskAtoms";
 import { storeOperation as str } from "./data/types/operations";
@@ -28,8 +24,21 @@ import { Task, TaskWithMetadata } from "./data/types/tasks";
 import { TaskService as CrudService } from "./service/taskService";
 import { TaskSyncService, TaskUpdate } from "./service/taskSyncService";
 import "./styles.css";
-import { TaskModal } from "./ui/components/TaskModal";
-import { showNotice } from "./ui/utils/notice";
+import { Button } from "./ui/base/Button";
+import {
+	Command,
+	CommandGroup,
+	CommandItem,
+	CommandList,
+} from "./ui/base/Command";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/base/Popover";
+import { ScrollArea, ScrollBar } from "./ui/base/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/base/Tabs";
+import { TaskModal } from "./ui/components/shared/TaskModal";
+import { ErrorView } from "./ui/ErrorView";
+import { showNotice } from "./ui/lib/notice";
+import ListView from "./ui/ListView";
+import { cn } from "./ui/utils";
 import { AppContext, useApp } from "./utils/context";
 import { logger } from "./utils/logger";
 
@@ -38,6 +47,19 @@ export const VIEW_TYPE_MAIN = "react-view";
 interface TaskUIAppProps {
 	onTasksUpdate: (update: TaskUpdate) => void;
 }
+
+// Define constant for direct TabTrigger styling
+const tabTriggerClasses = cn(
+	// Base layout & typography
+	"inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-lg font-medium",
+	"!bg-transparent !border-none text-muted-foreground !shadow-none ",
+	// Hover state
+	"hover:text-foreground hover:ring-2 hover:ring-hover !!hover:bg-hover",
+	// Active state: different text color, bottom border effect
+	"data-[state=active]:text-foreground data-[state=active]:ring-2 data-[state=active]:ring-hover  data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:bottom-0 data-[state=active]:after:h-0.5 !data-[state=active]:after:bg-hover",
+	// Disabled state
+	"disabled:pointer-events-none disabled:text-muted-foreground",
+);
 
 const LoadingScreen: React.FC = () => (
 	<div className="flex items-center justify-center min-h-screen">
@@ -51,12 +73,11 @@ const LoadingScreen: React.FC = () => (
 );
 
 const TaskUIApp: React.FC<TaskUIAppProps> = ({ onTasksUpdate }) => {
-	const [error, setError] = useState<string | null>(null);
-	const [crudService, setCrudService] = useState<CrudService | null>(null);
 	const [, changeTasks] = useAtom(changeTasksAtom);
-	const debugState = useAtomValue(debugStateAtom);
 	const app = useApp();
 	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const [crudService, setCrudService] = useState<CrudService | null>(null);
 
 	async function reloadTasks() {
 		try {
@@ -85,67 +106,6 @@ const TaskUIApp: React.FC<TaskUIAppProps> = ({ onTasksUpdate }) => {
 		}
 
 		showNotice("<span>Tasks loaded successfully!</span>");
-	}
-
-	async function resetTasks() {
-		try {
-			const update = {
-				operation: str.RESET,
-				tasks: [],
-				source: "local" as const,
-				timestamp: Date.now(),
-			};
-			changeTasks(update);
-			logger.debug("Tasks reset and state cleared successfully.");
-		} catch (error) {
-			logger.error(`Error fetching tasks: ${error.message}`);
-			setError(error.message);
-		}
-		showNotice("<span>Tasks cleared successfully!</span>");
-	}
-
-	async function createTask() {
-		if (!app) {
-			logger.error(
-				"[MainView] App context not available for createTask.",
-			);
-			new Notice("Cannot create task: App context unavailable.");
-			return;
-		}
-
-		// Open the TaskModal for creating a new task (pass null as initialTask)
-		// Constructor: (app, onSubmitCallback, initialTask?)
-		new TaskModal(
-			app,
-			(newTask: Task | null) => {
-				// This callback receives the fully built Task object from TaskForm/TaskModal
-				if (newTask) {
-					logger.info(
-						"[MainView] TaskModal closed with new task:",
-						newTask,
-					);
-					// Dispatch LOCAL_ADD to update UI state immediately
-					// The effect observer will handle calling the sync service.
-					changeTasks({
-						operation: str.LOCAL_ADD,
-						tasks: [newTask],
-						source: "local" as const,
-						timestamp: Date.now(),
-					});
-					// Optional notice
-					new Notice(
-						`Task "${newTask.description.substring(0, 20)}..." added.`,
-					);
-				} else {
-					logger.info(
-						"[MainView] TaskModal closed without creating a task.",
-					);
-					// new Notice(`Task creation cancelled.`); // Optional notice
-				}
-			},
-			undefined,
-		) // Pass undefined for optional initialTask
-			.open(); // Call open() to display the modal
 	}
 
 	useEffect(() => {
@@ -193,9 +153,40 @@ const TaskUIApp: React.FC<TaskUIAppProps> = ({ onTasksUpdate }) => {
 		}
 	}, [crudService]);
 
+	async function createTask() {
+		if (!app) {
+			logger.error(
+				"[MainView] App context not available for createTask.",
+			);
+			new Notice("Cannot create task: App context unavailable.");
+			return;
+		}
+		new TaskModal(app, (newTask: Task | null) => {
+			if (newTask) {
+				logger.info(
+					"[MainView] TaskModal closed with new task:",
+					newTask,
+				);
+				changeTasks({
+					operation: str.LOCAL_ADD,
+					tasks: [newTask],
+					source: "local" as const,
+					timestamp: Date.now(),
+				});
+				new Notice(
+					`Task "${newTask.description.substring(0, 20)}..." added.`,
+				);
+			} else {
+				logger.info(
+					"[MainView] TaskModal closed without creating a task.",
+				);
+			}
+		}).open();
+	}
+
 	if (error) {
 		return (
-			<div className="flex items-center justify-center min-h-screen bg-gray-100">
+			<div className="flex items-center justify-center min-h-screen bg-background">
 				<ErrorView message={error} />
 			</div>
 		);
@@ -205,99 +196,196 @@ const TaskUIApp: React.FC<TaskUIAppProps> = ({ onTasksUpdate }) => {
 		return <LoadingScreen />;
 	}
 
+	const contentAreaBaseClass =
+		" flex-grow overflow-auto border-t border-l border-r border-b border-border rounded-md";
+
 	return (
-		<div>
-			<Tabs defaultValue="list" className="w-full h-full">
-				<div className="flex items-center max-w-full justify-between bg-transparent">
-					<TabsList className="flex grow max-w-full space-x-2 bg-transparent">
+		<Tabs
+			defaultValue="list"
+			className="w-full h-full flex flex-col bg-background"
+			activationMode="manual"
+		>
+			<div className="flex flex-wrap items-center justify-between pt-0 gap-8 shrink-0">
+				<ScrollArea className="w-full sm:w-auto">
+					<TabsList className="gap-2">
 						<TabsTrigger
-							value="list"
-							className="font-black grow"
-							asChild
+							value="overview"
+							className={tabTriggerClasses}
+							disabled={true}
 						>
-							<Button variant="outline">
-								<List />
-								List
-							</Button>
+							<LayoutGrid
+								className="-ms-0.5 me-1.5 h-4 w-4"
+								aria-hidden="true"
+							/>
+							Overview
+						</TabsTrigger>
+						<TabsTrigger value="list" className={tabTriggerClasses}>
+							<ListCollapseIcon
+								className="-ms-0.5 me-1.5 h-4 w-4"
+								aria-hidden="true"
+							/>
+							List
 						</TabsTrigger>
 						<TabsTrigger
 							value="board"
-							className="font-black grow"
-							asChild
+							className={tabTriggerClasses}
+							disabled={true}
 						>
-							<Button variant="outline">
-								<KanbanSquare />
-								Board
-							</Button>
+							<KanbanSquare
+								className="-ms-0.5 me-1.5 h-4 w-4"
+								aria-hidden="true"
+							/>
+							Board
 						</TabsTrigger>
 						<TabsTrigger
-							value="debug"
-							className="font-black grow"
-							asChild
+							value="calendar"
+							className={tabTriggerClasses}
+							disabled={true}
 						>
-							<Button variant="outline">
-								<Bug />
-								Debug
-							</Button>
+							<Calendar
+								className="-ms-0.5 me-1.5 h-4 w-4"
+								aria-hidden="true"
+							/>
+							Calendar
 						</TabsTrigger>
-						<div className="flex items-center space-x-0.5">
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={createTask}
-							>
-								<Plus className="h-5 w-5" />
-								<span className="sr-only">Add Task</span>
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={reloadTasks}
-							>
-								<RefreshCw className="h-5 w-5" />
-								<span className="sr-only">Reload Tasks</span>
-							</Button>
-						</div>
 					</TabsList>
-				</div>
-				<TabsContent value="list">
-					<TaskList />
-				</TabsContent>
-				<TabsContent value="board">
-					<KanbanBoard />
-				</TabsContent>
-				<TabsContent value="debug">
-					<div className="p-4 space-y-4">
-						<div className="flex items-center justify-between">
-							<h3 className="text-lg font-semibold">
-								Jotai Debug View
-							</h3>
-							<Button
-								variant="destructive"
-								onClick={() => {
-									resetTasks();
-								}}
-							>
-								Reset State
-							</Button>
-						</div>
+					<ScrollBar orientation="horizontal" className="invisible" />
+				</ScrollArea>
 
-						{Object.entries(debugState).map(([key, value]) => (
-							<div key={key} className="space-y-2">
-								<h4 className="font-medium text-sm text-muted-foreground">
-									{key}
-								</h4>
-								<div className="bg-secondary p-4 rounded-md">
-									<pre className="whitespace-pre-wrap overflow-x-auto">
-										{JSON.stringify(value, null, 2)}
-									</pre>
-								</div>
-							</div>
-						))}
-					</div>
-				</TabsContent>
-			</Tabs>
-		</div>
+				{/* Right Side Controls Added */}
+				<div className="flex items-center space-x-2 py-2 sm:py-0 sm:ms-auto shrink-0">
+					{/* Filter Popover (Dummy) */}
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button
+								size="sm"
+								className="h-9 gap-1"
+							>
+								<Filter className="h-4 w-4" />
+								<span className="text-sm">Filter</span>
+								<ChevronDownIcon className="h-4 w-4 opacity-50" />
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-[200px] p-0">
+							<Command>
+								<CommandList>
+									<CommandGroup heading="Dummy Filters">
+										<CommandItem>Incomplete</CommandItem>
+										<CommandItem>Due Today</CommandItem>
+										<CommandItem>High Priority</CommandItem>
+									</CommandGroup>
+								</CommandList>
+							</Command>
+						</PopoverContent>
+					</Popover>
+
+					{/* Group By Popover (Dummy) */}
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button
+								size="sm"
+								className="h-9 gap-1"
+							>
+								{/* Need an icon for Group By - using LayoutGrid for now */}
+								<LayoutGrid className="h-4 w-4" />
+								<span className="text-sm">Group By</span>
+								<ChevronDownIcon className="h-4 w-4 opacity-50" />
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-[200px] p-0">
+							<Command>
+								<CommandList>
+									<CommandGroup heading="Dummy Groups">
+										<CommandItem>Status</CommandItem>
+										<CommandItem>Priority</CommandItem>
+										<CommandItem>None</CommandItem>
+									</CommandGroup>
+								</CommandList>
+							</Command>
+						</PopoverContent>
+					</Popover>
+
+					{/* Sort By Popover (Dummy) */}
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button
+								size="sm"
+								className="h-9 gap-1"
+							>
+								{/* Need an icon for Sort By - using ArrowUpDown for now */}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									className="h-4 w-4"
+								>
+									<path d="m3 16 4 4 4-4M7 20V4M21 8l-4-4-4 4M17 4v16" />
+								</svg>
+								<span className="text-sm">Sort By</span>
+								<ChevronDownIcon className="h-4 w-4 opacity-50" />
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-[200px] p-0">
+							<Command>
+								<CommandList>
+									<CommandGroup heading="Dummy Sorts">
+										<CommandItem>Priority</CommandItem>
+										<CommandItem>Due Date</CommandItem>
+										<CommandItem>Description</CommandItem>
+									</CommandGroup>
+								</CommandList>
+							</Command>
+						</PopoverContent>
+					</Popover>
+
+					{/* Add Task Button */}
+					<Button
+						variant="default"
+						size="sm"
+						className="h-9 gap-1 bg-accent text-accent-foreground hover:bg-accent/90"
+						onClick={createTask} // Connect to the function
+					>
+						<Plus className="h-4 w-4" />
+						<span className="text-sm">Add Task</span>
+					</Button>
+				</div>
+			</div>
+
+			<TabsContent
+				value="list"
+				className={cn(
+					contentAreaBaseClass,
+					"data-[state=active]:block",
+				)}
+			>
+				<ListView />
+			</TabsContent>
+			<TabsContent
+				value="overview"
+				className={cn(
+					contentAreaBaseClass,
+					"data-[state=active]:block",
+				)}
+			></TabsContent>
+			<TabsContent
+				value="board"
+				className={cn(
+					contentAreaBaseClass,
+					"data-[state=active]:block",
+				)}
+			></TabsContent>
+			<TabsContent
+				value="calendar"
+				className={cn(
+					contentAreaBaseClass,
+					"data-[state=active]:block",
+				)}
+			></TabsContent>
+		</Tabs>
 	);
 };
 

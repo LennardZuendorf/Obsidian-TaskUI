@@ -7,6 +7,7 @@ import {
 	TaskStatus,
 	TaskWithMetadata,
 } from "./types/tasks";
+import { ViewSettings } from "./types/viewTypes";
 
 // Define the structure for tags used in the UI selector
 export type TaskTag = {
@@ -338,3 +339,10 @@ if (process.env.NODE_ENV !== "production") {
 	unsyncedTasksAtom.debugLabel = "unsyncedTasksAtom";
 	availableTagsAtom.debugLabel = "availableTagsAtom"; // Add label for the new atom
 }
+
+export const viewSettingsAtom = atom<ViewSettings>({
+	groupBy: "none",
+	globalFilter: "",
+	sortBy: "priority",
+	sortOrder: "desc",
+});

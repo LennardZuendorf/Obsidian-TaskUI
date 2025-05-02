@@ -10,7 +10,7 @@ import {
 	useDayPicker,
 	type DayPickerProps,
 } from "react-day-picker";
-import { cn } from "../utils/cn";
+import { cn } from "../utils";
 import { Button, buttonVariants } from "./Button";
 
 export type CalendarProps = DayPickerProps & {
@@ -70,17 +70,15 @@ function Calendar({
 	const [displayYears, setDisplayYears] = React.useState<{
 		from: number;
 		to: number;
-	}>(
-		React.useMemo(() => {
-			const currentYear = new Date().getFullYear();
-			return {
-				from: currentYear - Math.floor(yearRange / 2 - 1),
-				to: currentYear + Math.ceil(yearRange / 2),
-			};
-		}, [yearRange]),
-	);
+	}>(() => {
+		const currentYear = new Date().getFullYear();
+		return {
+			from: currentYear - Math.floor(yearRange / 2 - 1),
+			to: currentYear + Math.ceil(yearRange / 2),
+		};
+	});
 
-	const { onNextClick, onPrevClick, startMonth, endMonth } = props;
+	const { onPrevClick, startMonth, endMonth, onNextClick } = props;
 
 	// NOTE: Linter might warn about onNextClick/onPrevClick being unused here,
 	// but they are passed down to the custom Nav component.
@@ -215,6 +213,7 @@ function Calendar({
 						startMonth={startMonth}
 						endMonth={endMonth}
 						onPrevClick={onPrevClick}
+						onNextClick={onNextClick}
 					/>
 				),
 				CaptionLabel: (props) => (
@@ -334,7 +333,8 @@ function Nav({
 			}));
 			onNextClick?.(
 				new Date(
-					displayYears.from + (displayYears.to - displayYears.from),
+					displayYears.from +
+						(displayYears.to - displayYears.from + 1),
 					0,
 					1,
 				),
@@ -343,7 +343,14 @@ function Nav({
 		}
 		goToMonth(nextMonth);
 		onNextClick?.(nextMonth);
-	}, [goToMonth, nextMonth]);
+	}, [
+		goToMonth,
+		nextMonth,
+		navView,
+		setDisplayYears,
+		displayYears,
+		onNextClick,
+	]);
 	return (
 		<nav className={cn("flex items-center", className)}>
 			<Button
@@ -474,17 +481,19 @@ function YearGrid({
 			{Array.from(
 				{ length: displayYears.to - displayYears.from + 1 },
 				(_, i) => {
-					const isBefore =
-						differenceInCalendarDays(
-							new Date(displayYears.from + i, 11, 31),
-							startMonth!,
-						) < 0;
+					const isBefore = startMonth
+						? differenceInCalendarDays(
+								new Date(displayYears.from + i, 11, 31),
+								startMonth,
+							) < 0
+						: false;
 
-					const isAfter =
-						differenceInCalendarDays(
-							new Date(displayYears.from + i, 0, 0),
-							endMonth!,
-						) > 0;
+					const isAfter = endMonth
+						? differenceInCalendarDays(
+								new Date(displayYears.from + i, 0, 0),
+								endMonth,
+							) > 0
+						: false;
 
 					const isDisabled = isBefore || isAfter;
 					return (

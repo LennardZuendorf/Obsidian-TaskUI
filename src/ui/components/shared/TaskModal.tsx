@@ -1,8 +1,8 @@
 import { App, Modal } from "obsidian";
 import React from "react";
 import { createRoot, Root } from "react-dom/client";
-import { Task } from "../../data/types/tasks";
-import { TaskForm } from "./TaskForm"; // Import the React component
+import { Task } from "../../../data/types/tasks";
+import FullTaskForm from "./FullTaskForm"; // Import the updated React component
 
 export class TaskModal extends Modal {
 	private task: Task | null;
@@ -21,7 +21,7 @@ export class TaskModal extends Modal {
 		this.reactRoot = createRoot(this.contentEl);
 		this.reactRoot.render(
 			<React.StrictMode>
-				<TaskForm
+				<FullTaskForm
 					initialTask={this.task}
 					onSubmit={this.handleFormSubmit}
 					onCancel={this.handleCancel}

@@ -258,9 +258,6 @@ export class TaskMapper {
 		}
 		lineWithoutAttrsOrStatus = lineWithoutAttrsOrStatus.trim();
 
-		const tagEndingRegex = /(\s+#\S+)+$/;
-		const tagEndingMatch = lineWithoutAttrsOrStatus.match(tagEndingRegex);
-
 		// --- Get desired components from newTask ---
 		const newStatusChar = this.reverseMapStatus(newTask.status);
 		const newDescription = newTask.description;

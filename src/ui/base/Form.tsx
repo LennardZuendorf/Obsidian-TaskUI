@@ -10,7 +10,7 @@ import {
 	useFormContext,
 } from "react-hook-form";
 
-import { cn } from "../utils/cn"; // Assuming cn utility exists
+import { cn } from "../utils"; // Assuming cn utility exists
 import { Label } from "./Label"; // Assuming Label component exists
 
 // Form Context and Provider

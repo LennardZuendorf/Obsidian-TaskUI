@@ -406,3 +406,20 @@ This approach provides flexibility in task identification while maintaining data
     2.  **ID Match:** Looks for an explicit `[id::...]` tag within the line and uses that for matching.
     3.  **Content Match (Ignoring Prefix):** If no ID is found, it compares the trimmed content of the line _after_ stripping any leading task marker patterns (like `- [ ]`, `- [/]`, etc.) using the regex `/^\\s*-\\s*\\[.?\\]\\s*/`. This ensures matching even if the status marker differs or is absent in the lookup string.
 -   Tasks are typically added under a specified markdown heading within the target file.
+
+## Component Interaction Patterns
+
+### Event Handling and State Mutation (Parent Component Responsibility)
+
+**Pattern:** Child components (like `TaskCard`) contain the UI elements that trigger actions (e.g., Edit/Delete buttons), but they signal these actions to parent components (like `KanbanBoard`) via callback props (e.g., `onEdit`, `onDelete`). The parent component, which has access to the centralized state management (Jotai setters), is responsible for handling the actual state mutation.
+
+**Rationale:**
+
+1.  **Centralized State Management:** Aligns with using Jotai (or similar libraries) where specific atoms/hooks manage state changes. Keeps mutation logic consolidated.
+2.  **Separation of Concerns:**
+    -   Child components focus on presentation and signaling user intent.
+    -   Parent components focus on orchestrating actions and interacting with the state layer.
+3.  **Clear Data Flow:** Uses explicit callback props, making the data/event flow predictable.
+4.  **Component Reusability & Decoupling:** Child components remain unaware of the specific state management implementation or the details of the editing/deletion process (e.g., which form to open), making them more reusable.
+
+**Example:** `newTaskCard.tsx` has Edit/Delete buttons that call `onEdit`/`onDelete` props. `newTaskBoard.tsx` provides these functions, which then might set local state (like `editingTask`) or call Jotai setters directly to modify the task list.

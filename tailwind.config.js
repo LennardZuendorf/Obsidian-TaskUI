@@ -29,12 +29,12 @@ module.exports = {
 					foreground: "var(--text-error)",
 				},
 				muted: {
-					DEFAULT: "var(--text-muted)",
+					DEFAULT: "var(--background-primary-alt)",
 					foreground: "var(--text-muted)",
 				},
 				accent: {
-					DEFAULT: "var(--text-accent)",
-					foreground: "var(--text-on-accent)",
+					DEFAULT: "var(--interactive-accent)",
+					foreground: "var(--text-accent)",
 				},
 				success: {
 					DEFAULT: "var(--interactive-success)",
@@ -48,6 +48,9 @@ module.exports = {
 					DEFAULT: "var(--modal-background)",
 					foreground: "var(--text-normal)",
 				},
+        hover: {
+          DEFAULT: "var(--interactive-hover)",
+        }
 			},
 			borderRadius: {
 				lg: `var(--modal-radius)`,
@@ -70,6 +73,14 @@ module.exports = {
 			animation: {
 				"accordion-down": "accordion-down 0.2s ease-out",
 				"accordion-up": "accordion-up 0.2s ease-out",
+			},
+			fontSize: {
+				xxl: "1.875rem",
+				xl: "var(--font-ui-larger)",
+				lg: "var(--font-ui-medium)",
+				md: "var(--font-text-size)",
+				sm: "var(--font-ui-small)",
+				xs: "var(--font-smallest)",
 			},
 		},
 	},

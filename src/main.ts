@@ -1,8 +1,11 @@
 import { Plugin, WorkspaceLeaf } from "obsidian";
+import {
+	appSettings,
+	AppSettingsTab,
+	defaultSettings,
+} from "./config/settings";
 import { MainView, VIEW_TYPE_MAIN } from "./MainView";
 import { logger } from "./utils/logger";
-import { defaultSettings, appSettings } from "./config/settings";
-import { AppSettingsTab } from "./config/settings";
 
 export default class ShardsTaskUIPlugin extends Plugin {
 	settings: appSettings;

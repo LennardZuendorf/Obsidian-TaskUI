@@ -2,7 +2,7 @@
 
 ## Overall Status (Consolidated)
 
-Core syncing/updating logic is fixed and validated. Linting issues resolved. Focus shifts to implementing and refining core UI features and views.
+Kanban board UI removed. Core syncing/updating logic remains fixed and validated. Linting issues resolved. Focus shifts to implementing a Table view as the primary task display within a newly styled tabbed interface.
 
 **Completed Milestones:**
 
@@ -11,64 +11,48 @@ Core syncing/updating logic is fixed and validated. Linting issues resolved. Foc
 -   Implemented core sync service structure
 -   Validated and tested the fixed sync/update logic and new architecture ✓
 -   Fixed all known linter errors and dependency issues ✓
+-   Removed Kanban board components (`boardView` directory) and associated code. ✓
+-   Updated `MainView.tsx` with new styled tabs (Overview, List, Board, Calendar - List active, others disabled). ✓
+-   Updated `ListView.tsx` to display raw task data from `baseTasksAtom`. ✓
 
 **Known Issues:**
 
 -   None currently identified.
--   **Performance:** Frequent "[Violation] Forced reflow while executing JavaScript took <N>ms" console messages during UI interactions (e.g., TaskModal, PrioritySelect). Indicates potential synchronous layout calculations needing optimization. (Low priority for now).
+-   **Performance:** Previous console messages about forced reflows might still occur in other components (e.g., TaskModal, selects). (Low priority).
 
 ## Active Goals (Feature Focus)
 
-1.  Finalize Task Modal for robust task creation and editing.
-2.  Implement an enhanced Kanban view with drag-and-drop.
-3.  Implement a customizable List view with drag-and-drop.
-4.  Implement a functional Calendar view with drag-and-drop.
-5.  Develop foundational components for future expansion (projects, tags, etc.).
+1.  Implement a functional and customizable Table view for tasks.
+2.  Finalize Task Modal for robust task creation and editing.
+3.  Develop foundational components for future expansion (projects, tags, etc.).
+4.  (Deferred) Implement Calendar view.
+5.  (Deferred) Implement Board view (if desired later).
 
 ## Open Tasks (Feature Implementation)
 
-1.  **Task Modal Finalization:**
-    -   Ensure modal correctly handles both task creation and editing modes.
+1.  **Table View Implementation (`ListView.tsx`):**
+    -   Replace current JSON display with a proper table structure (e.g., using `@tanstack/react-table`).
+    -   Define table columns based on `Task` properties (Description, Priority, Status, Due Date, Tags, etc.).
+    -   Connect table controls (Filter, Columns dropdown in `MainView.tsx`) to filter/show/hide table columns.
+    -   Implement sorting based on `viewSettings.sortBy` and `viewSettings.sortOrder`.
+    -   Implement row selection.
+    -   Implement inline editing or link rows to `TaskModal` for editing.
+    -   Consider adding drag-and-drop for reordering rows (if required).
+2.  **Task Modal Finalization:**
+    -   Ensure modal correctly handles both task creation and editing modes (re-enable commented-out handlers in `MainView.tsx` when needed).
     -   Validate input fields thoroughly.
     -   Refine UI/UX for clarity and ease of use.
     -   Integrate fully with `TaskService` and state updates.
-2.  **Kanban View Enhancement:**
-    -   Implement drag-and-drop functionality for tasks between columns.
-    -   Implement drag-and-drop for reordering tasks within columns.
-    -   Design and implement improved Task Card component appearance.
-    -   Ensure view reflects state changes accurately.
-    -   Add basic column configuration/customization.
-3.  **List View Implementation:**
-    -   Implement core list display of tasks.
-    -   Implement drag-and-drop for task reordering.
-    -   Add sorting options.
-    -   Add filtering system.
-    -   Develop customizable list item templates/layout.
-    -   Ensure view reflects state changes accurately.
-4.  **Calendar View Implementation:**
-    -   Implement basic calendar layout (monthly/weekly).
-    -   Display tasks based on due/scheduled dates.
-    -   Implement drag-and-drop for rescheduling tasks.
-    -   Develop planning view concepts.
-5.  **Infrastructure & Settings (Supporting Features):**
-    -   Implement settings system (potentially deferring UI until needed by views).
-    -   Implement `InternalApiService.off` method.
-    -   Add retry mechanism for sync failures (Lower Priority).
-    -   Implement batch processing for sync operations (Lower Priority).
-    -   Add conflict resolution for concurrent edits (Lower Priority).
-    -   Improve error recovery mechanisms (Lower Priority).
-    -   Consider adding state persistence for offline support (Defer).
-6.  **Technical Debt (Ongoing Consideration):**
-    -   Consider adding TypeScript strict mode.
-    -   Add comprehensive error boundaries.
-    -   Consider performance monitoring implementation.
-7.  **Documentation:**
-    -   Update documentation for new components/features as they are built.
-    -   Update component usage examples.
+3.  **Infrastructure & Settings (Supporting Features):**
+    -   (As needed for Table/Modal)
+4.  **Technical Debt (Ongoing Consideration):**
+    -   (As before)
+5.  **Documentation:**
+    -   Update documentation for the new Table view component.
 
 ## Current Focus
 
--   **Finalize TaskModal for editing and creation.**
+-   **Implement the core Table view structure in `ListView.tsx`.**
 
 ## Blockers
 
@@ -76,38 +60,31 @@ Core syncing/updating logic is fixed and validated. Linting issues resolved. Foc
 
 ## Open Questions/Decisions Needed
 
-1.  Specific UI library/approach for drag-and-drop?
-2.  Details of Kanban column configuration?
-3.  Details of List view customization options?
-4.  Specific requirements for Calendar planning view?
-5.  Should settings UI be built now or deferred?
-6.  Should we implement an undo/redo system for task modifications?
+1.  Confirm choice of table library (e.g., `@tanstack/react-table`).
+2.  Final list of columns for the initial Table view.
+3.  How should editing be handled (inline vs. modal)?
+4.  Is drag-and-drop row reordering required for the Table view?
 
 ## Implementation Priorities (Feature-Driven)
 
-1.  Finalize TaskModal
-2.  Implement Enhanced Kanban View (incl. D&D)
-3.  Implement Customizable List View (incl. D&D)
-4.  Implement Calendar View (incl. D&D)
-5.  Address supporting infrastructure/settings as needed.
-6.  Consider technical debt items.
+1.  Implement core Table View (`ListView.tsx`).
+2.  Finalize TaskModal (linking edit/delete actions from Table).
+3.  Refine Table view features (sorting, filtering, column visibility).
+4.  Address supporting infrastructure/settings as needed.
+5.  Consider technical debt items.
+6.  (Deferred) Calendar / Board Views.
 
 ## Future Goals / Roadmap
 
--   Reimagine the entire layout to be closer to Todoist.
--   Add support for Projects and Tags.
--   Implement advanced querying capabilities.
--   Implement persistent settings storage.
--   Implement customizable application state management.
--   Add an Obsidian sidebar component with different views/quick access.
+-   (As before)
 
 ## Active Goals
 
--   Refine UI elements based on user feedback.
+-   Implement core Table View in `ListView.tsx`.
 
 ## Open Tasks
 
--   None currently.
+-   See "Open Tasks (Feature Implementation)" section above, starting with Table View.
 
 ## Blockers
 
@@ -115,34 +92,137 @@ Core syncing/updating logic is fixed and validated. Linting issues resolved. Foc
 
 ## Execution Status
 
--   **Completed:** Adjusted styling for tag input and the associated 'Save Task' button.
--   **Completed:** Increased right padding within tags (`pe-9`).
--   **Completed:** Refactored tag input handling (moved logic, ensured save, deleted old component).
--   **Completed:** Fixed React Hook rule violation for tag input.
--   **Completed:** Corrected `TaskForm` `onSubmit` logic.
--   **Completed:** Resolved TypeScript/Zod validation errors in `TaskForm`.
--   **Completed:** Refactored `TaskForm.tsx` to use `react-hook-form` and `zod`:
-    -   Installed `react-hook-form` and `@hookform/resolvers`.
-    -   Created base `shadcn/ui`-style `Form` components in `src/ui/base/Form.tsx`.
-    -   Updated `TaskForm` to use `useForm`, `zodResolver`, and the base `Form` components.
-    -   Implemented only the `description` field initially.
-    -   Paused deletion of unused components (`TagInputField`, `PrioritySelect`, `StatusSelect`) pending testing.
--   **Inquiry:** Checked for `Collapsible` and `Separator` components locally. Found they are not present in `src/ui/components` or `src/ui/base`.
--   **Dependency Check:** Confirmed `@radix-ui/react-collapsible` is installed via `package.json`, but `@radix-ui/react-separator` is not.
--   **User Action:** User added `Collapsible` and `Separator` components (presumably at `src/ui/base/`).
--   **Completed:** Modified `StatusSelect.tsx` trigger button to be icon-only.
--   **Issue:** `Collapsible` styling changes in `TaskForm.tsx` not applied due to persistent import errors for `Collapsible` and `Separator`.
--   **Resolved:** User confirmed import errors for `Collapsible` and `Separator` are fixed.
--   **Completed:** Applied requested styling to `CollapsibleTrigger` in `TaskForm.tsx` (ghost variant, chevron icon).
--   **Completed:** Corrected conflicting/redundant classes on `CollapsibleTrigger` and inner `Button` in `TaskForm.tsx` to properly apply ghost styling.
+-   **Completed:** Removed Kanban Board UI (`boardView` directory and related code).
+-   **Completed:** Updated `MainView.tsx` with new styled tabs (List active, others disabled).
+-   **Completed:** Updated `ListView.tsx` to display raw task JSON data.
+-   **Completed:** Performed full codebase lint and fixed remaining warnings (e.g., `any` type in `TagInput.tsx`).
 
 ## Next Steps
 
--   Await user confirmation that `CollapsibleTrigger` styling in `TaskForm.tsx` is now correct.
--   Await user testing and feedback on the current `TaskForm.tsx` implementation (using `react-hook-form` for the description field).
--   If testing is successful, proceed to refactor priority, status, and tag fields to use `react-hook-form`.
--   Delete unused component files after full refactoring.
+-   Start implementing the Table view structure in `ListView.tsx`.
+
+## Active Goal
+
+-   Ensure correct type mapping for date fields in `fullTaskForm.tsx` using `@internationalized/date` for conversion between native `Date` and `DateValue` at the interface with `DateField`.
+
+## Actions Taken
+
+-   Imported `fromDate` and `toDate` from `@internationalized/date`.
+-   When rendering `DateField`, convert `selectedDueDate` and `selectedScheduledDate` from native `Date` to `CalendarDate` using `fromDate`.
+-   In the `onChange` handler for `DateField`, convert the `DateValue` back to a native `Date` using `toDate` before storing in form state.
+-   Removed unused date state variables and functions as indicated by the linter.
+-   Updated types for `value` and `onChange` props to match what `DateField` expects.
+
+## Outcome
+
+-   The runtime error and linter/type errors related to date handling are resolved.
+-   The rest of the form and application continues to use native `Date` objects.
+-   All conversion logic is encapsulated within `fullTaskForm.tsx`.
+
+## Next Steps
+
+-   Test the form to ensure date selection and clearing works as expected.
+-   Monitor for any further issues related to date handling or type mismatches.
+
+## UI Fixes (Recent)
+
+-   **Completed:** Removed double border/ring/outline from tag select input in `fullTaskForm.tsx` by updating the tag input's className to suppress all border, ring, and outline styles. Change is scoped to the tag input and preserves accessibility.
+-   **Completed:** Fixed JSX parsing error in `TaskCard.tsx` by correcting the conditional rendering of `<CardFooter>`. The footer is now always rendered, and its content is conditionally shown if `task.dueDate` exists. This resolves the linter error and ensures correct UI rendering.
+-   **Completed:** Refactored Kanban UI (`MainView`, `TaskBoardView`, `TaskColumn`, `TaskCard`) to match minimalist inspiration image.
+
+## Current State
+
+**Active Goals:**
+
+-   Test and refine the new Kanban board UI.
+
+**Open Tasks:**
+
+1.  **Kanban UI Testing:**
+    -   Verify visual alignment with the inspiration image across different screen sizes/themes.
+    -   Test drag-and-drop functionality between columns.
+    -   Test Filter control.
+    -   Test Columns dropdown (visibility control).
+    -   Test Add Task button flow.
+    -   Test Edit/Delete task actions via `TaskCard` menu.
+2.  **Minor Style Adjustments:** Address any visual glitches or inconsistencies found during testing.
+
+**Blockers:**
+
+-   None currently identified.
+
+**Execution Status:**
+
+-   Kanban UI refactoring implemented.
+
+**Next Steps:**
+
+-   Proceed with testing the refactored Kanban UI.
 
 ---
 
 _Previous detailed logs and status updates have been consolidated into the sections above. Older granular entries are removed for clarity._
+
+**Active Goal:** Refactor Task Board UI towards Inspiration Image
+
+**Status:** Planning Complete, Ready for Implementation
+
+**Blockers:** None
+
+**Execution Plan:**
+
+1.  **Define Types & Atoms:**
+
+    -   Create/update `src/data/types/viewTypes.ts`: Define `ViewSettings` interface (including `globalFilter`, `groupBy`, `sortBy`, `sortOrder`, `visibleStatuses`) and related types (`GroupByOption`, `SortByOption`).
+    -   Create/update `src/data/taskAtoms.ts`:
+        -   Define `initialViewSettings: ViewSettings`.
+        -   Define `viewSettingsAtom = atom<ViewSettings>(initialViewSettings)`.
+        -   Define derived atoms:
+            -   `filteredTasksAtom`: Filters `baseTasksAtom` based on `viewSettingsAtom.globalFilter`.
+            -   `sortedTasksAtom`: Sorts `filteredTasksAtom` based on `viewSettingsAtom.sortBy` and `viewSettingsAtom.sortOrder`.
+            -   `groupedBoardTasksAtom`: Groups `sortedTasksAtom` based on `viewSettingsAtom.groupBy`. Filters result by `viewSettingsAtom.visibleStatuses` if `groupBy === 'status'`. Outputs `Record<string, TaskWithMetadata[]>`.
+
+2.  **Refactor `MainView.tsx` (Header & Controls):**
+
+    -   Update `Tabs`, `TabsList`, `TabsTrigger` styling to match inspiration (flatter look, integrated feel).
+    -   Add global controls to the header row next to tabs:
+        -   Filter: `Input` component.
+        -   Group By: `Select` component.
+        -   Columns: `DropdownMenu` component (to control `visibleStatuses`).
+    -   Connect controls to `viewSettingsAtom`: Use `useAtom` hook. On change, update the corresponding field in the `viewSettingsAtom` object.
+
+3.  **Refactor `TaskBoardView.tsx` (Layout & Data Consumption):**
+
+    -   Remove local state management (`groupBy`, `visibleColumnIds`, etc.).
+    -   Remove the old header row (containing "Group by:", "Columns" button).
+    -   Use `useAtomValue(groupedBoardTasksAtom)` to get processed task data.
+    -   Render a new external header row _above_ the main grid: Iterate through the keys of the `groupedBoardTasksAtom` result (e.g., 'open', 'in-progress', 'done') to display column titles (map ID to title), task counts, and action icons (`+`, `...`).
+    -   Update the grid layout (`DndContext` area): Map over the `groupedBoardTasksAtom` result. For each group/column, pass its tasks array (`TaskWithMetadata[]`) to a `TaskColumn` component.
+
+4.  **Refactor `TaskColumn.tsx` (Simplification & Styling):**
+
+    -   Simplify props: Primarily accept `tasks: TaskWithMetadata[]`. Remove handlers like `onEditTask`, `onDeleteTask`.
+    -   Remove internal state (`searchTerm`, `sortBy`, `sortOrder`).
+    -   Remove all header elements within the column card (Title, count, dropdown, search, sort).
+    -   Simplify structure: The component might just become a `div` wrapper around the `SortableContext` and task mapping.
+    -   Update styling: Remove `bg-secondary`, `shadow-md`, `rounded-lg`, `p-4` from the main container. It should blend into the board background.
+    -   Render `TaskCard` components based on the `tasks` prop, applying `space-y-4` to the container.
+    -   Keep `useDroppable` if column-level dropping is still needed for status changes (might need adjustment).
+
+5.  **Refactor `TaskCard.tsx` (Styling & Content):**
+
+    -   Update card styling:
+        -   Set background (e.g., `bg-background` or a slightly lighter variant if the main board is `bg-background`).
+        -   Remove `border border-input`.
+        -   Increase rounding (e.g., `rounded-lg`).
+        -   Verify padding (`p-3`) and margins (`mb-4`).
+    -   Refactor tag display: Use the `Badge` component for tags (`#tagname`).
+    -   Refactor priority display: Use the `Badge` component for priority (e.g., styled P1, P2, P3 badges based on `task.priority`).
+
+6.  **Testing & Refinement:**
+    -   Verify state updates correctly propagate via atoms.
+    -   Test filtering, sorting, grouping.
+    -   Test drag-and-drop functionality.
+    -   Adjust styling nuances.
+
+**Next Step:** Begin Implementation Phase - Step 1: Define Types & Atoms.

@@ -1,16 +1,20 @@
-import * as React from "react";
+import { useAtomValue } from "jotai";
+import { baseTasksAtom } from "../data/taskAtoms"; // Adjust path as needed
 
 /**
  * Task List component to display tasks in a list view.
- * This component is used to display tasks in a list view.
- * TODO: Implement the task list view.
+ * Currently displays raw task data as JSON.
+ * TODO: Implement the actual table view.
  */
-export default function TaskList() {
+export default function ListView() {
+	const tasksWithMeta = useAtomValue(baseTasksAtom);
+
 	return (
-		<div className="kanban-board">
-			<div className="p-4 min-h-screen w-full">
-				<h1 className="text-2xl font-bold mb-4">Task List</h1>
-			</div>
+		<div className="flex flex-col h-full w-full p-4 bg-background">
+			{/* <h1 className="text-lg font-semibold mb-4">Task List (Raw Data)</h1> */}
+			<pre className="text-xs bg-secondary p-4 rounded-md overflow-auto flex-grow">
+				{JSON.stringify(tasksWithMeta, null, 2)}
+			</pre>
 		</div>
 	);
 }
