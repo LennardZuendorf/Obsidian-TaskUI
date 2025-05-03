@@ -137,7 +137,7 @@ export default function FullTaskForm({
 	}, [taskId, updateTaskMetadata]);
 
 	const handleTagCreate = (newTagName: string) => {
-		logger.info(
+		logger.trace(
 			`New tag created: ${newTagName}. Consider updating global state.`,
 		);
 		// Example: addNewGlobalTag({ label: newTagName, value: newTagName.toLowerCase() });
@@ -155,7 +155,7 @@ export default function FullTaskForm({
 	};
 
 	const submitForm = (data: TaskFormValues) => {
-		logger.info("Form data submitted:", data);
+		logger.trace("FullTaskForm: Form values submitted", { data });
 
 		const processedTags = (data.tags || []).map((tagName) =>
 			tagName.startsWith("#") ? tagName : `#${tagName}`,
@@ -180,7 +180,8 @@ export default function FullTaskForm({
 			builder.setTags(processedTags);
 
 			const task = builder.build();
-			logger.info("Submitting built task:", task);
+			logger.trace("FullTaskForm: Built task object", { task });
+			logger.trace("FullTaskForm: Calling onSubmit prop");
 			onSubmit(task);
 			reset({
 				description: initialTask?.description || "",
@@ -198,7 +199,7 @@ export default function FullTaskForm({
 					) || [],
 			});
 		} catch (error) {
-			logger.error("Error building task:", error);
+			logger.error("FullTaskForm: Error building task:", error);
 		}
 	};
 
@@ -497,7 +498,9 @@ export default function FullTaskForm({
 					</div>
 
 					<div className="flex flex-col col-span-1 w-full">
-						<div className="text-xs text-muted-foreground mb-1 ml-1">Tags</div>
+						<div className="text-xs text-muted-foreground mb-1 ml-1">
+							Tags
+						</div>
 						<Controller
 							name="tags"
 							control={control}

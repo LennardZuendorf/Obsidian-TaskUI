@@ -36,12 +36,12 @@ export class TaskSyncService {
 		this.internalApiService = new InternalApiService(app);
 		this.boundRemoteHandler = this.remoteUpdateHandler.bind(this);
 		this.setupListeners();
-		logger.info("TaskSyncService: Initialized");
+		logger.trace("TaskSyncService: Initialized");
 	}
 
 	private setupListeners() {
 		this.internalApiService.on("tasksFetched", this.boundRemoteHandler);
-		logger.info("TaskSyncService: Set up listeners");
+		logger.trace("TaskSyncService: Set up listeners");
 	}
 
 	/**
@@ -66,9 +66,9 @@ export class TaskSyncService {
 			// Validate tasks before updating state
 			validateTasks(update.tasks);
 
-			logger.info("TaskSyncService: Updating state", update);
+			logger.trace("TaskSyncService: Updating state", update);
 			this.store.set(changeTasksAtom, update);
-			logger.info("TaskSyncService: State updated successfully");
+			logger.trace("TaskSyncService: State updated successfully");
 		} catch (error) {
 			logger.error(
 				`TaskSyncService: Invalid task data detected: ${error.message}`,
@@ -89,34 +89,36 @@ export class TaskSyncService {
 	 */
 	private remoteUpdateHandler(remoteTasks: Task[]) {
 		if (!this.isActive) return;
+		logger.trace(
+			"[TaskSyncService.remoteUpdateHandler] Received remote tasks",
+			{ count: remoteTasks.length },
+		);
 
 		try {
-			// Validate remote tasks before creating update
 			validateTasks(remoteTasks);
-
 			logger.debug(
-				`TaskSyncService: Received remote update with ${remoteTasks.length} tasks`,
+				"[TaskSyncService.remoteUpdateHandler] Validated remote tasks successfully.",
 			);
 
-			// Use REMOTE_UPDATE operation which won't overwrite local changes
 			const update: TaskUpdate = {
 				operation: storeOperation.REMOTE_UPDATE,
 				tasks: remoteTasks,
 				source: "remote",
 				timestamp: Date.now(),
 			};
-			this.updateState(update);
+			logger.trace(
+				"[TaskSyncService.remoteUpdateHandler] Prepared REMOTE_UPDATE payload",
+				{ update },
+			);
+			this.updateState(update); // This now calls the atom setter
 			logger.debug(
-				"TaskSyncService: Remote update processed and state updated",
+				"[TaskSyncService.remoteUpdateHandler] Remote update processed via updateState.",
 			);
 		} catch (error) {
 			logger.error(
-				`TaskSyncService: Invalid remote task data received: ${error.message}`,
+				`[TaskSyncService.remoteUpdateHandler] Error processing remote update: ${error.message}`,
 			);
-			// Optionally, you could emit an event or handle the error in some way
-			throw new Error(
-				`Cannot process remote update with invalid task data: ${error.message}`,
-			);
+			// throw error; // Re-throwing might be too disruptive? Decide on error handling.
 		}
 	}
 
@@ -133,29 +135,35 @@ export class TaskSyncService {
 		if (!this.isActive) return;
 
 		const { task, metadata } = taskWithMeta;
+		logger.trace(
+			"[TaskSyncService.handleLocalChange] Processing local change",
+			{ taskId: task.id, action: metadata.toBeSyncedAction },
+		);
 
 		try {
 			switch (metadata.toBeSyncedAction) {
 				case "add": {
-					logger.debug(
-						`TaskSyncService: Creating new task ${task.id}`,
+					logger.trace(
+						"[TaskSyncService.handleLocalChange] Calling internalApiService.createTask",
+						{ task },
 					);
 					const result = await this.internalApiService.createTask(
 						task,
 						"# Tasks",
 					);
 					if (result.status && result.task) {
-						// Update metadata using the new atom
+						const metadataUpdates = {
+							lastSynced: Date.now(),
+							needsSync: false,
+							toBeSyncedAction: null,
+						};
+						logger.trace(
+							"[TaskSyncService.handleLocalChange] Create success. Updating metadata",
+							{ taskId: result.task.id, metadataUpdates },
+						);
 						this.store.set(updateTaskMetadataAtom, {
 							taskId: result.task.id,
-							metadataUpdates: {
-								lastSynced: Date.now(),
-								needsSync: false,
-								toBeSyncedAction: null,
-							},
-							// We might also want to update the task data itself if the API returned modified data
-							// If the API guarantees returning the exact same task data, this isn't needed
-							// taskData: result.task // Optional: Update task data too
+							metadataUpdates,
 						});
 
 						logger.debug(
@@ -171,7 +179,14 @@ export class TaskSyncService {
 				}
 
 				case "edit": {
-					logger.debug(`TaskSyncService: Updating task ${task.id}`);
+					logger.trace(
+						"[TaskSyncService.handleLocalChange] Calling internalApiService.editTask",
+						{
+							taskId: task.id,
+							task,
+							previousVersion: metadata.previousVersion,
+						},
+					);
 					const previousVersion = metadata.previousVersion;
 
 					if (!previousVersion) {
@@ -186,16 +201,18 @@ export class TaskSyncService {
 						previousVersion,
 					);
 					if (result.status && result.task) {
-						// Update metadata using the new atom
+						const metadataUpdates = {
+							lastSynced: Date.now(),
+							needsSync: false,
+							toBeSyncedAction: null,
+						};
+						logger.trace(
+							"[TaskSyncService.handleLocalChange] Edit success. Updating metadata",
+							{ taskId: result.task.id, metadataUpdates },
+						);
 						this.store.set(updateTaskMetadataAtom, {
 							taskId: result.task.id,
-							metadataUpdates: {
-								lastSynced: Date.now(),
-								needsSync: false,
-								toBeSyncedAction: null,
-							},
-							// Potentially update task data if API returned modified data
-							// taskData: result.task
+							metadataUpdates,
 						});
 
 						logger.debug(
@@ -211,11 +228,17 @@ export class TaskSyncService {
 				}
 
 				case "delete": {
-					logger.debug(`TaskSyncService: Deleting task ${task.id}`);
+					logger.trace(
+						"[TaskSyncService.handleLocalChange] Calling internalApiService.deleteTask",
+						{ taskId: task.id },
+					);
 					const result =
 						await this.internalApiService.deleteTask(task);
 					if (result.status) {
-						// Remove from baseTasksAtom completely (this is not just metadata)
+						logger.trace(
+							"[TaskSyncService.handleLocalChange] Delete success. Removing task from baseTasksAtom",
+							{ taskId: task.id },
+						);
 						const tasksWithMeta = this.store.get(baseTasksAtom);
 						const updatedTasks = tasksWithMeta.filter(
 							(t) => t.task.id !== task.id,
@@ -223,6 +246,10 @@ export class TaskSyncService {
 						this.store.set(baseTasksAtom, updatedTasks);
 						logger.debug(
 							`TaskSyncService: Task ${task.id} deleted from store`,
+						);
+					} else {
+						logger.error(
+							`[TaskSyncService.handleLocalChange] Failed to delete task ${task.id} via API.`,
 						);
 					}
 					break;
@@ -268,6 +295,6 @@ export class TaskSyncService {
 	public cleanup() {
 		this.isActive = false;
 		this.internalApiService.off("tasksFetched", this.boundRemoteHandler);
-		logger.info("TaskSyncService: Cleaned up and deactivated");
+		logger.trace("TaskSyncService: Cleaned up and deactivated");
 	}
 }

@@ -423,3 +423,16 @@ This approach provides flexibility in task identification while maintaining data
 4.  **Component Reusability & Decoupling:** Child components remain unaware of the specific state management implementation or the details of the editing/deletion process (e.g., which form to open), making them more reusable.
 
 **Example:** `newTaskCard.tsx` has Edit/Delete buttons that call `onEdit`/`onDelete` props. `newTaskBoard.tsx` provides these functions, which then might set local state (like `editingTask`) or call Jotai setters directly to modify the task list.
+
+## Jotai Atom Usage
+
+-   When using `useAtom(atom)`, the hook returns a tuple: `[value, setter]`.
+-   The first element is the current value of the atom.
+-   The second element is the setter function, which should be used to update the atom's state.
+-   For example:
+    ```ts
+    const [value, setValue] = useAtom(myAtom);
+    // To update:
+    setValue(newValue);
+    ```
+-   Using the value as a function will result in runtime errors (e.g., 'is not a function').

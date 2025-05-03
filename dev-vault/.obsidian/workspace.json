@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "408c15a345a3e2cb",
+        "id": "61182570620d0057",
         "type": "tabs",
         "children": [
           {
-            "id": "3f36d58927023595",
+            "id": "c8f6a175de97e6ca",
             "type": "leaf",
             "state": {
               "type": "react-view",
@@ -156,20 +156,20 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "taskui-plugin:Activate Main Tab View": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
-      "command-palette:Open command palette": false
+      "command-palette:Open command palette": false,
+      "taskui-plugin:Activate Main Tab View": false
     }
   },
-  "active": "3f36d58927023595",
+  "active": "c8f6a175de97e6ca",
   "lastOpenFiles": [
     "2025-05-03.md",
-    "Untitled 1.md",
     "Tasks.md",
+    "Untitled 1.md",
     "Test Notes.md",
     "Untitled.canvas",
     "Untitled.md",

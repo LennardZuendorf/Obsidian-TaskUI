@@ -25,7 +25,7 @@ export class InternalApiService implements ApiService {
 		this.taskMapper = new TaskMapper();
 		this.eventEmitter = new EventEmitter();
 		this.initiatePeriodicTaskFetch().then((r) =>
-			logger.info(
+			logger.trace(
 				"TaskUI: Periodic task fetch initiated for internal source.",
 			),
 		);
@@ -67,21 +67,17 @@ export class InternalApiService implements ApiService {
 	}
 
 	public async editTask(newTask: Task, oldTask: Task): Promise<taskObject> {
-		logger.debug("[InternalApiService.editTask] Called", {
-			newTask: JSON.stringify(newTask, null, 2),
-			oldTask: JSON.stringify(oldTask, null, 2),
+		logger.trace("[InternalApiService.editTask] Start", {
+			taskId: newTask.id,
+			oldTaskId: oldTask.id,
 		});
 		try {
-			// Use the non-nullable rawTaskLine from the previous version for lookup
 			const lineToLookup = oldTask.rawTaskLine;
-
-			// Generate the final desired line string using the merge logic
 			const finalLineToWrite = this.taskMapper.mergeTaskOntoRawLine(
 				newTask,
 				oldTask.rawTaskLine,
 			);
-
-			logger.debug("[InternalApiService.editTask] Merge result", {
+			logger.trace("[InternalApiService.editTask] Lines prepared", {
 				lineToLookup,
 				finalLineToWrite,
 			});
@@ -93,34 +89,34 @@ export class InternalApiService implements ApiService {
 				return { status: false };
 			}
 
-			logger.debug(
-				`[InternalApiService.editTask] Calling mdApi.editTask with path: ${oldTask.path}`,
+			logger.trace(
+				"[InternalApiService.editTask] Calling mdApi.editTask",
+				{ path: oldTask.path },
 			);
-			// Call the simplified mdApi.editTask
 			const updatedLine = await this.mdApi.editTask(
-				finalLineToWrite, // The merged line to write
-				lineToLookup, // The raw line from the old task to find
+				finalLineToWrite,
+				lineToLookup,
 				oldTask.path,
+			);
+			logger.trace(
+				"[InternalApiService.editTask] mdApi.editTask returned",
+				{ updatedLine },
 			);
 
 			if (updatedLine !== finalLineToWrite) {
-				// Check if write was successful
 				logger.error(
 					`Updating task with path ${oldTask.path} failed in mdApi. Expected line: "${finalLineToWrite}", Got: "${updatedLine}"`,
 				);
 				return { status: false };
 			}
 
-			logger.debug(
-				`[InternalApiService.editTask] mdApi.editTask successful. Returning task ID: ${newTask.id}`,
-			);
+			logger.trace("[InternalApiService.editTask] Success");
 			const returnedTask = {
 				...newTask,
-				lineDescription: finalLineToWrite, // Reflects the actual content written
-				rawTaskLine: finalLineToWrite, // Update raw line to match what was written
+				lineDescription: finalLineToWrite,
+				rawTaskLine: finalLineToWrite,
 			};
 
-			// Validate the updated task object
 			try {
 				validateTasks([returnedTask]);
 				return { status: true, task: returnedTask };
@@ -139,10 +135,12 @@ export class InternalApiService implements ApiService {
 	}
 
 	public async deleteTask(task: Task): Promise<taskObject> {
+		logger.trace("[InternalApiService.deleteTask] Start", {
+			taskId: task.id,
+			path: task.path,
+		});
 		try {
-			// Use the non-nullable rawTaskLine for lookup
 			const lineToLookup = task.rawTaskLine;
-
 			if (!task.path) {
 				logger.error(
 					`Task (ID: ${task.id}) is missing path information for deletion.`,
@@ -150,13 +148,22 @@ export class InternalApiService implements ApiService {
 				return { status: false };
 			}
 
+			logger.trace(
+				"[InternalApiService.deleteTask] Calling mdApi.deleteTask",
+				{ lineToLookup, path: task.path },
+			);
 			const deleted = await this.mdApi.deleteTask(
-				lineToLookup, // The raw line to find and delete
+				lineToLookup,
 				task.path,
+			);
+			logger.trace(
+				"[InternalApiService.deleteTask] mdApi.deleteTask returned",
+				{ deleted },
 			);
 
 			if (deleted) {
-				return { status: true, task }; // Return original task data on success
+				logger.trace("[InternalApiService.deleteTask] Success");
+				return { status: true, task };
 			} else {
 				logger.error(
 					`Deleting task with path ${task.path} failed in mdApi.`,
@@ -172,13 +179,15 @@ export class InternalApiService implements ApiService {
 	}
 
 	public async createTask(task: Task, heading: string): Promise<taskObject> {
+		logger.trace("[InternalApiService.createTask] Start", {
+			taskId: task.id,
+			path: task.path,
+			heading,
+		});
 		try {
-			// Task object from TaskBuilder now includes rawTaskLine
-			const lineToWrite = task.rawTaskLine; // Use the pre-generated raw line
-
-			// Validate task before proceeding
+			const lineToWrite = task.rawTaskLine;
 			try {
-				validateTasks([task]); // Task already includes generated lines
+				validateTasks([task]);
 			} catch (error) {
 				logger.error(
 					`Invalid task provided to createTask: ${error.message}`,
@@ -193,16 +202,24 @@ export class InternalApiService implements ApiService {
 				return { status: false };
 			}
 
-			// Call the simplified mdApi.createTask
+			logger.trace(
+				"[InternalApiService.createTask] Calling mdApi.createTask",
+				{ lineToWrite, path: task.path, heading },
+			);
 			const responseLine = await this.mdApi.createTask(
-				lineToWrite, // Use the raw line from the builder
+				lineToWrite,
 				task.path,
 				heading,
 			);
+			logger.trace(
+				"[InternalApiService.createTask] mdApi.createTask returned",
+				{ responseLine },
+			);
 
 			if (responseLine === lineToWrite) {
-				// Check if write was successful
-				// Return the already complete task object from the builder
+				logger.trace("[InternalApiService.createTask] Success", {
+					task,
+				});
 				return { status: true, task: task };
 			} else {
 				logger.error(
@@ -218,24 +235,37 @@ export class InternalApiService implements ApiService {
 		}
 	}
 
-	// --- Event Handling & Periodic Fetch --- (Keep existing logic) ...
 	private async initiatePeriodicTaskFetch() {
 		setInterval(async () => {
+			logger.trace("[InternalApiService] Initiating periodic task fetch");
 			const allDvTasks = await this.dvApi.getAllTasks();
 			if (allDvTasks) {
+				logger.trace(
+					"[InternalApiService] Fetched raw tasks from dvApi",
+					{ count: allDvTasks.length },
+				);
 				try {
 					const mappedTasks = allDvTasks.map((dvTask) =>
 						this.taskMapper.mapDvToTaskType(dvTask),
 					);
-
+					logger.trace("[InternalApiService] Mapped tasks", {
+						count: mappedTasks.length,
+					});
 					validateTasks(mappedTasks);
+					logger.trace(
+						"[InternalApiService] Emitting tasksFetched event",
+						{ count: mappedTasks.length },
+					);
 					this.eventEmitter.emit("tasksFetched", mappedTasks);
-					logger.info("Periodic task fetch completed successfully");
 				} catch (error) {
 					logger.error(
 						`Invalid tasks in periodic fetch: ${error.message}`,
 					);
 				}
+			} else {
+				logger.trace(
+					"[InternalApiService] No tasks returned from dvApi fetch.",
+				);
 			}
 		}, 5000);
 	}

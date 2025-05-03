@@ -36,11 +36,11 @@ export function checkRequiredPlugins(
 		if (!this.app.plugins.enabledPlugins.has(pluginId)) {
 			missingOptionalPlugins.push(pluginId);
 			if (this.app.plugins.plugins[pluginId]) {
-				logger.info(
+				logger.trace(
 					`Optional plugin ${pluginId} is installed, but not enabled.`,
 				);
 			} else {
-				logger.info(`Optional plugin ${pluginId} is not installed.`);
+				logger.trace(`Optional plugin ${pluginId} is not installed.`);
 			}
 		}
 	});

@@ -2,23 +2,56 @@
 
 ## Overall Status (Consolidated)
 
-Kanban board UI removed. Core syncing/updating logic remains fixed and validated. Linting issues resolved. Focus shifts to implementing a Table view as the primary task display within a newly styled tabbed interface.
+-   All known critical bugs are resolved. The application loads tasks and manages state without runtime errors.
+-   The main focus is now on implementing and refining the Table/List view for tasks.
 
-**Completed Milestones:**
+## App Structure Overview
 
--   State management refactoring (unidirectional flow with Jotai)
--   Fixed circular update issues between TaskSyncService and UI
--   Implemented core sync service structure
--   Validated and tested the fixed sync/update logic and new architecture ✓
--   Fixed all known linter errors and dependency issues ✓
--   Removed Kanban board components (`boardView` directory) and associated code. ✓
--   Updated `MainView.tsx` with new styled tabs (Overview, List, Board, Calendar - List active, others disabled). ✓
--   Updated `ListView.tsx` to display raw task data from `baseTasksAtom`. ✓
+The application is structured as a modular React/Obsidian plugin with Jotai for state management. The main modules and their relationships are as follows:
 
-**Known Issues:**
+-   **MainView.tsx**: Entry point for the React UI, manages initialization, error handling, and renders the main UI manager.
+-   **TaskUIManager.tsx**: Main UI controller, handles tab navigation, task creation, and passes state update functions to child components.
+-   **TaskService/TaskSyncService**: Business logic for CRUD operations and synchronization with the Obsidian vault.
+-   **Jotai Atoms (taskAtoms.ts)**: Centralized state management for tasks and view settings.
+-   **UI Components**: Modular components for displaying and editing tasks (ListView, TaskModal, etc.).
+-   **Config/Settings**: Context providers for app-wide settings.
 
--   None currently identified.
--   **Performance:** Previous console messages about forced reflows might still occur in other components (e.g., TaskModal, selects). (Low priority).
+### App Structure (Mermaid Diagram)
+
+```mermaid
+graph TD
+    A[MainView.tsx] --> B[TaskUIManager.tsx]
+    B --> C[ListView.tsx / TableView.tsx]
+    B --> D[TaskModal]
+    B --> E[Tabs/Controls]
+    A --> F[TaskService / TaskSyncService]
+    F --> G[Jotai Atoms (taskAtoms.ts)]
+    B --> G
+    C --> G
+    D --> G
+    G --> H[Task Data]
+    A --> I[SettingsContext]
+    B --> I
+```
+
+## Recent Bug Fixes
+
+-   **Bug:** Error fetching tasks: changeTasksState is not a function (MainView.tsx)
+    -   **Root Cause:** Used the value of the Jotai atom instead of the setter function from useAtom(changeTasksAtom).
+    -   **Fix:** Updated AppController to use the setter (const [, changeTasksState] = useAtom(changeTasksAtom)).
+    -   **Status:** Fixed and verified by user.
+
+## Active Goals
+
+-   Implement a functional and customizable Table view for tasks in ListView.tsx.
+
+## Open Tasks
+
+-   [ ] Implement Table view structure and features as outlined in the roadmap.
+
+## Blockers
+
+-   None at this time.
 
 ## Active Goals (Feature Focus)
 
@@ -226,3 +259,34 @@ _Previous detailed logs and status updates have been consolidated into the secti
     -   Adjust styling nuances.
 
 **Next Step:** Begin Implementation Phase - Step 1: Define Types & Atoms.
+
+## Active Tasks & Status
+
+-   **Refine Tab Styling in `MainView.tsx`:**
+    -   **Status:** Completed/Verified.
+    -   **Details:** Investigated adding a bottom border indicator for the active tab, similar to a provided code snippet using a `Separator`. Verified that the current implementation using Tailwind's `data-[state=active]` selector with a `::after` pseudo-element (`!data-[state=active]:after:bg-hover`) in `tabTriggerClasses` already achieves the desired visual effect. No code changes were necessary. Previous iterations involved troubleshooting hover and transparency issues, which are now resolved.
+-   **Implement Table View:**
+    -   **Status:** Pending.
+    -   **Details:** Next step after finalizing the main view structure and tab navigation. Will involve creating a `TableView.tsx` component to display tasks.
+-   **Restore Board/Calendar Views:**
+    -   **Status:** On Hold.
+    -   **Details:** Tabs exist but are disabled. Functionality to be added after List/Table views are stable.
+
+## Active Goals
+
+-   Ensure task loading and state management works without runtime errors in MainView and TaskUIManager.
+
+## Recent Bug Fixes
+
+-   **Bug:** Error fetching tasks: changeTasksState is not a function (MainView.tsx)
+    -   **Root Cause:** Used the value of the Jotai atom instead of the setter function from useAtom(changeTasksAtom).
+    -   **Fix:** Updated AppController to use the setter (const [, changeTasksState] = useAtom(changeTasksAtom)).
+    -   **Status:** Fixed and verified by user.
+
+## Open Tasks
+
+-   [ ] User to verify that the error is resolved and tasks load correctly.
+
+## Blockers
+
+-   None at this time.

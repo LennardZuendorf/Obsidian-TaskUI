@@ -48,14 +48,14 @@ export default class ShardsTaskUIPlugin extends Plugin {
 	async activateMainTabView() {
 		const { workspace } = this.app;
 
-		logger.info("Shards: Activating Main Tab View");
+		logger.trace("Shards: Activating Main Tab View");
 		let leaf: WorkspaceLeaf | null = null;
 		const leaves = workspace.getLeavesOfType(VIEW_TYPE_MAIN);
 
 		if (leaves.length > 0) {
 			leaf = leaves[0];
 			await workspace.revealLeaf(leaf);
-			logger.info("Shards: Switched to existing main tab leaf.");
+			logger.trace("Shards: Switched to existing main tab leaf.");
 		} else {
 			leaf = workspace.getLeaf(false);
 
@@ -65,7 +65,7 @@ export default class ShardsTaskUIPlugin extends Plugin {
 					active: true,
 				});
 			}
-			logger.info("Shards: Created new main tab leaf.");
+			logger.trace("Shards: Created new main tab leaf.");
 		}
 	}
 }

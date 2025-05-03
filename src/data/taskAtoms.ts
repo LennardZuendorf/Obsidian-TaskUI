@@ -1,4 +1,10 @@
+import {
+	ExpandedState,
+	GroupingState,
+	SortingState,
+} from "@tanstack/react-table";
 import { atom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 import { logger } from "../utils/logger";
 import { storeOperation, UpdateMetadataPayload } from "./types/operations";
 import {
@@ -7,7 +13,6 @@ import {
 	TaskStatus,
 	TaskWithMetadata,
 } from "./types/tasks";
-import { ViewSettings } from "./types/viewTypes";
 
 // Define the structure for tags used in the UI selector
 export type TaskTag = {
@@ -70,6 +75,9 @@ export const changeTasksAtom = atom(
 
 		switch (change.operation) {
 			case storeOperation.LOCAL_ADD: {
+				logger.trace("[changeTasksAtom] Handling LOCAL_ADD", {
+					tasks: change.tasks,
+				});
 				const newTasksWithMeta = change.tasks.map((task) => ({
 					task,
 					metadata: {
@@ -78,11 +86,19 @@ export const changeTasksAtom = atom(
 						toBeSyncedAction: "add" as const,
 					},
 				}));
-				set(baseTasksAtom, [...tasksWithMeta, ...newTasksWithMeta]);
+				const finalState = [...tasksWithMeta, ...newTasksWithMeta];
+				logger.trace(
+					"[changeTasksAtom] Setting new state for LOCAL_ADD",
+					{ count: finalState.length },
+				);
+				set(baseTasksAtom, finalState);
 				break;
 			}
 
 			case storeOperation.LOCAL_UPDATE: {
+				logger.trace("[changeTasksAtom] Handling LOCAL_UPDATE", {
+					tasks: change.tasks,
+				});
 				const updatedTasks = tasksWithMeta.map((taskWithMeta) => {
 					const matchingTask = change.tasks.find(
 						(t) => t.id === taskWithMeta.task.id,
@@ -112,11 +128,18 @@ export const changeTasksAtom = atom(
 						},
 					};
 				});
+				logger.trace(
+					"[changeTasksAtom] Setting new state for LOCAL_UPDATE",
+					{ count: updatedTasks.length },
+				);
 				set(baseTasksAtom, updatedTasks);
 				break;
 			}
 
 			case storeOperation.LOCAL_DELETE: {
+				logger.trace("[changeTasksAtom] Handling LOCAL_DELETE", {
+					tasks: change.tasks,
+				});
 				const updatedTasks = tasksWithMeta.map((taskWithMeta) => {
 					const isDeleted = change.tasks.some(
 						(t) => t.id === taskWithMeta.task.id,
@@ -133,55 +156,95 @@ export const changeTasksAtom = atom(
 						},
 					};
 				});
+				logger.trace(
+					"[changeTasksAtom] Setting new state for LOCAL_DELETE",
+					{ count: updatedTasks.length },
+				);
 				set(baseTasksAtom, updatedTasks);
 				break;
 			}
 
 			case storeOperation.REMOTE_UPDATE: {
-				const updatedTasks = [...tasksWithMeta]; // Start with current local tasks
-				const remoteTaskIds = new Set(change.tasks.map((t) => t.id)); // IDs from remote
+				logger.trace("[changeTasksAtom] Handling REMOTE_UPDATE", {
+					taskCount: change.tasks.length,
+				});
+				const originalTasksWithMeta = get(baseTasksAtom);
+				const now = change.timestamp || Date.now();
+				let hasChanged = false;
+
+				const updatedTasks = [...originalTasksWithMeta]; // Start with a shallow copy
+				const remoteTaskIds = new Set(change.tasks.map((t) => t.id));
 
 				// Process updates/adds from remote
 				change.tasks.forEach((remoteTask) => {
-					// remoteTask now includes rawTaskLine from mapper
-					// Try to find by ID first
 					let localIndex = updatedTasks.findIndex(
 						({ task }) => task.id === remoteTask.id,
 					);
 
-					// If no ID match, try to find by description and status (secondary matching)
 					if (localIndex === -1) {
 						localIndex = updatedTasks.findIndex(
 							({ task }) =>
 								task.description === remoteTask.description &&
 								task.status === remoteTask.status,
 						);
-						// If found via secondary matching, update its ID to match remote
-						// and ensure it's treated as an update below.
 						if (localIndex !== -1) {
-							updatedTasks[localIndex].task.id = remoteTask.id;
-							remoteTaskIds.add(remoteTask.id); // Ensure this ID is considered 'remote'
+							// Found by secondary matching, update ID and treat as update
+							if (
+								updatedTasks[localIndex].task.id !==
+								remoteTask.id
+							) {
+								updatedTasks[localIndex].task.id =
+									remoteTask.id;
+								hasChanged = true; // ID change counts as a change
+							}
+							remoteTaskIds.add(remoteTask.id);
 						}
 					}
 
 					if (localIndex !== -1) {
 						// Existing task found locally
 						const localTaskWithMeta = updatedTasks[localIndex];
-						// Only update if there are no pending local changes
 						if (!localTaskWithMeta.metadata.needsSync) {
 							const previousVersion = localTaskWithMeta.task;
-							updatedTasks[localIndex] = {
-								task: remoteTask, // Use the remoteTask data
-								metadata: {
-									lastUpdated: now,
-									lastSynced: now,
-									needsSync: false,
-									toBeSyncedAction: null,
-									previousVersion: previousVersion,
-								},
-							};
+							// Check if remote task is actually different before marking changed
+							// Simple check: compare rawTaskLine or a few key fields if rawTaskLine isn't reliable
+							if (
+								JSON.stringify(previousVersion) !==
+								JSON.stringify(remoteTask)
+							) {
+								// Basic change detection
+								updatedTasks[localIndex] = {
+									task: remoteTask,
+									metadata: {
+										lastUpdated: now,
+										lastSynced: now,
+										needsSync: false,
+										toBeSyncedAction: null,
+										previousVersion: previousVersion,
+									},
+								};
+								hasChanged = true;
+							} else {
+								// Even if data is identical, we might need to update metadata (e.g., lastSynced)
+								if (
+									localTaskWithMeta.metadata.lastSynced !==
+									now
+								) {
+									updatedTasks[localIndex] = {
+										...localTaskWithMeta,
+										metadata: {
+											...localTaskWithMeta.metadata,
+											lastSynced: now,
+											needsSync: false,
+											toBeSyncedAction: null,
+										},
+									};
+									// Not marking hasChanged = true for only metadata update might be okay,
+									// unless metadata drives UI reactivity significantly.
+									// Let's assume for now only task data changes matter for this optimization.
+								}
+							}
 						}
-						// If needsSync is true, we keep the local version and its pending changes.
 					} else {
 						// New task from remote
 						updatedTasks.push({
@@ -193,6 +256,7 @@ export const changeTasksAtom = atom(
 								toBeSyncedAction: null,
 							},
 						});
+						hasChanged = true;
 					}
 				});
 
@@ -200,16 +264,29 @@ export const changeTasksAtom = atom(
 				const finalTasks = updatedTasks.filter((taskWithMeta) => {
 					const isInRemote = remoteTaskIds.has(taskWithMeta.task.id);
 					const needsSync = taskWithMeta.metadata.needsSync;
-
-					// Keep the task if it's in remote OR if it needs syncing (has local changes)
 					return isInRemote || needsSync;
 				});
 
-				set(baseTasksAtom, finalTasks);
+				// Only update the atom if the length changed or if an add/update occurred
+				if (
+					hasChanged ||
+					finalTasks.length !== originalTasksWithMeta.length
+				) {
+					logger.trace(
+						"[changeTasksAtom] Setting new state for REMOTE_UPDATE",
+						{ count: finalTasks.length },
+					);
+					set(baseTasksAtom, finalTasks);
+				} else {
+					logger.trace(
+						"[changeTasksAtom] Skipping state update for REMOTE_UPDATE - no effective change",
+					);
+				}
 				break;
 			}
 
 			case storeOperation.RESET: {
+				logger.trace("[changeTasksAtom] Handling RESET");
 				set(baseTasksAtom, []);
 				break;
 			}
@@ -340,9 +417,42 @@ if (process.env.NODE_ENV !== "production") {
 	availableTagsAtom.debugLabel = "availableTagsAtom"; // Add label for the new atom
 }
 
-export const viewSettingsAtom = atom<ViewSettings>({
-	groupBy: "none",
-	globalFilter: "",
-	sortBy: "priority",
-	sortOrder: "desc",
-});
+// ----------------------------------------------------------------------------
+// View State Atoms (Persistent)
+// ----------------------------------------------------------------------------
+
+/**
+ * Controls the sorting state of the task table.
+ * Persisted in local storage.
+ */
+export const sortingAtom = atomWithStorage<SortingState>(
+	"taskui-view-sorting", // Unique storage key
+	[], // Initial state: no sorting
+);
+
+/**
+ * Controls the grouping state of the task table.
+ * Persisted in local storage.
+ */
+export const groupingAtom = atomWithStorage<GroupingState>(
+	"taskui-view-grouping", // Unique storage key
+	[], // Initial state: no grouping
+);
+
+/**
+ * Controls the expanded state of groups in the task table.
+ * Persisted in local storage.
+ */
+export const expandedAtom = atomWithStorage<ExpandedState>(
+	"taskui-view-expanded", // Unique storage key
+	{
+		"status:in-progress": true,
+		"status:todo": true,
+		"status:cancelled": true,
+		"status:done": true,
+		"priority:high": true,
+		"priority:medium": true,
+		"priority:low": true,
+		"priority:none": true,
+	}, // Initial state: all groups expanded by default
+);
