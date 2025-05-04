@@ -15,9 +15,9 @@ import { TaskWithMetadata } from "./data/types/tasks";
 import { TaskService as CrudService } from "./service/taskService";
 import { TaskSyncService, TaskUpdate } from "./service/taskSyncService";
 import "./styles.css";
-import { ErrorView } from "./ui/ErrorView";
+import { TaskView } from "./ui/components/TaskView";
+import { ErrorView } from "./ui/components/views/ErrorView";
 import { showNotice } from "./ui/lib/notice";
-import TaskUIManager from "./ui/TaskUIManager";
 import { AppContext, useApp } from "./utils/context";
 import { logger } from "./utils/logger";
 
@@ -132,7 +132,7 @@ const AppController: React.FC = () => {
 		return <LoadingScreen />;
 	}
 
-	return <TaskUIManager app={app as App} changeTasks={changeTasksState} />;
+	return <TaskView app={app as App} changeTasks={changeTasksState} />;
 };
 
 export class MainView extends ItemView {

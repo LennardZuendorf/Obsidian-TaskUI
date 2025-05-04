@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAtomValue, useSetAtom } from "jotai";
-import { Check, ChevronDownIcon, Circle, X } from "lucide-react";
+import { Check, ChevronDownIcon, Circle } from "lucide-react";
 
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -17,16 +17,6 @@ import {
 	TaskSource,
 	TaskStatus,
 } from "../../../data/types/tasks";
-import {
-	priorityEnumToString,
-	priorityLabels,
-	priorityStringToEnum,
-	statusEnumToString,
-	statusLabels,
-	statusStringToEnum,
-	taskPriorityConfig,
-	taskStatusConfig,
-} from "../../../data/utils/taskEnumMappings";
 import { logger } from "../../../utils/logger";
 import { Alert } from "../../base/Alert";
 import { Badge } from "../../base/Badge";
@@ -39,6 +29,16 @@ import {
 } from "../../base/Command";
 import { Input } from "../../base/Input";
 import { Popover, PopoverContent, PopoverTrigger } from "../../base/Popover";
+import {
+	priorityEnumToString,
+	priorityLabels,
+	priorityStringToEnum,
+	statusEnumToString,
+	statusLabels,
+	statusStringToEnum,
+	taskPriorityConfig,
+	taskStatusConfig,
+} from "../../lib/taskEnumDisplay";
 import { cn } from "../../utils";
 import { TagInput } from "./TagInput";
 
@@ -527,13 +527,13 @@ export default function FullTaskForm({
 				{selectedTags.length > 0 && (
 					<div className="flex flex-wrap gap-2">
 						{selectedTags.map((tag) => (
-							<Badge key={tag} variant="accent">
+							<Badge
+								key={tag}
+								variant="accent"
+								onRemove={() => removeTag(tag)}
+								removeAriaLabel={`Remove tag ${tag}`}
+							>
 								{tag.startsWith("#") ? tag : `#${tag}`}
-								<X
-									className="h-3 w-3 ml-1 cursor-pointer opacity-70 hover:opacity-100"
-									onClick={() => removeTag(tag)}
-									aria-label={`Remove tag ${tag}`}
-								/>
 							</Badge>
 						))}
 					</div>

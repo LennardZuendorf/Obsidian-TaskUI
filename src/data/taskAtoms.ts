@@ -1,3 +1,4 @@
+import type { ColumnFiltersState } from "@tanstack/react-table";
 import {
 	ExpandedState,
 	GroupingState,
@@ -430,6 +431,11 @@ export const sortingAtom = atomWithStorage<SortingState>(
 	[], // Initial state: no sorting
 );
 
+export const filtersAtom = atomWithStorage<ColumnFiltersState>(
+	"taskui-view-filter", // Unique storage key
+	[], // Initial state: no filters
+);
+
 /**
  * Controls the grouping state of the task table.
  * Persisted in local storage.
@@ -454,5 +460,28 @@ export const expandedAtom = atomWithStorage<ExpandedState>(
 		"priority:medium": true,
 		"priority:low": true,
 		"priority:none": true,
+		// Date categories for scheduled dates
+		"scheduledDateCategory:Today": true,
+		"scheduledDateCategory:Tomorrow": true,
+		"scheduledDateCategory:Next 7 days": true,
+		"scheduledDateCategory:Next 30 days": true,
+		"scheduledDateCategory:Future": true,
+		"scheduledDateCategory:No date": true,
+		"scheduledDateCategory:Overdue": true,
+		// Date categories for due dates
+		"dueDateCategory:Today": true,
+		"dueDateCategory:Tomorrow": true,
+		"dueDateCategory:Next 7 days": true,
+		"dueDateCategory:Next 30 days": true,
+		"dueDateCategory:Future": true,
+		"dueDateCategory:No date": true,
+		"dueDateCategory:Overdue": true,
 	}, // Initial state: all groups expanded by default
 );
+
+// Pagination State (Added)
+// Default to page index 0 and page size 30
+export const paginationAtom = atom({
+	pageIndex: 0,
+	pageSize: 30,
+});

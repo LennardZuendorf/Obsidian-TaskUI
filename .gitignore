@@ -1,5 +1,5 @@
 # vscode
-.vscode 
+.vscode
 .history
 
 # Intellij
@@ -36,3 +36,6 @@ data.json
 /build/taskui-plugin/
 /dev-vault/.obsidian/plugins/taskui-plugin/
 /dev-vault/.obsidian/plugins/taskui-plugin/
+
+# cursor
+.cursor/memory/current-state.md
