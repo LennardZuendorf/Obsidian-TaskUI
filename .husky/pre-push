@@ -1,0 +1,15 @@
+# Step 1: Run lint-staged
+echo "Running lint & format on staged files..."
+pnpm run check
+if [ $? -ne 0 ]; then
+  echo "build failed. Aborting push."
+  exit 1
+fi
+
+# Step 1: Run lint-staged
+echo "Running lint & format on staged files..."
+pnpm run build
+if [ $? -ne 0 ]; then
+  echo "build failed. Aborting push."
+  exit 1
+fi
