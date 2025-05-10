@@ -140,16 +140,15 @@ export class ObsidianApiProvider {
 					await this.obsidianApp.vault.modify(file, lines.join("\n"));
 
 					return lineString;
-				} catch (error) {
-					const errorMsg = `Error fetching file at path: ${filePath}`;
+				} catch (e: unknown) {
+					const errorMsg = `Error fetching file at path: ${filePath} with error: ${e instanceof Error ? e.message : String(e)}`;
 					logger.error(errorMsg);
 					return null;
 				}
 			}
-		} catch (error) {
-			logger.error(
-				`Error while trying to add a new task: ${error.message}`,
-			);
+		} catch (e: unknown) {
+			const errorMsg = `Error while trying to add a new task: ${e instanceof Error ? e.message : String(e)}`;
+			logger.error(errorMsg);
 			return null;
 		}
 	}
@@ -283,5 +282,21 @@ export class ObsidianApiProvider {
 			);
 			return false;
 		}
+	}
+
+	async updateTaskInFile(filePath: string, task: Task): Promise<void> {
+		// ... existing code ...
+	}
+
+	async processDataviewQuery(filePath: string): Promise<Task[]> {
+		const tasksWithSource: Task[] = [];
+		try {
+			// ... existing code ...
+		} catch (e: Error) {
+			logger.error(
+				`[ObsidianApi] Error processing data view query for ${filePath}: ${e.message}`,
+			);
+		}
+		return tasksWithSource;
 	}
 }

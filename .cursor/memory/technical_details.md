@@ -459,6 +459,7 @@ const TaskList: React.FC = () => {
 -   Contains pure validation functions that use the schema
 -   `validateTask`: Validates a single task
 -   `validateTasks`: Validates an array of tasks
+-   `isValidDateNumberString(dateStr: string, temporal?: 'any' | 'future' | 'past')` — Validates if a string is a valid date in that format, and optionally if it is in the past or future (uses date-fns for comparison).
 
 ### Design Decisions
 
@@ -649,3 +650,34 @@ To improve separation of concerns and support multiple view types (List, Board, 
 -   Fixes previous bugs with Edit/Delete buttons.
 -   No linter errors remain.
 -   Future UI changes to action buttons can be made in one place (`ListView.tsx`).
+
+## UI Component: PrioritySelect
+
+-   A reusable React component for selecting a task priority.
+-   Uses display config from `priorityDisplayConfig.ts` for icons, labels, and colors.
+-   Preserves the popover/button styling and structure from the original implementation.
+-   Decoupled from table/sorting logic; does not depend on table state.
+-   API:
+    ```ts
+    type PrioritySelectProps = {
+    	value: TaskPriority | null;
+    	onChange: (priority: TaskPriority) => void;
+    	disabled?: boolean;
+    	className?: string;
+    };
+    ```
+-   Parent component manages the selected value and handles changes.
+-   Fully accessible and keyboard-navigable.
+-   Dynamically renders all priorities defined in the display config.
+
+## Input and DateInput Components (Co-located in `src/ui/base/Input.tsx` - YYYY-MM-DD)
+
+-   Both the general-purpose `Input` component and the specialized `DateInput` component are defined and exported from the same file: `src/ui/base/Input.tsx`.
+    -   **`Input` Component**: Provides base styling (via CVA variants `default`, `bare`) and structure for various input types. Handles common props like `icon`, `value`, `onChange`, `type`.
+    -   **`DateInput` Component**: A specialized component for date entry.
+        -   It **uses the `Input` component (defined in the same file)** internally (typically with `variant="default"`) to ensure visual consistency.
+        -   Manages masked date entry (DD/MM/YYYY) using `use-mask-input` (aliased as `dateInputWithMask`).
+        -   Uses `date-fns` based utilities from `dateUtils.ts` (imports aliased, e.g., `dateInputDateToNumberString`).
+        -   **Key Props**: `label`, `value` (Date object), `onChange` (Date callback), `validation` ("any" | "future" | "past"), `placeholder`, etc.
+        -   Includes a `CalendarIcon` (aliased as `DateInputCalendarIcon`).
+-   This co-location keeps related input functionalities together while maintaining them as distinct, exportable components.

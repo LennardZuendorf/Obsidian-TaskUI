@@ -4,7 +4,7 @@ import { dvTaskType } from "../api/internalApi/dataviewApi";
 import { defaultSettings } from "../config/settings";
 import { TaskBuilder } from "./taskBuilder";
 import { Task, TaskPriority, TaskSource, TaskStatus } from "./types/tasks";
-import { parseDate } from "./utils/parseDate";
+import { parseDate } from "./utils/dateUtils";
 
 export class TaskMapper {
 	/**

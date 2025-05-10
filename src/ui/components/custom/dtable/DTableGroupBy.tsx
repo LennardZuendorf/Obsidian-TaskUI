@@ -1,7 +1,7 @@
 import { Table } from "@tanstack/react-table";
 import { Check, ChevronDown, LayoutGrid } from "lucide-react";
-import React from "react";
 
+import { getColumnDisplay } from "../../../lib/displayConfig/columnDisplayConfig"; // Adjusted path
 import { Button } from "../../../base/Button";
 import {
 	Command,
@@ -10,7 +10,6 @@ import {
 	CommandList,
 } from "../../../base/Command";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../base/Popover";
-import { getColumnDisplayInfo } from "../../../lib/tableColumnDisplay"; // Adjusted path
 import { cn } from "../../../utils"; // Adjusted path
 
 interface DTableGroupByProps<TData> {
@@ -23,7 +22,7 @@ export function DTableGroupBy<TData>({ table }: DTableGroupByProps<TData>) {
 	// Helper to get groupable columns based on table configuration
 	const groupableColumns = table.getAllLeafColumns().filter((col) => {
 		const canGroup = col.getCanGroup();
-		const hasLabel = !!getColumnDisplayInfo(col.id).label;
+		const hasLabel = !!getColumnDisplay(col.id).label;
 		const isAllowed =
 			![col.id, col.accessorFn?.toString()].includes("scheduledDate") &&
 			![col.id, col.accessorFn?.toString()].includes("dueDate");
@@ -50,7 +49,7 @@ export function DTableGroupBy<TData>({ table }: DTableGroupByProps<TData>) {
 							const activeGroupId = grouping[0];
 							if (activeGroupId) {
 								const displayInfo =
-									getColumnDisplayInfo(activeGroupId);
+									getColumnDisplay(activeGroupId);
 								const IconComponent = displayInfo.icon;
 								return (
 									<>
@@ -80,7 +79,7 @@ export function DTableGroupBy<TData>({ table }: DTableGroupByProps<TData>) {
 							<CommandGroup heading="Group by">
 								{groupableColumnIds.map((columnId) => {
 									const displayInfo =
-										getColumnDisplayInfo(columnId);
+										getColumnDisplay(columnId);
 									const IconComponent = displayInfo.icon;
 									const isSelected = grouping[0] === columnId;
 

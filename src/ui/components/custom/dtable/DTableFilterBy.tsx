@@ -2,6 +2,10 @@ import { Table } from "@tanstack/react-table";
 import { Check, ChevronDown, Filter } from "lucide-react";
 import { useState } from "react";
 
+import { getColumnDisplay } from "../../../lib/displayConfig/columnDisplayConfig"; // Adjust path as needed
+import { priorityEnumToString } from "../../../lib/displayConfig/priorityDisplayConfig";
+import { statusEnumToString } from "../../../lib/displayConfig/statusDisplayConfig";
+// Adjust path as needed
 import { TaskPriority, TaskStatus } from "../../../../data/types/tasks"; // Adjust path as needed
 import { Badge } from "../../../base/Badge";
 import { Button } from "../../../base/Button";
@@ -12,11 +16,6 @@ import {
 	CommandList,
 } from "../../../base/Command";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../base/Popover";
-import { getColumnDisplayInfo } from "../../../lib/tableColumnDisplay"; // Adjust path as needed
-import {
-	priorityEnumToString,
-	statusEnumToString,
-} from "../../../lib/taskEnumDisplay"; // Adjust path as needed
 import { cn } from "../../../utils"; // Adjust path as needed
 
 interface DTableFilterByProps<TData> {
@@ -27,7 +26,7 @@ interface DTableFilterByProps<TData> {
 function getFilterableColumns<TData>(table: Table<TData>) {
 	return table.getAllLeafColumns().filter((col) => {
 		const canFilter = col.getCanFilter();
-		const hasLabel = !!getColumnDisplayInfo(col.id).label;
+		const hasLabel = !!getColumnDisplay(col.id).label;
 		const isAllowed =
 			![col.id, col.accessorFn?.toString()].includes("scheduledDate") &&
 			![col.id, col.accessorFn?.toString()].includes("dueDate");
@@ -138,9 +137,7 @@ export function DTableFilterBy<TData>({ table }: DTableFilterByProps<TData>) {
 						{(() => {
 							if (columnFilters.length === 1) {
 								const filter = columnFilters[0];
-								const displayInfo = getColumnDisplayInfo(
-									filter.id,
-								);
+								const displayInfo = getColumnDisplay(filter.id);
 								const IconComponent = displayInfo.icon;
 								return (
 									<>
@@ -159,9 +156,7 @@ export function DTableFilterBy<TData>({ table }: DTableFilterByProps<TData>) {
 											.slice(0, 4)
 											.map((filter) => {
 												const displayInfo =
-													getColumnDisplayInfo(
-														filter.id,
-													);
+													getColumnDisplay(filter.id);
 												const IconComponent =
 													displayInfo.icon;
 												return IconComponent ? (
@@ -208,7 +203,7 @@ export function DTableFilterBy<TData>({ table }: DTableFilterByProps<TData>) {
 							</div>
 							<div className="flex flex-wrap gap-1">
 								{columnFilters.map((filter) => {
-									const displayInfo = getColumnDisplayInfo(
+									const displayInfo = getColumnDisplay(
 										filter.id,
 									);
 									const IconComponent = displayInfo.icon;
@@ -259,7 +254,7 @@ export function DTableFilterBy<TData>({ table }: DTableFilterByProps<TData>) {
 
 									const columnId = column.id;
 									const columnLabel =
-										getColumnDisplayInfo(columnId).label ||
+										getColumnDisplay(columnId).label ||
 										columnId;
 									const filterOptions =
 										filterOptionsMap[columnId] || [];
@@ -318,7 +313,7 @@ export function DTableFilterBy<TData>({ table }: DTableFilterByProps<TData>) {
 										{filterableColumns.map((col) => {
 											const columnId = col.id;
 											const displayInfo =
-												getColumnDisplayInfo(columnId);
+												getColumnDisplay(columnId);
 											const IconComponent =
 												displayInfo.icon;
 											const columnLabel =

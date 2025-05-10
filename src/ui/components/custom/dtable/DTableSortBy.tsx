@@ -2,6 +2,7 @@ import type { SortingState } from "@tanstack/react-table";
 import { Table } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 
+import { getColumnDisplay } from "../../../lib/displayConfig/columnDisplayConfig"; // Adjusted path
 import { Button } from "../../../base/Button";
 import {
 	Command,
@@ -10,7 +11,6 @@ import {
 	CommandList,
 } from "../../../base/Command";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../base/Popover";
-import { getColumnDisplayInfo } from "../../../lib/tableColumnDisplay"; // Adjusted path
 import { cn } from "../../../utils"; // Adjusted path
 
 interface DTableSortByProps<TData> {
@@ -22,9 +22,7 @@ function getSortableColumns<TData>(table: Table<TData>) {
 	// Filter leaf columns that have sorting enabled and a label for display
 	return table
 		.getAllLeafColumns()
-		.filter(
-			(col) => col.getCanSort() && getColumnDisplayInfo(col.id).label,
-		);
+		.filter((col) => col.getCanSort() && getColumnDisplay(col.id).label);
 }
 
 export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
@@ -33,8 +31,8 @@ export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
 
 	// Explicitly sort columns by label for stable display order
 	const sortedDisplayColumns = [...sortableColumns].sort((a, b) => {
-		const labelA = getColumnDisplayInfo(a.id).label || "";
-		const labelB = getColumnDisplayInfo(b.id).label || "";
+		const labelA = getColumnDisplay(a.id).label || "";
+		const labelB = getColumnDisplay(b.id).label || "";
 		return labelA.localeCompare(labelB);
 	});
 
@@ -55,7 +53,7 @@ export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
 						{(() => {
 							const activeSort = sorting[0];
 							if (activeSort) {
-								const displayInfo = getColumnDisplayInfo(
+								const displayInfo = getColumnDisplay(
 									activeSort.id,
 								);
 								const IconComponent = displayInfo.icon;
@@ -108,7 +106,7 @@ export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
 								{sortedDisplayColumns.map((col) => {
 									const columnId = col.id;
 									const displayInfo =
-										getColumnDisplayInfo(columnId);
+										getColumnDisplay(columnId);
 									const IconComponent = displayInfo.icon;
 									const columnLabel = displayInfo.label;
 

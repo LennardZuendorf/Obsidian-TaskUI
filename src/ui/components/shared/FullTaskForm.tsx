@@ -12,11 +12,26 @@ import {
 } from "../../../data/taskAtoms";
 import { TaskBuilder } from "../../../data/taskBuilder";
 import {
+	getPriorityDisplay,
+	getPriorityLabels,
+	priorityEnumToString,
+	priorityStringToEnum,
+} from "../../../ui/lib/displayConfig/priorityDisplayConfig";
+
+import {
+	getStatusDisplay,
+	getStatusLabels,
+	statusEnumToString,
+	statusStringToEnum,
+} from "../../../ui/lib/displayConfig/statusDisplayConfig";
+
+import {
 	Task,
 	TaskPriority,
 	TaskSource,
 	TaskStatus,
 } from "../../../data/types/tasks";
+
 import { logger } from "../../../utils/logger";
 import { Alert } from "../../base/Alert";
 import { Badge } from "../../base/Badge";
@@ -27,27 +42,19 @@ import {
 	CommandItem,
 	CommandList,
 } from "../../base/Command";
-import { Input } from "../../base/Input";
+import { DateInput, Input } from "../../base/Input";
 import { Popover, PopoverContent, PopoverTrigger } from "../../base/Popover";
-import {
-	priorityEnumToString,
-	priorityLabels,
-	priorityStringToEnum,
-	statusEnumToString,
-	statusLabels,
-	statusStringToEnum,
-	taskPriorityConfig,
-	taskStatusConfig,
-} from "../../lib/taskEnumDisplay";
 import { cn } from "../../utils";
 import { TagInput } from "./TagInput";
+import { type TaskFormValues } from "./TaskFormSchema";
 
 // Define the schema for the form validation using raw tag names
 const formSchema = z.object({
 	description: z.string().min(1, { message: "Description is required." }),
-	status: z.enum([statusLabels[0], ...statusLabels.slice(1)]),
-	priority: z.enum([priorityLabels[0], ...priorityLabels.slice(1)]),
+	status: z.enum([getStatusLabels[0], ...getStatusLabels.slice(1)]),
+	priority: z.enum([getPriorityLabels[0], ...getPriorityLabels.slice(1)]),
 	tags: z.array(z.string()).optional(),
+	dueDate: z.date().optional(),
 });
 
 // Type for form values (matching the schema)
@@ -70,6 +77,9 @@ export default function FullTaskForm({
 	const taskId = initialTask?.id;
 	const globalAvailableTags = useAtomValue(availableTagsAtom);
 
+	const statusLabels = getStatusLabels;
+	const priorityLabels = getPriorityLabels;
+
 	// Memoize the list of available tag names to avoid recalculating on every render
 	const availableTagNames = useMemo(() => {
 		const initialTags =
@@ -87,7 +97,6 @@ export default function FullTaskForm({
 	}, [globalAvailableTags, initialTask?.tags]);
 
 	const {
-		register,
 		handleSubmit,
 		setValue,
 		watch,
@@ -110,6 +119,7 @@ export default function FullTaskForm({
 				initialTask?.tags?.map((tag) =>
 					tag.startsWith("#") ? tag.slice(1) : tag,
 				) || [],
+			dueDate: initialTask?.dueDate || undefined,
 		},
 	});
 
@@ -178,6 +188,9 @@ export default function FullTaskForm({
 				priorityStringToEnum[data.priority] ?? TaskPriority.MEDIUM,
 			);
 			builder.setTags(processedTags);
+			if (data.dueDate) {
+				builder.setDueDate(data.dueDate);
+			}
 
 			const task = builder.build();
 			logger.trace("FullTaskForm: Built task object", { task });
@@ -197,6 +210,7 @@ export default function FullTaskForm({
 					initialTask?.tags?.map((tag) =>
 						tag.startsWith("#") ? tag.slice(1) : tag,
 					) || [],
+				dueDate: initialTask?.dueDate || undefined,
 			});
 		} catch (error) {
 			logger.error("FullTaskForm: Error building task:", error);
@@ -221,6 +235,7 @@ export default function FullTaskForm({
 					initialTask?.tags?.map((tag) =>
 						tag.startsWith("#") ? tag.slice(1) : tag,
 					) || [],
+				dueDate: initialTask?.dueDate || undefined,
 			});
 		}
 	};
@@ -263,7 +278,7 @@ export default function FullTaskForm({
 												<Circle className="h-4 w-4" />
 											);
 										const config =
-											taskStatusConfig[statusEnum];
+											getStatusDisplay(statusEnum);
 										const IconComponent = config.icon;
 										return (
 											<IconComponent
@@ -287,9 +302,9 @@ export default function FullTaskForm({
 													];
 												if (!statusEnum) return null;
 												const config =
-													taskStatusConfig[
-														statusEnum
-													];
+													getStatusDisplay(
+														statusEnum,
+													);
 												const IconComponent =
 													config.icon;
 												return (
@@ -353,19 +368,28 @@ export default function FullTaskForm({
 						>
 							Task Description
 						</label>
-						<div className="flex flex-row items-center gap-1">
-							<Input
-								id="description-input"
-								{...register("description")}
-								placeholder="What needs to be done?"
-								autoFocus
-								className="flex flex-shrink"
-								aria-label={`Set the Task Description`}
-								aria-invalid={
-									errors.description ? "true" : "false"
-								}
-							/>
-						</div>
+						<Controller
+							name="description"
+							control={control}
+							render={({ field }) => (
+								<Input
+									id="description-input"
+									value={field.value || ""}
+									onChange={(stringValue) =>
+										field.onChange(stringValue)
+									}
+									onBlur={field.onBlur}
+									ref={field.ref}
+									placeholder="What needs to be done?"
+									autoFocus
+									className="flex flex-shrink"
+									aria-label={`Set the Task Description`}
+									aria-invalid={
+										errors.description ? "true" : "false"
+									}
+								/>
+							)}
+						/>
 					</div>
 				</div>
 
@@ -397,7 +421,7 @@ export default function FullTaskForm({
 										if (!priorityEnum)
 											return <span>Medium</span>;
 										const config =
-											taskPriorityConfig[priorityEnum];
+											getPriorityDisplay(priorityEnum);
 										const IconComponent = config.icon;
 										return (
 											<div
@@ -433,9 +457,9 @@ export default function FullTaskForm({
 													if (!priorityEnum)
 														return null;
 													const config =
-														taskPriorityConfig[
-															priorityEnum
-														];
+														getPriorityDisplay(
+															priorityEnum,
+														);
 													const IconComponent =
 														config.icon;
 													return (
@@ -506,7 +530,10 @@ export default function FullTaskForm({
 							control={control}
 							render={({ field }) => (
 								<TagInput
-									field={field}
+									field={{
+										...field,
+										value: field.value || [],
+									}}
 									availableTags={availableTagNames}
 									onTagCreate={handleTagCreate}
 									placeholder="Add or create tags..."
@@ -538,6 +565,23 @@ export default function FullTaskForm({
 						))}
 					</div>
 				)}
+
+				<div className="flex flex-col w-full">
+					<Controller
+						name="dueDate"
+						control={control}
+						render={({ field }) => (
+							<DateInput
+								label="Due Date"
+								value={field.value || new Date()}
+								onChange={(date: Date) => field.onChange(date)}
+								validation="any"
+								aria-label="Set the Task Due Date"
+								placeholder="Select a due date"
+							/>
+						)}
+					/>
+				</div>
 
 				<div className="flex flex-row justify-end pt-4 gap-2">
 					<Button

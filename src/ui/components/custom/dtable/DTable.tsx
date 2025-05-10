@@ -27,9 +27,11 @@ import {
 	paginationAtom,
 	sortingAtom,
 } from "../../../../data/taskAtoms";
-import { getDateCategory } from "../../../../data/types/dateCategories";
 import { Task, TaskPriority, TaskStatus } from "../../../../data/types/tasks";
 import type { TaskUpdate } from "../../../../service/taskSyncService";
+import { dateToDateCategory } from "../../../../ui/lib/displayConfig/dateDisplayConfig";
+import { getOrderedTaskPriorities } from "../../../../ui/lib/displayConfig/priorityDisplayConfig";
+import { getOrderedTaskStatuses } from "../../../../ui/lib/displayConfig/statusDisplayConfig";
 import { logger } from "../../../../utils/logger";
 
 // Define column visibility as a simple Record type
@@ -45,15 +47,6 @@ interface UseDTableProps {
 
 // --- Custom Sorting Functions ---
 
-// Define Priority Order (Highest first)
-const priorityOrder: TaskPriority[] = [
-	TaskPriority.HIGHEST,
-	TaskPriority.HIGH,
-	TaskPriority.MEDIUM,
-	TaskPriority.LOW,
-	TaskPriority.LOWEST,
-];
-
 // Custom sorting function for priority
 const prioritySortingFn: SortingFn<Task> = (
 	rkA: Row<Task>,
@@ -63,31 +56,20 @@ const prioritySortingFn: SortingFn<Task> = (
 	const priorityA = rkA.getValue<TaskPriority | null | undefined>(columnId);
 	const priorityB = rkB.getValue<TaskPriority | null | undefined>(columnId);
 
-	// Corrected variable names and refined logic
 	const isADefined = priorityA != null;
 	const isBDefined = priorityB != null;
 
-	// Handle cases where one or both are null/undefined by returning early
-	if (isADefined && !isBDefined) return -1; // A defined, B undefined -> A comes first
-	if (!isADefined && isBDefined) return 1; // A undefined, B defined -> B comes first
-	if (!isADefined && !isBDefined) return 0; // Both undefined -> equal
+	if (isADefined && !isBDefined) return -1;
+	if (!isADefined && isBDefined) return 1;
+	if (!isADefined && !isBDefined) return 0;
 
-	// If we reach here, TypeScript knows both are defined (TaskPriority)
-	// Use type assertion `as TaskPriority` instead of `!`
-	const indexA = priorityOrder.indexOf(priorityA as TaskPriority);
-	const indexB = priorityOrder.indexOf(priorityB as TaskPriority);
+	// Get the ordered list of priorities
+	const orderedPriorities = getOrderedTaskPriorities();
+	const indexA = orderedPriorities.indexOf(priorityA as TaskPriority);
+	const indexB = orderedPriorities.indexOf(priorityB as TaskPriority);
 
-	// Lower index means higher priority (comes first)
 	return indexA - indexB;
 };
-
-// Define Status Order (Active first)
-const statusOrder: TaskStatus[] = [
-	TaskStatus.TODO,
-	TaskStatus.IN_PROGRESS,
-	TaskStatus.DONE,
-	TaskStatus.CANCELLED,
-];
 
 // Custom sorting function for status
 const statusSortingFn: SortingFn<Task> = (
@@ -98,10 +80,11 @@ const statusSortingFn: SortingFn<Task> = (
 	const statusA = rkA.getValue<TaskStatus>(columnId);
 	const statusB = rkB.getValue<TaskStatus>(columnId);
 
-	const indexA = statusOrder.indexOf(statusA ?? TaskStatus.TODO); // Default unknowns to Todo
-	const indexB = statusOrder.indexOf(statusB ?? TaskStatus.TODO);
+	// Get the ordered list of statuses
+	const orderedStatuses = getOrderedTaskStatuses();
+	const indexA = orderedStatuses.indexOf(statusA ?? TaskStatus.TODO);
+	const indexB = orderedStatuses.indexOf(statusB ?? TaskStatus.TODO);
 
-	// Lower index means higher priority in this order (comes first)
 	return indexA - indexB;
 };
 
@@ -122,10 +105,7 @@ const priorityFilterFn: FilterFn<Task> = (row, columnId, filterValue) => {
 // Define a type-safe filter function for date categories
 const categoryFilterFn: FilterFn<Task> = (row, columnId, filterValue) => {
 	const category = row.getValue(columnId) as string;
-	const passes = category === filterValue;
-	// Log filter execution details
-	// console.log(`Filtering ${columnId}: Row ${row.id} category='${category}', FilterValue='${filterValue}', Passes=${passes}`);
-	return passes;
+	return category === filterValue;
 };
 
 // Initial column visibility state - initially hide categories
@@ -182,14 +162,13 @@ const taskTableColumns: ColumnDef<Task>[] = [
 	{
 		id: "scheduledDateCategory",
 		accessorFn: (row) => {
-			const category = getDateCategory(
+			const category = dateToDateCategory(
 				row.scheduledDate ? new Date(row.scheduledDate) : null,
 			);
-			// console.log(`Scheduled category for task ${row.id}: ${category}`);
 			return category;
 		},
-		header: () => "Sched Cat", // Add simple header for visibility
-		cell: (info) => info.getValue(), // Add cell renderer to display value
+		header: () => "Sched Cat",
+		cell: (info) => info.getValue(),
 		meta: { headerLabel: "Scheduled Category" },
 		filterFn: categoryFilterFn,
 		enableGrouping: true,
@@ -209,14 +188,13 @@ const taskTableColumns: ColumnDef<Task>[] = [
 	{
 		id: "dueDateCategory",
 		accessorFn: (row) => {
-			const category = getDateCategory(
+			const category = dateToDateCategory(
 				row.dueDate ? new Date(row.dueDate) : null,
 			);
-			// console.log(`Due category for task ${row.id}: ${category}`);
 			return category;
 		},
-		header: () => "Due Cat", // Add simple header for visibility
-		cell: (info) => info.getValue(), // Add cell renderer to display value
+		header: () => "Due Cat",
+		cell: (info) => info.getValue(),
 		meta: { headerLabel: "Due Category" },
 		filterFn: categoryFilterFn,
 		enableGrouping: true,

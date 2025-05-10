@@ -1,8 +1,7 @@
-import { flexRender, Table as TanstackTable } from "@tanstack/react-table";
-
+import { flexRender } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, Pencil, Trash2 } from "lucide-react";
-import { formatDate } from "../../../data/types/dateCategories";
-import type { Task } from "../../../data/types/tasks";
+import type { Task } from "../../../../data/types/tasks";
+import { formatDate } from "../../../data/utils/dateUtils";
 import { Button } from "../../base/Button";
 import {
 	Table,
@@ -13,18 +12,14 @@ import {
 	TableRow,
 } from "../../base/Table";
 import { DataTablePagination } from "../custom/dtable/DTablePagination";
+import type { TabViewProps } from "../TaskView";
 
-interface ListViewProps<TData> {
-	table: TanstackTable<TData>;
-	handleEditTask: (task: TData) => void;
-	handleDeleteTask: (task: TData) => void;
-}
-
-export function ListView<TData extends Task>({
+export function TableView<TData extends Task>({
 	table,
 	handleEditTask,
 	handleDeleteTask,
-}: ListViewProps<TData>) {
+	handleTaskStatusChange,
+}: TabViewProps<TData>) {
 	const grouping = table.getState().grouping;
 
 	return (

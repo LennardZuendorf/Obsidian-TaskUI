@@ -14,7 +14,7 @@ export function BoardView<TData>({ table }: BoardViewProps<TData>) {
 			Board View Placeholder
 			{/* Temporary: Display row count */}
 			<p className="text-xs mt-2">
-				(Row count: {table.getRowModel().rows.length})
+				(Tasks count: {table.getRowModel().rows.length})
 			</p>
 		</div>
 	);

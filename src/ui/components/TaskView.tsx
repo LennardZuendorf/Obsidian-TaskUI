@@ -1,3 +1,4 @@
+import { Table as TanstackTable } from "@tanstack/react-table";
 import {
 	Calendar,
 	KanbanSquare,
@@ -8,7 +9,7 @@ import {
 import { Notice, type App } from "obsidian";
 import React from "react";
 import { storeOperation as str } from "../../data/types/operations"; // Adjusted path
-import type { Task } from "../../data/types/tasks"; // Adjusted path
+import type { Task, TaskStatus } from "../../data/types/tasks"; // Adjusted path
 import type { TaskUpdate } from "../../service/taskSyncService"; // Adjusted path
 import { logger } from "../../utils/logger"; // Adjusted path
 import { Button } from "../base/Button";
@@ -20,20 +21,9 @@ import { DTableFilterBy } from "./custom/dtable/DTableFilterBy"; // Adjusted pat
 import { DTableGroupBy } from "./custom/dtable/DTableGroupBy"; // Adjusted path
 import { DTableSortBy } from "./custom/dtable/DTableSortBy"; // Adjusted path
 import { TaskModal } from "./shared/TaskModal"; // Keep for Add Task
-import { BoardView } from "./views/BoardView"; // Adjusted path
-import { ListView } from "./views/ListView"; // Adjusted path
-
-// Copied from DTable.tsx - TODO: Move to a shared constants file?
-const tabTriggerClasses = cn(
-	"inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-lg font-medium",
-	"!bg-transparent !border-none text-muted-foreground !shadow-none ",
-	"hover:text-foreground hover:ring-2 hover:ring-hover !!hover:bg-hover",
-	"data-[state=active]:text-foreground data-[state=active]:ring-2 data-[state=active]:ring-hover  data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:bottom-0 data-[state=active]:after:h-0.5 !data-[state=active]:after:bg-hover",
-	"disabled:pointer-events-none disabled:text-muted-foreground",
-);
-
-const contentAreaBaseClass =
-	" flex-grow overflow-auto border-t border-l border-r border-b border-border rounded-md";
+import { BoardView } from "./tabViews/BoardView"; // Adjusted path
+import { ListView } from "./tabViews/ListView"; // Adjusted path
+import { TableView } from "./tabViews/TableView"; // Adjusted path
 
 // Props needed by TaskView (and passed down to useDTable)
 interface TaskViewProps {
@@ -96,6 +86,24 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 		[changeTasks],
 	);
 
+	const handleTaskStatusChange = React.useCallback(
+		(task: Task, newStatus: TaskStatus) => {
+			const updatedTask: Task = {
+				...task,
+				status: newStatus,
+			};
+
+			const update: TaskUpdate = {
+				operation: str.LOCAL_UPDATE,
+				tasks: [updatedTask],
+				source: "local",
+				timestamp: Date.now(),
+			};
+			changeTasks(update);
+		},
+		[changeTasks],
+	);
+
 	// Call useDTable AFTER handlers are defined
 	const table = useDTable({
 		app,
@@ -150,18 +158,14 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 				{/* Tabs List */}
 				<ScrollArea className="w-full sm:w-auto">
 					<TabsList className="gap-2">
-						<TabsTrigger
-							value="overview"
-							className={tabTriggerClasses}
-							disabled={true}
-						>
+						<TabsTrigger value="overview">
 							<LayoutGrid
 								className="-ms-0.5 me-1.5 h-4 w-4"
 								aria-hidden="true"
 							/>
 							Overview
 						</TabsTrigger>
-						<TabsTrigger value="list" className={tabTriggerClasses}>
+						<TabsTrigger value="list">
 							<ListCollapseIcon
 								className="-ms-0.5 me-1.5 h-4 w-4"
 								aria-hidden="true"
@@ -170,7 +174,6 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 						</TabsTrigger>
 						<TabsTrigger
 							value="board"
-							className={tabTriggerClasses}
 							// disabled={true} // Enable when BoardView is ready
 						>
 							<KanbanSquare
@@ -181,7 +184,6 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 						</TabsTrigger>
 						<TabsTrigger
 							value="calendar"
-							className={tabTriggerClasses}
 							disabled={true} // TODO: Implement Calendar
 						>
 							<Calendar
@@ -226,51 +228,49 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 
 			{/* View Content Area */}
 			<TabsContent
+				value="overview"
+				className={cn("data-[state=active]:flex flex-col")}
+			>
+				<TableView
+					table={table}
+					handleEditTask={handleEditTask}
+					handleDeleteTask={handleDeleteTask}
+					handleTaskStatusChange={handleTaskStatusChange}
+				/>
+			</TabsContent>
+			<TabsContent
 				value="list"
-				className={cn(
-					contentAreaBaseClass,
-					"data-[state=active]:flex flex-col",
-				)}
+				className={cn("data-[state=active]:flex flex-col")}
 			>
 				<ListView
 					table={table}
 					handleEditTask={handleEditTask}
 					handleDeleteTask={handleDeleteTask}
+					handleTaskStatusChange={handleTaskStatusChange}
 				/>
 			</TabsContent>
 			<TabsContent
 				value="board"
-				className={cn(
-					contentAreaBaseClass,
-					"data-[state=active]:block",
-				)}
+				className={cn("data-[state=active]:block")}
 			>
-				<BoardView table={table as any} />
+				<BoardView table={table} />
 			</TabsContent>
 			<TabsContent
 				value="calendar"
-				className={cn(
-					contentAreaBaseClass,
-					"data-[state=active]:block",
-				)}
+				className={cn("data-[state=active]:block")}
 			>
 				{/* Placeholder for Calendar View */}
 				<div className="p-4 text-center text-muted-foreground">
 					Calendar View Placeholder
 				</div>
 			</TabsContent>
-			<TabsContent
-				value="overview"
-				className={cn(
-					contentAreaBaseClass,
-					"data-[state=active]:block",
-				)}
-			>
-				{/* Placeholder for Overview View */}
-				<div className="p-4 text-center text-muted-foreground">
-					Overview Placeholder
-				</div>
-			</TabsContent>
 		</Tabs>
 	);
+}
+
+export interface TabViewProps<TData> {
+	table: TanstackTable<TData>;
+	handleEditTask: (task: TData) => void;
+	handleDeleteTask: (task: TData) => void;
+	handleTaskStatusChange: (task: TData, newStatus: TaskStatus) => void;
 }
