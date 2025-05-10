@@ -35,7 +35,8 @@ data.json
 
 /build/taskui-plugin/
 /dev-vault/.obsidian/plugins/taskui-plugin/
-/dev-vault/.obsidian/plugins/taskui-plugin/
+/dev-vault/.obsidian/plugins/obsidian-style-settings/
 
 # cursor
 .cursor/memory/current-state.md
+.cursor/mcp.json
