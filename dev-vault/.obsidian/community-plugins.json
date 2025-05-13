@@ -3,5 +3,6 @@
   "dataview",
   "obsidian-tasks-plugin",
   "taskui-plugin",
-  "obsidian-style-settings"
+  "obsidian-style-settings",
+  "shards-taskui-plugin"
 ]

@@ -681,3 +681,11 @@ To improve separation of concerns and support multiple view types (List, Board, 
         -   **Key Props**: `label`, `value` (Date object), `onChange` (Date callback), `validation` ("any" | "future" | "past"), `placeholder`, etc.
         -   Includes a `CalendarIcon` (aliased as `DateInputCalendarIcon`).
 -   This co-location keeps related input functionalities together while maintaining them as distinct, exportable components.
+
+## Technical Details
+
+-   **Framework/Library:** React with TypeScript
+-   **UI Components:** Custom components built using `lucide-react` for icons, and base components for `Button`, `Popover`, `Command`, etc. Likely inspired by or using parts of a UI library like Shadcn UI.
+-   **Styling:** Tailwind CSS for utility-first CSS styling.
+-   **State Management:** (Details to be added as observed, currently using React component state and prop drilling, potentially a more robust solution like Zustand or Jotai later if needed).
+-   **Data Handling:** Interacts with an `App` object (likely Obsidian API) for task data persistence and updates.

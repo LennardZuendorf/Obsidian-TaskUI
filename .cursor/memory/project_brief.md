@@ -1,6 +1,6 @@
 # Project Brief
 
-This project aims to build a task management application with seamless synchronization capabilities between a local datastore and a remote backend. The core goal is to ensure data consistency and provide a reliable user experience across different sessions and potentially devices.
+This project aims to develop a feature-rich task management UI plugin, likely for an application like Obsidian. The goal is to provide users with multiple views (list, board, calendar) and intuitive controls for managing their tasks effectively. Visual consistency and a good user experience are key priorities.
 
 ## Key Objectives
 
