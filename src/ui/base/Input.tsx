@@ -18,7 +18,7 @@ const inputVariants = cva(
 			variant: {
 				default:
 					"h-9 border border-input bg-secondary px-3 py-1 shadow-sm",
-				bare: "h-12 border-0 shadow-none bg-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0",
+				bare: "h-12 border-0 shadow-none bg-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:text-primary text-primary",
 			},
 		},
 		defaultVariants: {
@@ -82,7 +82,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 				<input
 					type={type}
 					className={cn(
-						"!text-muted-foreground !bg-transparent !border-none !ring-0 !shadow-none !focus:ring-0 !focus:shadow-none !focus:border-none w-full",
+						"!text-primary-foreground !bg-transparent !border-none !ring-0 !shadow-none !focus:ring-0 !focus:shadow-none !focus:border-none w-full",
 					)}
 					ref={ref}
 					value={value ?? ""} // Ensure value is controlled

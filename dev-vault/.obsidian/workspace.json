@@ -4,17 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "688c3c50d8373992",
+        "id": "4143df397964bbbc",
         "type": "tabs",
         "children": [
           {
-            "id": "d299347673190e00",
+            "id": "54bd43a0b2f8d7a2",
             "type": "leaf",
             "state": {
               "type": "react-view",
               "state": {},
               "icon": "lucide-file",
               "title": "TaskUI"
+            }
+          },
+          {
+            "id": "ee0265227562b448",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Tasks.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Tasks"
             }
           }
         ]
@@ -162,10 +176,10 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "taskui-plugin:Activate Main Tab View": false
+      "shards-taskui-plugin:Activate Main Tab View": false
     }
   },
-  "active": "d299347673190e00",
+  "active": "54bd43a0b2f8d7a2",
   "lastOpenFiles": [
     "2025-05-03.md",
     "Tasks.md",

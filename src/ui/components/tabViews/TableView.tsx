@@ -1,6 +1,6 @@
 import { flexRender } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, Pencil, Trash2 } from "lucide-react";
-import type { Task } from "../../../../data/types/tasks";
+import type { Task } from "../../../data/types/tasks";
 import { formatDate } from "../../../data/utils/dateUtils";
 import { Button } from "../../base/Button";
 import {
@@ -18,7 +18,7 @@ export function TableView<TData extends Task>({
 	table,
 	handleEditTask,
 	handleDeleteTask,
-	handleTaskStatusChange,
+	handleUpdateTask,
 }: TabViewProps<TData>) {
 	const grouping = table.getState().grouping;
 

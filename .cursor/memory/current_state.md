@@ -8,35 +8,6 @@ Develop a Task Management UI view within Obsidian, leveraging React and Tanstack
 
 -   Refactor the core table architecture for better separation of concerns and reusability.
 
-## Active Goals (Architecture Refactoring)
-
-1.  **Centralize Table Logic:** Extract TanStack Table configuration and state management into a reusable hook (`useTaskTable`).
-2.  **Orchestrate Views:** Create a `TaskViewManager` component to manage tabs, shared controls, and render the active view.
-3.  **Separate Views:** Implement distinct components for each view type (List, Board, Calendar) that receive the table instance and handle rendering.
-
-## Open Tasks (Refactoring Phase 1)
-
-1.  [ ] Rename `DTable.tsx` to `useTaskTable.ts` and move hook logic there.
-2.  [ ] Create `TaskViewManager.tsx` to handle tabs, controls, and view rendering.
-3.  [ ] Create `DTableViewList.tsx` and move list rendering logic there.
-4.  [ ] Create placeholder components for Board and Calendar views (`DTableViewBoard.tsx`, `DTableViewCalendar.tsx`).
-5.  [ ] Update `TaskViewManager.tsx` to render the List view and placeholders within respective tabs.
-
-## Open Tasks (Phase 2: View Implementation)
-
--   [ ] Implement `DTableViewBoard.tsx` (Kanban).
--   [ ] Implement `DTableViewCalendar.tsx`.
-
-## Open Tasks (Phase 3: Form & Settings)
-
--   [ ] Refine/Rename Task Form (`TaskModal.tsx`).
--   [ ] Implement Obsidian Settings integration.
-
-## Open Tasks (Phase 4: Refactoring & Tests)
-
--   [ ] Perform necessary refactoring based on new structure.
--   [ ] Add unit/integration tests.
-
 ## Blockers
 
 -   None currently identified.
@@ -116,3 +87,55 @@ Develop a Task Management UI view within Obsidian, leveraging React and Tanstack
 -   This resolves issues with incorrect task object flow and button malfunction.
 -   No linter errors remain after the refactor.
 -   Next: Monitor for any UI/UX or logic issues in the new setup.
+
+## Open Refactoring Tasks
+
+-   Evaluate and potentially refactor the display config logic in `statusDisplayConfig.ts`, `priorityDisplayConfig.ts`, and `dateDisplayConfig.ts` into a shared abstraction (class or factory function). The goal is to reduce code duplication and improve maintainability. No implementation has been started yet; this is a planning/consideration task.
+
+## Active Goal: Reusable PrioritySelect Component
+
+-   Refactor the existing PrioritySelect to be a reusable, dynamic selector for task priorities.
+-   Use display config from priorityDisplayConfig.ts for icons, labels, and colors.
+-   Preserve the current popover/button styling and structure.
+-   Remove all table/sorting logic; decouple from table state.
+-   Accepts props: value (TaskPriority or null), onChange (callback), disabled, className.
+-   Parent manages value and handles changes.
+-   Ensure accessibility and keyboard navigation.
+-   Update technical details and documentation after implementation.
+
+-   PrioritySelect is now integrated into TaskCard, replacing the old Select dropdown for priority. The component is currently rendered with disabled={true}.
+
+Refactor StatusSelect to match the controlled, popover-based, display-config-driven pattern of PrioritySelect. It will use status display config and match the same styling and API.
+
+StatusSelect is now integrated into TaskCard, replacing the old status dropdown. The component is currently rendered with disabled={true}.
+
+DescInput is now integrated into TaskCard, displaying the task description as a disabled input for now.
+
+Implement a reusable, controlled DescInput component for task description editing. It will use the provided Input, support value/onChange, error, disabled, className, and accessibility props, and preserve the current design.
+
+# Current State
+
+-   **Active Goal:** Split the unified Input component back into `Input.tsx` (base) and `DateInput.tsx` (specialized, using base for styling).
+-   **Open Tasks:** None (Components split, documentation updated).
+-   **Blockers:** None
+-   **Execution Status:** Execution complete. Returning to planning mode.
+
+## Current Goal
+
+Implement List View UI in `ListView.tsx`.
+
+## Blockers/Notes
+
+-   The in-group "Add Task" button in `ListView.tsx` will be a visual placeholder for now, its functionality will be addressed later.
+-   Confirm `formatGroupValue` logic during implementation (initial simple version to be used).
+
+## Current State
+
+**Active Goal:** Refactor `PrioritySelect.tsx` to visually align its dropdown style (trigger button, popover items) with the `DTableSortBy.tsx` component (as seen in the 'Sort by' dropdown in `TaskView.tsx`).
+
+**Blockers:** None currently.
+
+**Next Steps:**
+
+1. Confirm the proposed changes for `PrioritySelect.tsx` with the user.
+2. Implement the approved changes in `PrioritySelect.tsx`.

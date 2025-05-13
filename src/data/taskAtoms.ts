@@ -1,4 +1,7 @@
-import type { ColumnFiltersState } from "@tanstack/react-table";
+import type {
+	ColumnFiltersState,
+	PaginationState,
+} from "@tanstack/react-table";
 import {
 	ExpandedState,
 	GroupingState,
@@ -445,6 +448,11 @@ export const groupingAtom = atomWithStorage<GroupingState>(
 	[], // Initial state: no grouping
 );
 
+export const groupSortingAtom = atomWithStorage<SortingState>(
+	"taskui-view-group-sorting", // Unique storage key
+	[], // Initial state: no sorting
+);
+
 /**
  * Controls the expanded state of groups in the task table.
  * Persisted in local storage.
@@ -481,7 +489,10 @@ export const expandedAtom = atomWithStorage<ExpandedState>(
 
 // Pagination State (Added)
 // Default to page index 0 and page size 30
-export const paginationAtom = atom({
-	pageIndex: 0,
-	pageSize: 30,
-});
+export const paginationAtom = atomWithStorage<PaginationState>(
+	"taskui-view-pagination", // Unique storage key
+	{
+		pageIndex: 0,
+		pageSize: 30,
+	}, // Initial state: page index 0 and page size 30
+);

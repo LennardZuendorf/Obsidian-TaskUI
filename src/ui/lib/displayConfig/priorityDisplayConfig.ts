@@ -22,42 +22,36 @@ const taskPriorityConfig: Record<
 	[TaskPriority.HIGHEST]: {
 		label: "Highest",
 		icon: PiCaretDoubleUpBold,
-		className: "text-destructive",
-		iconClassName: "text-destructive",
+		className: "text-destructive-foreground",
+		iconClassName: "text-destructive-foreground",
 		order: 1,
 	},
 	[TaskPriority.HIGH]: {
 		label: "High",
 		icon: PiCaretUpBold,
-		className: "text-orange-500",
-		iconClassName: "text-orange-500",
+		className: "text-primary-foreground",
+		iconClassName: "text-primary-foreground",
 		order: 2,
 	},
 	[TaskPriority.MEDIUM]: {
 		label: "Medium",
 		icon: PiMinusBold,
-		className:
-			"text-green-500 group-hover:text-green-900 dark:group-hover:text-green-300",
-		iconClassName:
-			"text-green-500 group-hover:text-green-900 dark:group-hover:text-green-300",
+		className: "text-primary-foreground",
+		iconClassName: "text-primary-foreground",
 		order: 3,
 	},
 	[TaskPriority.LOW]: {
 		label: "Low",
 		icon: PiCaretDownBold,
-		className:
-			"text-sky-500 group-hover:text-sky-900 dark:group-hover:text-sky-300",
-		iconClassName:
-			"text-sky-500 group-hover:text-sky-900 dark:group-hover:text-sky-300",
+		className: "text-primary-foreground",
+		iconClassName: "text-primary-foreground",
 		order: 4,
 	},
 	[TaskPriority.LOWEST]: {
 		label: "Lowest",
 		icon: PiCaretDoubleDownBold,
-		className:
-			"text-blue-500 group-hover:text-blue-900 dark:group-hover:text-blue-300",
-		iconClassName:
-			"text-blue-500 group-hover:text-blue-900 dark:group-hover:text-blue-300",
+		className: "text-primary-foreground",
+		iconClassName: "text-primary-foreground",
 		order: 5,
 	},
 };

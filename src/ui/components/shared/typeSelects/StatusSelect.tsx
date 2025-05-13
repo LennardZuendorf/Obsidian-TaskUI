@@ -1,7 +1,7 @@
 import { ArrowUp, ChevronsUpDown } from "lucide-react";
 import React from "react";
 import type { TaskStatus } from "../../../../data/types/tasks";
-import { Button } from "../../../base/Button";
+import { Button, ButtonProps } from "../../../base/Button";
 import {
 	Command,
 	CommandGroup,
@@ -20,6 +20,8 @@ export type StatusSelectProps = {
 	onChange: (status: TaskStatus) => void;
 	disabled?: boolean;
 	className?: string;
+	buttonSize?: ButtonProps["size"];
+	showLabel?: boolean;
 };
 
 export function StatusSelect({
@@ -27,6 +29,8 @@ export function StatusSelect({
 	onChange,
 	disabled,
 	className,
+	buttonSize = "icon",
+	showLabel = false,
 }: StatusSelectProps) {
 	const [sSelectOpen, setSSelectOpen] = React.useState(false);
 
@@ -35,21 +39,25 @@ export function StatusSelect({
 
 	return (
 		<div className={cn("flex flex-col", className)}>
-			<span
-				className={cn(
-					"text-xs text-muted-foreground mb-1 ml-1",
-					value == null ? "opacity-0" : "opacity-100",
-				)}
-			>
-				Status
-			</span>
+			{showLabel && (
+				<span
+					className={cn(
+						"text-xs text-muted-foreground mb-1 ml-1",
+						value == null ? "opacity-0" : "opacity-100",
+					)}
+				>
+					Status
+				</span>
+			)}
 			<Popover open={sSelectOpen} onOpenChange={setSSelectOpen}>
 				<PopoverTrigger asChild>
 					<Button
-						className="gap-1"
 						disabled={disabled}
-						aria-label="Select status"
+						aria-label={disabled ? "Status" : "Edit Status"}
 						type="button"
+						size={buttonSize}
+						variant="ghost"
+						onClick={() => setSSelectOpen(true)}
 					>
 						{(() => {
 							if (value) {
@@ -64,9 +72,6 @@ export function StatusSelect({
 												)}
 											/>
 										)}
-										<span className="text-sm">
-											{selectedDisplay.label}
-										</span>
 									</>
 								);
 							}
@@ -75,7 +80,7 @@ export function StatusSelect({
 								<>
 									<ChevronsUpDown className="h-4 w-4 opacity-50" />
 									<span className="text-sm">
-										Select status
+										Select Status
 									</span>
 								</>
 							);
@@ -112,7 +117,13 @@ export function StatusSelect({
 														)}
 													/>
 												)}
-												<span>{status.label}</span>
+												<span
+													className={cn(
+														status.className,
+													)}
+												>
+													{status.label}
+												</span>
 											</div>
 											{isSelected && (
 												<ArrowUp className="h-4 w-4 text-primary" />

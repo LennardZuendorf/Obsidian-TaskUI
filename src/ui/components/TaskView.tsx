@@ -9,11 +9,10 @@ import {
 import { Notice, type App } from "obsidian";
 import React from "react";
 import { storeOperation as str } from "../../data/types/operations"; // Adjusted path
-import type { Task, TaskStatus } from "../../data/types/tasks"; // Adjusted path
+import type { Task } from "../../data/types/tasks"; // Adjusted path
 import type { TaskUpdate } from "../../service/taskSyncService"; // Adjusted path
 import { logger } from "../../utils/logger"; // Adjusted path
 import { Button } from "../base/Button";
-import { ScrollArea, ScrollBar } from "../base/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../base/Tabs";
 import { cn } from "../utils"; // Adjusted path
 import { useDTable } from "./custom/dtable/DTable"; // Updated import path
@@ -24,6 +23,7 @@ import { TaskModal } from "./shared/TaskModal"; // Keep for Add Task
 import { BoardView } from "./tabViews/BoardView"; // Adjusted path
 import { ListView } from "./tabViews/ListView"; // Adjusted path
 import { TableView } from "./tabViews/TableView"; // Adjusted path
+import { Separator } from "../base/Separator";
 
 // Props needed by TaskView (and passed down to useDTable)
 interface TaskViewProps {
@@ -86,13 +86,8 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 		[changeTasks],
 	);
 
-	const handleTaskStatusChange = React.useCallback(
-		(task: Task, newStatus: TaskStatus) => {
-			const updatedTask: Task = {
-				...task,
-				status: newStatus,
-			};
-
+	const handleUpdateTask = React.useCallback(
+		(updatedTask: Task) => {
 			const update: TaskUpdate = {
 				operation: str.LOCAL_UPDATE,
 				tasks: [updatedTask],
@@ -104,7 +99,6 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 		[changeTasks],
 	);
 
-	// Call useDTable AFTER handlers are defined
 	const table = useDTable({
 		app,
 		changeTasks,
@@ -154,47 +148,44 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 			activationMode="manual"
 		>
 			{/* Top section: Tabs and Controls */}
-			<div className="flex flex-wrap items-end justify-between pt-0 gap-8 shrink-0">
+			<div className="flex flex-wrap items-end justify-between pt-0 gap-8 shrink-0 border-none pb-4">
 				{/* Tabs List */}
-				<ScrollArea className="w-full sm:w-auto">
-					<TabsList className="gap-2">
-						<TabsTrigger value="overview">
-							<LayoutGrid
-								className="-ms-0.5 me-1.5 h-4 w-4"
-								aria-hidden="true"
-							/>
-							Overview
-						</TabsTrigger>
-						<TabsTrigger value="list">
-							<ListCollapseIcon
-								className="-ms-0.5 me-1.5 h-4 w-4"
-								aria-hidden="true"
-							/>
-							List
-						</TabsTrigger>
-						<TabsTrigger
-							value="board"
-							// disabled={true} // Enable when BoardView is ready
-						>
-							<KanbanSquare
-								className="-ms-0.5 me-1.5 h-4 w-4"
-								aria-hidden="true"
-							/>
-							Board
-						</TabsTrigger>
-						<TabsTrigger
-							value="calendar"
-							disabled={true} // TODO: Implement Calendar
-						>
-							<Calendar
-								className="-ms-0.5 me-1.5 h-4 w-4"
-								aria-hidden="true"
-							/>
-							Calendar
-						</TabsTrigger>
-					</TabsList>
-					<ScrollBar orientation="horizontal" className="invisible" />
-				</ScrollArea>
+				<TabsList className="gap-2">
+					<TabsTrigger value="overview">
+						<LayoutGrid
+							className="-ms-0.5 me-1.5 h-4 w-4"
+							aria-hidden="true"
+						/>
+						Overview
+					</TabsTrigger>
+					<TabsTrigger value="list">
+						<ListCollapseIcon
+							className="-ms-0.5 me-1.5 h-4 w-4"
+							aria-hidden="true"
+						/>
+						List
+					</TabsTrigger>
+					<TabsTrigger
+						value="board"
+						// disabled={true} // Enable when BoardView is ready
+					>
+						<KanbanSquare
+							className="-ms-0.5 me-1.5 h-4 w-4"
+							aria-hidden="true"
+						/>
+						Board
+					</TabsTrigger>
+					<TabsTrigger
+						value="calendar"
+						disabled={true} // TODO: Implement Calendar
+					>
+						<Calendar
+							className="-ms-0.5 me-1.5 h-4 w-4"
+							aria-hidden="true"
+						/>
+						Calendar
+					</TabsTrigger>
+				</TabsList>
 
 				{/* Shared Controls + Add Task Button */}
 				<div className="flex space-x-6 py-2 sm:py-0 sm:ms-auto shrink-0">
@@ -226,38 +217,46 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 				</div>
 			</div>
 
+      <Separator />
+
 			{/* View Content Area */}
 			<TabsContent
 				value="overview"
-				className={cn("data-[state=active]:flex flex-col")}
+				className={cn(" w-11/12 justify-center items-center")}
 			>
 				<TableView
 					table={table}
 					handleEditTask={handleEditTask}
 					handleDeleteTask={handleDeleteTask}
-					handleTaskStatusChange={handleTaskStatusChange}
+					handleUpdateTask={handleUpdateTask}
+					handleCreateTask={createTask}
 				/>
 			</TabsContent>
 			<TabsContent
 				value="list"
-				className={cn("data-[state=active]:flex flex-col")}
+				className={cn("flex flex-col w-11/12 items-center mx-auto")}
 			>
 				<ListView
 					table={table}
 					handleEditTask={handleEditTask}
 					handleDeleteTask={handleDeleteTask}
-					handleTaskStatusChange={handleTaskStatusChange}
+					handleUpdateTask={handleUpdateTask}
+					handleCreateTask={createTask}
 				/>
 			</TabsContent>
 			<TabsContent
 				value="board"
-				className={cn("data-[state=active]:block")}
+				className={cn(
+					"data-[state=active]:block w-11/12 justify-center items-center",
+				)}
 			>
 				<BoardView table={table} />
 			</TabsContent>
 			<TabsContent
 				value="calendar"
-				className={cn("data-[state=active]:block")}
+				className={cn(
+					"data-[state=active]:block w-9/10 justify-center items-center",
+				)}
 			>
 				{/* Placeholder for Calendar View */}
 				<div className="p-4 text-center text-muted-foreground">
@@ -270,7 +269,8 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 
 export interface TabViewProps<TData> {
 	table: TanstackTable<TData>;
-	handleEditTask: (task: TData) => void;
-	handleDeleteTask: (task: TData) => void;
-	handleTaskStatusChange: (task: TData, newStatus: TaskStatus) => void;
+	handleEditTask: (task: Task) => void;
+	handleDeleteTask: (task: Task) => void;
+	handleUpdateTask: (task: Task) => void;
+	handleCreateTask: () => void;
 }

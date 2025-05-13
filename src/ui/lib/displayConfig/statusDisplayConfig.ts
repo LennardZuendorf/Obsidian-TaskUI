@@ -22,12 +22,16 @@ const statusDisplayConfig: Record<
 		label: "To Do",
 		icon: Circle,
 		order: 1,
+		className: "text-primary-foreground",
+		iconClassName: "text-primary-foreground",
 	},
 	[TaskStatus.IN_PROGRESS]: {
 		enum: TaskStatus.IN_PROGRESS,
 		label: "In Progress",
 		icon: PlayCircle,
 		order: 2,
+		className: "text-primary-foreground",
+		iconClassName: "text-primary-foreground",
 	},
 	[TaskStatus.DONE]: {
 		enum: TaskStatus.DONE,
@@ -41,8 +45,8 @@ const statusDisplayConfig: Record<
 		enum: TaskStatus.CANCELLED,
 		label: "Cancelled",
 		icon: XCircle,
-		className: "text-destructive",
-		iconClassName: "text-destructive",
+		className: "text-destructive-foreground",
+		iconClassName: "text-destructive-foreground",
 	},
 };
 

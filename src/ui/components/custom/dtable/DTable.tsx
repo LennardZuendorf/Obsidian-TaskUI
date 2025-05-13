@@ -11,8 +11,6 @@ import {
 	getSortedRowModel,
 	GroupingState,
 	OnChangeFn,
-	Row,
-	SortingFn,
 	SortingState,
 	Table as TanstackTable,
 	useReactTable,
@@ -30,9 +28,16 @@ import {
 import { Task, TaskPriority, TaskStatus } from "../../../../data/types/tasks";
 import type { TaskUpdate } from "../../../../service/taskSyncService";
 import { dateToDateCategory } from "../../../../ui/lib/displayConfig/dateDisplayConfig";
-import { getOrderedTaskPriorities } from "../../../../ui/lib/displayConfig/priorityDisplayConfig";
-import { getOrderedTaskStatuses } from "../../../../ui/lib/displayConfig/statusDisplayConfig";
 import { logger } from "../../../../utils/logger";
+import {
+	sortTasksByPriority,
+	sortTasksByStatus,
+} from "../../../../utils/sorting/taskSortingFunctions";
+
+// Define a more specific type for column meta
+export interface DTableColumnMeta {
+	headerLabel?: string;
+}
 
 // Define column visibility as a simple Record type
 type ColumnVisibility = Record<string, boolean>;
@@ -46,47 +51,6 @@ interface UseDTableProps {
 }
 
 // --- Custom Sorting Functions ---
-
-// Custom sorting function for priority
-const prioritySortingFn: SortingFn<Task> = (
-	rkA: Row<Task>,
-	rkB: Row<Task>,
-	columnId: string,
-): number => {
-	const priorityA = rkA.getValue<TaskPriority | null | undefined>(columnId);
-	const priorityB = rkB.getValue<TaskPriority | null | undefined>(columnId);
-
-	const isADefined = priorityA != null;
-	const isBDefined = priorityB != null;
-
-	if (isADefined && !isBDefined) return -1;
-	if (!isADefined && isBDefined) return 1;
-	if (!isADefined && !isBDefined) return 0;
-
-	// Get the ordered list of priorities
-	const orderedPriorities = getOrderedTaskPriorities();
-	const indexA = orderedPriorities.indexOf(priorityA as TaskPriority);
-	const indexB = orderedPriorities.indexOf(priorityB as TaskPriority);
-
-	return indexA - indexB;
-};
-
-// Custom sorting function for status
-const statusSortingFn: SortingFn<Task> = (
-	rkA: Row<Task>,
-	rkB: Row<Task>,
-	columnId: string,
-): number => {
-	const statusA = rkA.getValue<TaskStatus>(columnId);
-	const statusB = rkB.getValue<TaskStatus>(columnId);
-
-	// Get the ordered list of statuses
-	const orderedStatuses = getOrderedTaskStatuses();
-	const indexA = orderedStatuses.indexOf(statusA ?? TaskStatus.TODO);
-	const indexB = orderedStatuses.indexOf(statusB ?? TaskStatus.TODO);
-
-	return indexA - indexB;
-};
 
 // --- End Custom Sorting Functions ---
 
@@ -115,7 +79,7 @@ const initialColumnVisibility: ColumnVisibility = {
 };
 
 // Minimal TanStack Table column definitions for Task
-const taskTableColumns: ColumnDef<Task>[] = [
+const taskTableColumns: ColumnDef<Task, any>[] = [
 	{
 		accessorKey: "description",
 		header: ({ column }) => column.id,
@@ -123,7 +87,7 @@ const taskTableColumns: ColumnDef<Task>[] = [
 		enableSorting: false,
 		enableGrouping: false,
 		enableColumnFilter: false,
-		meta: { headerLabel: "Description" },
+		meta: { headerLabel: "Description" } as DTableColumnMeta,
 	},
 	{
 		accessorKey: "tags",
@@ -135,29 +99,29 @@ const taskTableColumns: ColumnDef<Task>[] = [
 		enableSorting: false,
 		enableGrouping: false,
 		enableColumnFilter: false,
-		meta: { headerLabel: "Tags" },
+		meta: { headerLabel: "Tags" } as DTableColumnMeta,
 	},
 	{
 		accessorKey: "status",
 		header: ({ column }) => column.id,
 		cell: (info) => info.getValue(),
-		sortingFn: statusSortingFn,
+		sortingFn: sortTasksByStatus,
 		filterFn: statusFilterFn,
 		enableGrouping: true,
 		enableSorting: true,
 		enableColumnFilter: true,
-		meta: { headerLabel: "Status" },
+		meta: { headerLabel: "Status" } as DTableColumnMeta,
 	},
 	{
 		accessorKey: "priority",
 		header: ({ column }) => column.id,
 		cell: (info) => info.getValue(),
-		sortingFn: prioritySortingFn,
+		sortingFn: sortTasksByPriority,
 		filterFn: priorityFilterFn,
 		enableGrouping: true,
 		enableSorting: true,
 		enableColumnFilter: true,
-		meta: { headerLabel: "Priority" },
+		meta: { headerLabel: "Priority" } as DTableColumnMeta,
 	},
 	{
 		id: "scheduledDateCategory",
@@ -169,9 +133,9 @@ const taskTableColumns: ColumnDef<Task>[] = [
 		},
 		header: () => "Sched Cat",
 		cell: (info) => info.getValue(),
-		meta: { headerLabel: "Scheduled Category" },
+		meta: { headerLabel: "Scheduled Category" } as DTableColumnMeta,
 		filterFn: categoryFilterFn,
-		enableGrouping: true,
+		enableGrouping: false,
 		enableSorting: false,
 		enableColumnFilter: true,
 	},
@@ -180,10 +144,10 @@ const taskTableColumns: ColumnDef<Task>[] = [
 		header: ({ column }) => column.id,
 		cell: (info) => info.getValue(),
 		sortingFn: "datetime",
-		enableGrouping: false,
+		enableGrouping: true,
 		enableSorting: true,
 		enableColumnFilter: false,
-		meta: { headerLabel: "Scheduled" },
+		meta: { headerLabel: "Scheduled" } as DTableColumnMeta,
 	},
 	{
 		id: "dueDateCategory",
@@ -195,9 +159,9 @@ const taskTableColumns: ColumnDef<Task>[] = [
 		},
 		header: () => "Due Cat",
 		cell: (info) => info.getValue(),
-		meta: { headerLabel: "Due Category" },
+		meta: { headerLabel: "Due Category" } as DTableColumnMeta,
 		filterFn: categoryFilterFn,
-		enableGrouping: true,
+		enableGrouping: false,
 		enableSorting: false,
 		enableColumnFilter: true,
 	},
@@ -206,10 +170,10 @@ const taskTableColumns: ColumnDef<Task>[] = [
 		header: ({ column }) => column.id,
 		cell: (info) => info.getValue(),
 		sortingFn: "datetime",
-		enableGrouping: false,
+		enableGrouping: true,
 		enableSorting: true,
 		enableColumnFilter: false,
-		meta: { headerLabel: "Due" },
+		meta: { headerLabel: "Due" } as DTableColumnMeta,
 	},
 ];
 
@@ -328,8 +292,8 @@ export function useDTable({
 			category: categoryFilterFn,
 		},
 		sortingFns: {
-			priority: prioritySortingFn,
-			status: statusSortingFn,
+			priority: sortTasksByPriority,
+			status: sortTasksByStatus,
 		},
 	});
 

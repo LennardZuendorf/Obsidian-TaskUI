@@ -1,5 +1,6 @@
 import React from "react";
 import { Input } from "../../../base/Input";
+import { cn } from "@//utils";
 
 export type DescInputProps = {
 	value: string;
@@ -10,6 +11,7 @@ export type DescInputProps = {
 	autoFocus?: boolean;
 	placeholder?: string;
 	id?: string;
+	showLabel?: boolean;
 };
 
 export function DescInput({
@@ -21,26 +23,35 @@ export function DescInput({
 	autoFocus,
 	placeholder = "What needs to be done?",
 	id = "description-input",
+	showLabel = false,
 }: DescInputProps) {
 	return (
-		<div className={`flex flex-col w-full ${className || ""}`}>
-			<label
-				htmlFor={id}
-				className="text-xs text-muted-foreground mb-1 ml-1"
-			>
-				Task Description
-			</label>
-			<div className="flex flex-row items-center gap-1">
+		<div className={cn("flex flex-col w-full", className)}>
+			{showLabel && (
+				<label
+					htmlFor={id}
+					className="text-xs text-muted-foreground mb-1 ml-1"
+				>
+					Task Description
+				</label>
+			)}
+			<div className="gap-1 w-full">
 				<Input
 					id={id}
 					value={value}
-					onChange={(e) => onChange(e.target.value)}
+					onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+						if (e.key === "Enter") {
+							e.preventDefault();
+							onChange(e.currentTarget.value);
+						}
+					}}
 					placeholder={placeholder}
 					autoFocus={autoFocus}
-					className="flex flex-shrink"
-					aria-label="Set the Task Description"
+					className="text-xl w-full"
+					aria-label={disabled ? "Task Description" : "Edit Task Description"}
 					aria-invalid={!!error}
 					disabled={disabled}
+					variant="bare"
 				/>
 			</div>
 			{error && (

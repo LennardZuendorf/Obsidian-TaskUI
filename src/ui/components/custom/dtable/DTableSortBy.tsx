@@ -1,8 +1,8 @@
 import type { SortingState } from "@tanstack/react-table";
+import { titleCase } from "title-case";
 import { Table } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 
-import { getColumnDisplay } from "../../../lib/displayConfig/columnDisplayConfig"; // Adjusted path
 import { Button } from "../../../base/Button";
 import {
 	Command,
@@ -11,6 +11,7 @@ import {
 	CommandList,
 } from "../../../base/Command";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../base/Popover";
+import { getColumnDisplay } from "../../../lib/displayConfig/columnDisplayConfig"; // Adjusted path
 import { cn } from "../../../utils"; // Adjusted path
 
 interface DTableSortByProps<TData> {
@@ -27,6 +28,7 @@ function getSortableColumns<TData>(table: Table<TData>) {
 
 export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
 	const sorting = table.getState().sorting;
+	const grouping = table.getState().grouping;
 	const sortableColumns = getSortableColumns(table);
 
 	// Explicitly sort columns by label for stable display order
@@ -36,25 +38,49 @@ export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
 		return labelA.localeCompare(labelB);
 	});
 
+	// Determine which sort entry to display on the button (user-defined sort)
+	let displaySortEntry: SortingState[0] | undefined;
+	const activeGroupId = grouping[0];
+	if (activeGroupId) {
+		// If grouping, displaySortEntry is sorting[1] if it exists and sorting[0] is the group sort
+		if (sorting.length > 1 && sorting[0]?.id === activeGroupId) {
+			displaySortEntry = sorting[1];
+		}
+	} else {
+		// No grouping, displaySortEntry is sorting[0]
+		displaySortEntry = sorting.length > 0 ? sorting[0] : undefined;
+	}
+
+	// Determine if the "Clear Sort" button should be active for the user-defined sort
+	let canClearUserSort = false;
+	if (activeGroupId) {
+		canClearUserSort = !!(
+			sorting.length > 1 &&
+			sorting[0]?.id === activeGroupId &&
+			sorting[1]
+		);
+	} else {
+		canClearUserSort = !!(sorting.length > 0 && sorting[0]);
+	}
+
 	return (
 		<div className="flex flex-col">
-			{/* Label always present, hidden when inactive */}
+			{/* Label shown only if a user-defined sort is active */}
 			<span
 				className={cn(
 					"text-xs text-muted-foreground mb-1 ml-1",
-					sorting.length === 0 ? "opacity-0" : "opacity-100",
+					displaySortEntry ? "opacity-100" : "opacity-0",
 				)}
 			>
-				Sort by:
+				{titleCase("Sort By:")}
 			</span>
 			<Popover>
 				<PopoverTrigger asChild>
 					<Button className="gap-1">
 						{(() => {
-							const activeSort = sorting[0];
-							if (activeSort) {
+							if (displaySortEntry) {
 								const displayInfo = getColumnDisplay(
-									activeSort.id,
+									displaySortEntry.id,
 								);
 								const IconComponent = displayInfo.icon;
 								return (
@@ -65,7 +91,7 @@ export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
 										<span className="text-sm">
 											{displayInfo.label}
 										</span>
-										{activeSort.desc ? (
+										{displaySortEntry.desc ? (
 											<ArrowDown className="h-4 w-4 ml-1" />
 										) : (
 											<ArrowUp className="h-4 w-4 ml-1" />
@@ -73,10 +99,9 @@ export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
 									</>
 								);
 							}
-							// Default view
+							// Default view (no displayable sort or only group sort active)
 							return (
 								<>
-									{/* Default Sort Icon (SVG) */}
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										viewBox="0 0 24 24"
@@ -93,7 +118,9 @@ export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
 								</>
 							);
 						})()}
-						{sorting.length === 0 && (
+						{/* Show chevron if no sort is displayed or if a sort is displayed but it's not the only one (group sort might be hidden) */}
+						{(!displaySortEntry ||
+							(displaySortEntry && sorting.length === 0)) && (
 							<ChevronDown className="h-4 w-4 opacity-50 ml-auto" />
 						)}
 					</Button>
@@ -101,8 +128,7 @@ export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
 				<PopoverContent className="w-[200px] p-0">
 					<Command>
 						<CommandList>
-							<CommandGroup heading="Sort by">
-								{/* Use the explicitly sorted array */}
+							<CommandGroup heading={titleCase("Sort by")}>
 								{sortedDisplayColumns.map((col) => {
 									const columnId = col.id;
 									const displayInfo =
@@ -110,27 +136,126 @@ export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
 									const IconComponent = displayInfo.icon;
 									const columnLabel = displayInfo.label;
 
-									// We already filtered for columns with labels
-									// if (!columnLabel) return null;
+									// Determine sort state for this columnId based on user-defined sort context
+									let columnSortEntryForDisplay:
+										| SortingState[0]
+										| undefined;
+									const currentTableSorting =
+										table.getState().sorting; // Get fresh state
+									const currentActiveGroupId =
+										table.getState().grouping[0];
 
-									const currentSort = sorting[0];
-									const isCurrentlySorted =
-										currentSort?.id === columnId;
-									const isDesc =
-										isCurrentlySorted && !!currentSort.desc;
+									if (currentActiveGroupId) {
+										// Grouping active: icon reflects state of sorting[1] if columnId matches sorting[1]
+										if (
+											currentTableSorting.length > 1 &&
+											currentTableSorting[0]?.id ===
+												currentActiveGroupId &&
+											currentTableSorting[1]?.id ===
+												columnId
+										) {
+											columnSortEntryForDisplay =
+												currentTableSorting[1];
+										}
+										// If columnId is the active group, it should appear neutral in this popover
+									} else {
+										// No grouping: icon reflects state of sorting[0] if columnId matches sorting[0]
+										if (
+											currentTableSorting.length > 0 &&
+											currentTableSorting[0]?.id ===
+												columnId
+										) {
+											columnSortEntryForDisplay =
+												currentTableSorting[0];
+										}
+									}
+									const isCurrentlySortedByUser =
+										!!columnSortEntryForDisplay;
+									const isDescByUser =
+										columnSortEntryForDisplay
+											? !!columnSortEntryForDisplay.desc
+											: false;
 
 									const handleSelect = () => {
-										let newSort: SortingState = [];
-										if (!isCurrentlySorted) {
-											newSort = [
-												{ id: columnId, desc: false },
-											];
-										} else if (!isDesc) {
-											newSort = [
-												{ id: columnId, desc: true },
-											];
-										} // else newSort remains []
-										table.setSorting(newSort);
+										const currentFullSorting =
+											table.getState().sorting;
+										const currentGroupId =
+											table.getState().grouping[0]; // Renamed for clarity
+										let newSortState: SortingState = [];
+
+										if (currentGroupId) {
+											const groupSortEntry =
+												currentFullSorting.find(
+													(s) =>
+														s.id === currentGroupId,
+												);
+											if (!groupSortEntry) {
+												// This case should ideally not happen if grouping always sets a sort
+												table.setSorting([]);
+												return;
+											}
+											newSortState.push(groupSortEntry); // Always preserve group sort as sorting[0]
+
+											// DTableSortBy only manages sorting[1] when grouping is active
+											// It will NOT change sorting[0] (group sort) even if columnId matches currentGroupId
+											const currentSecondarySort =
+												currentFullSorting.length > 1 &&
+												currentFullSorting[0]?.id ===
+													currentGroupId
+													? currentFullSorting[1]
+													: undefined;
+
+											if (
+												currentSecondarySort?.id ===
+												columnId
+											) {
+												// Clicking current secondary sort
+												if (
+													!currentSecondarySort.desc
+												) {
+													// was asc, now desc
+													newSortState.push({
+														id: columnId,
+														desc: true,
+													});
+												} // else was desc, now clear secondary (newSortState only has primary)
+											} else {
+												// New or different secondary sort (or columnId is group id but we set as secondary)
+												newSortState.push({
+													id: columnId,
+													desc: false,
+												});
+											}
+										} else {
+											// No grouping, DTableSortBy manages sorting[0]
+											const currentPrimarySort =
+												currentFullSorting[0];
+											if (
+												currentPrimarySort?.id ===
+												columnId
+											) {
+												// Clicking current primary
+												if (!currentPrimarySort.desc) {
+													newSortState = [
+														{
+															id: columnId,
+															desc: true,
+														},
+													];
+												} // else was desc, now clear primary (newSortState remains [])
+											} else {
+												// New or different primary sort
+												newSortState = [
+													{
+														id: columnId,
+														desc: false,
+													},
+												];
+											}
+										}
+										table.setSorting(
+											newSortState.slice(0, 2),
+										); // Ensure max 2 sorts
 									};
 
 									return (
@@ -145,8 +270,8 @@ export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
 												)}
 												<span>{columnLabel}</span>
 											</div>
-											{isCurrentlySorted ? (
-												isDesc ? (
+											{isCurrentlySortedByUser ? (
+												isDescByUser ? (
 													<ArrowDown className="h-4 w-4" />
 												) : (
 													<ArrowUp className="h-4 w-4" />
@@ -160,8 +285,29 @@ export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
 							</CommandGroup>
 							<CommandGroup>
 								<CommandItem
-									disabled={sorting.length === 0}
-									onSelect={() => table.setSorting([])}
+									disabled={!canClearUserSort}
+									onSelect={() => {
+										const currentFullSorting =
+											table.getState().sorting;
+										const currentGroupId =
+											table.getState().grouping[0];
+										if (currentGroupId) {
+											// Clear only user-defined sort (sorting[1]), keep group sort (sorting[0])
+											const groupSortEntry =
+												currentFullSorting.find(
+													(s) =>
+														s.id === currentGroupId,
+												);
+											table.setSorting(
+												groupSortEntry
+													? [groupSortEntry]
+													: [],
+											);
+										} else {
+											// No grouping, clear all sorts
+											table.setSorting([]);
+										}
+									}}
 									className="border-t border-input pt-2 mt-2 text-muted-foreground hover:text-foreground"
 								>
 									Clear Sort

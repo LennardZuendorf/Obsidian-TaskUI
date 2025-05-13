@@ -1,7 +1,7 @@
-import { ArrowUp, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import React from "react";
 import type { TaskPriority } from "../../../../data/types/tasks";
-import { Button } from "../../../base/Button";
+import { Button, ButtonProps } from "../../../base/Button";
 import {
 	Command,
 	CommandGroup,
@@ -20,6 +20,8 @@ export type PrioritySelectProps = {
 	onChange: (priority: TaskPriority) => void;
 	disabled?: boolean;
 	className?: string;
+	buttonSize?: ButtonProps["size"];
+	showLabel?: boolean;
 };
 
 export function PrioritySelect({
@@ -27,45 +29,44 @@ export function PrioritySelect({
 	onChange,
 	disabled,
 	className,
+	buttonSize = "default",
+	showLabel = false,
 }: PrioritySelectProps) {
 	const [pSelectOpen, setPSelectOpen] = React.useState(false);
-
 	const priorities = getOrderedTaskPriorities();
-	const selectedDisplay = getPriorityDisplay(value);
 
 	return (
 		<div className={cn("flex flex-col", className)}>
-			<span
-				className={cn(
-					"text-xs text-muted-foreground mb-1 ml-1",
-					value == null ? "opacity-0" : "opacity-100",
-				)}
-			>
-				Priority
-			</span>
+			{showLabel && (
+				<span
+					className={cn(
+						"text-xs text-muted-foreground mb-1 ml-1",
+						value == null ? "opacity-0" : "opacity-100",
+					)}
+				>
+					Priority
+				</span>
+			)}
 			<Popover open={pSelectOpen} onOpenChange={setPSelectOpen}>
 				<PopoverTrigger asChild>
 					<Button
-						className="gap-1"
+						size={buttonSize}
 						disabled={disabled}
-						aria-label="Select priority"
-						type="button"
+						onClick={() => setPSelectOpen(true)}
 					>
 						{(() => {
-							if (value) {
-								const IconComponent = selectedDisplay.icon;
+							const activePriority = value;
+							if (activePriority) {
+								const displayInfo =
+									getPriorityDisplay(activePriority);
+								const IconComponent = displayInfo.icon;
 								return (
 									<>
 										{IconComponent && (
-											<IconComponent
-												className={cn(
-													"h-4 w-4",
-													selectedDisplay.iconClassName,
-												)}
-											/>
+											<IconComponent className="h-4 w-4" />
 										)}
 										<span className="text-sm">
-											{selectedDisplay.label}
+											{displayInfo.label}
 										</span>
 									</>
 								);
@@ -73,52 +74,80 @@ export function PrioritySelect({
 							// Default view
 							return (
 								<>
-									<ChevronsUpDown className="h-4 w-4 opacity-50" />
-									<span className="text-sm">
-										Select priority
-									</span>
+									{/* Default Sort Icon (SVG) */}
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										className="h-4 w-4"
+									>
+										<path d="m3 16 4 4 4-4M7 20V4M21 8l-4-4-4 4M17 4v16" />
+									</svg>
+									<span className="text-sm">Sort</span>
 								</>
 							);
 						})()}
+						<ChevronDown className="h-4 w-4 opacity-50 ml-auto" />
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent className="w-[200px] p-0">
 					<Command>
 						<CommandList>
-							<CommandGroup heading="Priority">
+							<CommandGroup
+								heading="Select Priority"
+								className="space-y-1"
+							>
+								{/* Use the explicitly sorted array */}
 								{priorities.map((priority) => {
-									const display =
+									const displayInfo =
 										getPriorityDisplay(priority);
-									const IconComponent = display.icon;
-									const isSelected = value === priority;
+									const IconComponent = displayInfo.icon;
+									const isCurrent = priority === value;
+
+									const handleSelect = () => {
+										onChange(priority);
+										setPSelectOpen(false);
+									};
+
 									return (
 										<CommandItem
 											key={priority}
-											onSelect={() => {
-												onChange(priority);
-												setPSelectOpen(false);
-											}}
+											onSelect={handleSelect}
 											className={cn(
-												"flex items-center justify-between w-full cursor-pointer",
-												isSelected &&
-													"bg-accent text-accent-foreground",
+												"flex items-center justify-between w-full",
+												isCurrent && "bg-secondary",
 											)}
-											aria-selected={isSelected}
 										>
 											<div className="flex items-center mr-2">
 												{IconComponent && (
 													<IconComponent
 														className={cn(
-															"mr-2 h-4 w-4",
-															display.iconClassName,
+															"mr-2 h-4 w-4 text-muted-foreground",
+															displayInfo.iconClassName,
 														)}
 													/>
 												)}
-												<span>{display.label}</span>
+												<span
+													className={cn(
+														"text-sm text-primary-foreground",
+														displayInfo.className,
+													)}
+												>
+													{displayInfo.label}
+												</span>
 											</div>
-											{isSelected && (
-												<ArrowUp className="h-4 w-4 text-primary" />
-											)}
+											{isCurrent ? (
+												<Check
+													className={cn(
+														"h-4 w-4 text-primary-foreground",
+														displayInfo.iconClassName,
+													)}
+												/>
+											) : null}
 										</CommandItem>
 									);
 								})}
