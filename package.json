@@ -83,6 +83,7 @@
 		"react-label": "^0.0.6",
 		"tailwind-merge": "^2.5.4",
 		"tailwindcss-animate": "^1.0.7",
+		"title-case": "^4.3.2",
 		"ts-randomstring": "^1.0.8",
 		"use-mask-input": "^3.4.2",
 		"uuid": "^11.1.0",
