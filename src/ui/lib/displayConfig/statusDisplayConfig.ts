@@ -1,4 +1,4 @@
-import { StatusDisplayConfig } from "@//lib/displayConfig/displayConfigTypes";
+import { StatusDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
 import { CheckCircle, Circle, PlayCircle, XCircle } from "lucide-react";
 import { TaskStatus } from "../../../data/types/tasks";
 

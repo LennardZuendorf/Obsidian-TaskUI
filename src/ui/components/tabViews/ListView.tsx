@@ -1,7 +1,7 @@
-import { DataTablePagination } from "@//components/custom/dtable/DTablePagination";
-import { EnumDisplayConfig } from "@//lib/displayConfig/displayConfigTypes";
-import { getMatchingDisplay } from "@//lib/displayConfig/utils";
-import { cn } from "@//utils";
+import { DataTablePagination } from "@/ui/components/custom/dtable/DTablePagination";
+import { EnumDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
+import { getMatchingDisplay } from "@/ui/lib/displayConfig/utils";
+import { cn } from "@/ui/utils";
 import type { Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
 import type { Task, TaskPriority, TaskStatus } from "../../../data/types/tasks";

@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
 import * as React from "react";
 
-import { cn } from "@//utils";
+import { cn } from "@/ui/utils";
 
 const badgeVariants = cva(
 	"inline-flex items-center rounded-full border-0 border-none px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 gap-1",

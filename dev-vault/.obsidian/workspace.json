@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "6665d1d54b6f15a5",
+        "id": "a793043b9d161725",
         "type": "tabs",
         "children": [
           {
-            "id": "830da2e3ab0a8fb0",
+            "id": "d7a11f6cc7803667",
             "type": "leaf",
             "state": {
               "type": "react-view",
@@ -166,7 +166,7 @@
       "shards-taskui-plugin:Activate Main Tab View": false
     }
   },
-  "active": "830da2e3ab0a8fb0",
+  "active": "d7a11f6cc7803667",
   "lastOpenFiles": [
     "Tasks.md",
     "2025-05-03.md",

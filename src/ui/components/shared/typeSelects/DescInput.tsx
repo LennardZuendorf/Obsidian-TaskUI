@@ -1,6 +1,6 @@
 import React from "react";
 import { Input } from "../../../base/Input";
-import { cn } from "@//utils";
+import { cn } from "@/ui/utils";
 
 export type DescInputProps = {
 	value: string;

@@ -1,5 +1,5 @@
-import { getOrderedTaskPriorities } from "@//lib/displayConfig/priorityDisplayConfig";
-import { getOrderedTaskStatuses } from "@//lib/displayConfig/statusDisplayConfig";
+import { getOrderedTaskPriorities } from "@/ui/lib/displayConfig/priorityDisplayConfig";
+import { getOrderedTaskStatuses } from "@/ui/lib/displayConfig/statusDisplayConfig";
 import { Row } from "@tanstack/react-table";
 import { Task, TaskPriority, TaskStatus } from "../../data/types/tasks";
 

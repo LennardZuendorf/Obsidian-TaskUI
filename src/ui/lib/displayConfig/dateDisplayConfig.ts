@@ -7,7 +7,7 @@ import {
 	LuCalendarFold,
 	LuCalendarOff,
 } from "react-icons/lu";
-import { dateDisplayConfig } from "@//lib/displayConfig/displayConfigTypes";
+import { dateDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
 
 /**
  * Configuration for date-based categories used in task organization and filtering.

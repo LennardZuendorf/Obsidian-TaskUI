@@ -1,6 +1,6 @@
 import { TaskPriority, TaskStatus } from "../../../data/types/tasks";
 import { format } from "date-fns";
-import { DateCategory } from "@//lib/dateCategoryEnum";
+import { DateCategory } from "@/ui/lib/dateCategoryEnum";
 import {
 	PriorityDisplayConfig,
 	StatusDisplayConfig,

@@ -1,8 +1,7 @@
 [
-  "hot-reload",
   "dataview",
   "obsidian-tasks-plugin",
   "taskui-plugin",
-  "obsidian-style-settings",
-  "shards-taskui-plugin"
+  "shards-taskui-plugin",
+  "hot-reload"
 ]

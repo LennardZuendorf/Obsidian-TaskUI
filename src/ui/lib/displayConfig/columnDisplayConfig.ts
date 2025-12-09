@@ -1,4 +1,4 @@
-import { ColumnDisplayInfo } from "@//lib/displayConfig/displayConfigTypes";
+import { ColumnDisplayInfo } from "@/ui/lib/displayConfig/displayConfigTypes";
 import {
 	CalendarCheck,
 	CalendarClock,

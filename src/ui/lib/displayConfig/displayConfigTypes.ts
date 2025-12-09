@@ -5,7 +5,7 @@
  * for consistent display and styling of UI elements.
  */
 
-import { DateCategory } from "@//lib/dateCategoryEnum";
+import { DateCategory } from "@/ui/lib/dateCategoryEnum";
 import { TaskPriority, TaskStatus } from "../../../data/types/tasks";
 
 /**
