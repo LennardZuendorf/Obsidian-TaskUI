@@ -66,10 +66,7 @@ export function StatusSelect({
 									<>
 										{IconComponent && (
 											<IconComponent
-												className={cn(
-													"h-4 w-4",
-													selectedDisplay.iconClassName,
-												)}
+												className={cn("h-4 w-4", selectedDisplay.iconClassName)}
 											/>
 										)}
 									</>
@@ -79,9 +76,7 @@ export function StatusSelect({
 							return (
 								<>
 									<ChevronsUpDown className="h-4 w-4 opacity-50" />
-									<span className="text-sm">
-										Select Status
-									</span>
+									<span className="text-sm">Select Status</span>
 								</>
 							);
 						})()}
@@ -103,25 +98,17 @@ export function StatusSelect({
 											}}
 											className={cn(
 												"flex items-center justify-between w-full cursor-pointer",
-												isSelected &&
-													"bg-accent text-accent-foreground",
+												isSelected && "bg-accent text-accent-foreground",
 											)}
 											aria-selected={isSelected}
 										>
 											<div className="flex items-center mr-2">
 												{IconComponent && (
 													<IconComponent
-														className={cn(
-															"mr-2 h-4 w-4",
-															status.iconClassName,
-														)}
+														className={cn("mr-2 h-4 w-4", status.iconClassName)}
 													/>
 												)}
-												<span
-													className={cn(
-														status.className,
-													)}
-												>
+												<span className={cn(status.className)}>
 													{status.label}
 												</span>
 											</div>

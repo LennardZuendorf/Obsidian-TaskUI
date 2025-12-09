@@ -35,8 +35,7 @@ export function TagInput({
 		const lowerInput = inputValue.toLowerCase();
 		const results = availableTags.filter(
 			(tag) =>
-				tag.toLowerCase().includes(lowerInput) &&
-				!selectedTags.includes(tag), // Exclude already selected tags
+				tag.toLowerCase().includes(lowerInput) && !selectedTags.includes(tag), // Exclude already selected tags
 		);
 		setSearchResults(results);
 		setIsDropdownOpen(
@@ -140,12 +139,8 @@ export function TagInput({
 									</li>
 								))}
 								{inputValue.trim() &&
-									!availableTags.includes(
-										inputValue.trim(),
-									) &&
-									!selectedTags.includes(
-										inputValue.trim(),
-									) && (
+									!availableTags.includes(inputValue.trim()) &&
+									!selectedTags.includes(inputValue.trim()) && (
 										<li
 											className="px-3 py-2 text-sm cursor-pointer hover:bg-secondary flex items-center gap-2"
 											onClick={createNewTag}

@@ -29,10 +29,7 @@ export function TableView<TData extends Task>({
 					{table.getHeaderGroups().map((headerGroup) => (
 						<TableRow key={headerGroup.id}>
 							{headerGroup.headers.map((header) => (
-								<TableHead
-									key={header.id}
-									style={{ width: header.getSize() }}
-								>
+								<TableHead key={header.id} style={{ width: header.getSize() }}>
 									{header.isPlaceholder
 										? null
 										: flexRender(
@@ -53,10 +50,7 @@ export function TableView<TData extends Task>({
 								return (
 									<TableRow key={row.id}>
 										<TableCell
-											colSpan={
-												table.getVisibleLeafColumns()
-													.length + 1
-											}
+											colSpan={table.getVisibleLeafColumns().length + 1}
 										>
 											<button
 												type="button"
@@ -70,10 +64,8 @@ export function TableView<TData extends Task>({
 													<ChevronRight className="h-4 w-4" />
 												)}
 												<span>
-													{row.getValue(
-														grouping[0] as string,
-													)}{" "}
-													({row.subRows.length})
+													{row.getValue(grouping[0] as string)} (
+													{row.subRows.length})
 												</span>
 											</button>
 										</TableCell>
@@ -84,8 +76,7 @@ export function TableView<TData extends Task>({
 									<TableRow key={row.id}>
 										{row.getVisibleCells().map((cell) => {
 											if (
-												cell.column.id ===
-													"scheduledDate" ||
+												cell.column.id === "scheduledDate" ||
 												cell.column.id === "dueDate"
 											) {
 												const dateValue = cell.getValue<
@@ -93,21 +84,14 @@ export function TableView<TData extends Task>({
 												>();
 												return (
 													<TableCell key={cell.id}>
-														{formatDate(
-															dateValue
-																? new Date(
-																		dateValue,
-																	)
-																: null,
-														)}
+														{formatDate(dateValue ? new Date(dateValue) : null)}
 													</TableCell>
 												);
 											} else {
 												return (
 													<TableCell key={cell.id}>
 														{flexRender(
-															cell.column
-																.columnDef.cell,
+															cell.column.columnDef.cell,
 															cell.getContext(),
 														)}
 													</TableCell>
@@ -115,19 +99,12 @@ export function TableView<TData extends Task>({
 											}
 										})}
 										{/* Extra cell for actions */}
-										<TableCell
-											key="actions-cell"
-											className="text-right"
-										>
+										<TableCell key="actions-cell" className="text-right">
 											<div className="flex justify-end space-x-1">
 												<Button
 													variant="ghost"
 													size="icon"
-													onClick={() =>
-														handleEditTask(
-															row.original,
-														)
-													}
+													onClick={() => handleEditTask(row.original)}
 													className="text-muted-foreground hover:text-foreground"
 													aria-label="Edit Task"
 												>
@@ -136,11 +113,7 @@ export function TableView<TData extends Task>({
 												<Button
 													variant="ghost"
 													size="icon"
-													onClick={() =>
-														handleDeleteTask(
-															row.original,
-														)
-													}
+													onClick={() => handleDeleteTask(row.original)}
 													className="text-destructive/80 hover:text-destructive hover:bg-destructive/10"
 													aria-label="Delete Task"
 												>

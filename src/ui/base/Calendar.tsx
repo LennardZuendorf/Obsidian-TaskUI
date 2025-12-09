@@ -5,10 +5,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
 import {
 	DayPicker,
+	type DayPickerProps,
 	labelNext,
 	labelPrevious,
 	useDayPicker,
-	type DayPickerProps,
 } from "react-day-picker";
 import { cn } from "../utils";
 import { Button, buttonVariants } from "./Button";
@@ -120,10 +120,7 @@ function Calendar({
 	);
 	const _navClassName = cn("flex items-start", props.navClassName);
 	const _monthGridClassName = cn("mx-auto mt-4", props.monthGridClassName);
-	const _weekClassName = cn(
-		"mt-2 flex w-max items-start",
-		props.weekClassName,
-	);
+	const _weekClassName = cn("mt-2 flex w-max items-start", props.weekClassName);
 	const _dayClassName = cn(
 		"flex size-8 flex-1 items-center justify-center p-0 text-sm",
 		props.dayClassName,
@@ -200,8 +197,7 @@ function Calendar({
 			}}
 			components={{
 				Chevron: ({ orientation }) => {
-					const Icon =
-						orientation === "left" ? ChevronLeft : ChevronRight;
+					const Icon = orientation === "left" ? ChevronLeft : ChevronRight;
 					return <Icon className="h-4 w-4" />;
 				},
 				Nav: ({ className }) => (
@@ -333,8 +329,7 @@ function Nav({
 			}));
 			onNextClick?.(
 				new Date(
-					displayYears.from +
-						(displayYears.to - displayYears.from + 1),
+					displayYears.from + (displayYears.to - displayYears.from + 1),
 					0,
 					1,
 				),
@@ -409,9 +404,7 @@ function CaptionLabel({
 			className="h-7 w-full truncate text-sm font-medium"
 			variant="ghost"
 			size="sm"
-			onClick={() =>
-				setNavView((prev) => (prev === "days" ? "years" : "days"))
-			}
+			onClick={() => setNavView((prev) => (prev === "days" ? "years" : "days"))}
 		>
 			{navView === "days"
 				? children
@@ -501,8 +494,7 @@ function YearGrid({
 							key={i}
 							className={cn(
 								"h-7 w-full text-sm font-normal text-foreground",
-								displayYears.from + i ===
-									new Date().getFullYear() &&
+								displayYears.from + i === new Date().getFullYear() &&
 									"bg-accent font-medium text-accent-foreground",
 							)}
 							variant="ghost"
@@ -511,15 +503,11 @@ function YearGrid({
 								goToMonth(
 									new Date(
 										displayYears.from + i,
-										(
-											selected as Date | undefined
-										)?.getMonth() ?? 0,
+										(selected as Date | undefined)?.getMonth() ?? 0,
 									),
 								);
 							}}
-							disabled={
-								navView === "years" ? isDisabled : undefined
-							}
+							disabled={navView === "years" ? isDisabled : undefined}
 						>
 							{displayYears.from + i}
 						</Button>

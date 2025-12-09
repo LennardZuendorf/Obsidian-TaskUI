@@ -1,5 +1,5 @@
-import { StatusDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
 import { CheckCircle, Circle, PlayCircle, XCircle } from "lucide-react";
+import { StatusDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
 import { TaskStatus } from "../../../data/types/tasks";
 
 /**
@@ -76,10 +76,7 @@ export const statusStringToEnum: Record<string, TaskStatus> =
  */
 export const statusEnumToString: Record<TaskStatus, string> =
 	Object.fromEntries(
-		Object.entries(statusDisplayConfig).map(([key, { label }]) => [
-			key,
-			label,
-		]),
+		Object.entries(statusDisplayConfig).map(([key, { label }]) => [key, label]),
 	) as Record<TaskStatus, string>;
 
 /**

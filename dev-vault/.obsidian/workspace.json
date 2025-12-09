@@ -4,17 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "a793043b9d161725",
+        "id": "0304222fa8c06ab6",
         "type": "tabs",
         "children": [
           {
-            "id": "d7a11f6cc7803667",
+            "id": "8a8893c6688b6d4d",
             "type": "leaf",
             "state": {
-              "type": "react-view",
+              "type": "empty",
               "state": {},
               "icon": "lucide-file",
-              "title": "TaskUI"
+              "title": "New tab"
             }
           }
         ]
@@ -166,7 +166,7 @@
       "shards-taskui-plugin:Activate Main Tab View": false
     }
   },
-  "active": "d7a11f6cc7803667",
+  "active": "8a8893c6688b6d4d",
   "lastOpenFiles": [
     "Tasks.md",
     "2025-05-03.md",

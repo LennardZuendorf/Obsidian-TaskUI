@@ -1,14 +1,14 @@
+import type { Row } from "@tanstack/react-table";
+import { ChevronDown, ChevronRight, Plus } from "lucide-react";
 import { DataTablePagination } from "@/ui/components/custom/dtable/DTablePagination";
 import { EnumDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
 import { getMatchingDisplay } from "@/ui/lib/displayConfig/utils";
 import { cn } from "@/ui/utils";
-import type { Row } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight, Plus } from "lucide-react";
 import type { Task, TaskPriority, TaskStatus } from "../../../data/types/tasks";
 import { logger } from "../../../utils/logger";
 import { Button } from "../../base/Button";
-import type { TabViewProps } from "../TaskView";
 import { TaskCard } from "../shared/TaskCard";
+import type { TabViewProps } from "../TaskView";
 
 // Helper function to render the "No tasks found" message
 function NoTasksMessage() {
@@ -78,9 +78,7 @@ export function ListView<TData extends Task>({
 								<div
 									className={cn(
 										"flex items-center gap-2 p-3 rounded-lg cursor-pointer sticky top-0 z-10",
-										row.subRows &&
-											row.subRows.length > 0 &&
-											"bg-primary",
+										row.subRows && row.subRows.length > 0 && "bg-primary",
 									)}
 								>
 									<div
@@ -103,11 +101,7 @@ export function ListView<TData extends Task>({
 											)}
 										</Button>
 										<span className="font-medium truncate">
-											<p
-												className={
-													groupDisplay.className
-												}
-											>
+											<p className={groupDisplay.className}>
 												{groupDisplay.label}
 											</p>
 										</span>
@@ -123,9 +117,7 @@ export function ListView<TData extends Task>({
 										onClick={handleCreateTask}
 									>
 										<Plus className="h-4 w-4" />
-										<span className="text-sm">
-											Add Task
-										</span>
+										<span className="text-sm">Add Task</span>
 									</Button>
 								</div>
 							</div>
@@ -138,16 +130,10 @@ export function ListView<TData extends Task>({
 							>
 								<TaskCard
 									DtableRow={row as unknown as Row<Task>}
-									onEditTask={() =>
-										handleEditTask(row.original)
-									}
-									onDeleteTask={() =>
-										handleDeleteTask(row.original)
-									}
+									onEditTask={() => handleEditTask(row.original)}
+									onDeleteTask={() => handleDeleteTask(row.original)}
 									onUpdateTask={(taskFromCard) =>
-										handleUpdateTask(
-											taskFromCard as unknown as TData,
-										)
+										handleUpdateTask(taskFromCard as unknown as TData)
 									}
 								/>
 							</div>

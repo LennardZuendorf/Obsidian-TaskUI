@@ -1,4 +1,4 @@
-import { getAPI, STask, DataviewApi, SMarkdownPage } from "obsidian-dataview";
+import { DataviewApi, getAPI, SMarkdownPage, STask } from "obsidian-dataview";
 import { logger } from "../../utils/logger";
 
 /**

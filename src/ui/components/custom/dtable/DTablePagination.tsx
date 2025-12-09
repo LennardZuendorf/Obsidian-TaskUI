@@ -49,27 +49,20 @@ export function DataTablePagination<TData>({
 									<CommandGroup>
 										{pageSizes.map((pageSize) => {
 											const isSelected =
-												table.getState().pagination
-													.pageSize === pageSize;
+												table.getState().pagination.pageSize === pageSize;
 											return (
 												<CommandItem
 													key={pageSize}
 													onSelect={() => {
-														table.setPageSize(
-															Number(pageSize),
-														);
+														table.setPageSize(Number(pageSize));
 													}}
 													className="flex items-center justify-between w-full text-sm"
 												>
-													<span>
-														{pageSize} Tasks
-													</span>
+													<span>{pageSize} Tasks</span>
 													<Check
 														className={cn(
 															"h-4 w-4",
-															isSelected
-																? "opacity-100"
-																: "opacity-0",
+															isSelected ? "opacity-100" : "opacity-0",
 														)}
 													/>
 												</CommandItem>
@@ -113,9 +106,7 @@ export function DataTablePagination<TData>({
 						</Button>
 						<Button
 							size="icon"
-							onClick={() =>
-								table.setPageIndex(table.getPageCount() - 1)
-							}
+							onClick={() => table.setPageIndex(table.getPageCount() - 1)}
 							disabled={!table.getCanNextPage()}
 						>
 							<span className="sr-only">Go to last page</span>

@@ -170,9 +170,7 @@ export class TaskSyncService {
 							`TaskSyncService: Task ${result.task.id} created and sync status updated in state`,
 						);
 					} else {
-						logger.error(
-							`Failed to create task ${task.id} via API.`,
-						);
+						logger.error(`Failed to create task ${task.id} via API.`);
 						// Handle failure? Maybe reset needsSync via updateTaskMetadataAtom?
 					}
 					break;
@@ -219,9 +217,7 @@ export class TaskSyncService {
 							`TaskSyncService: Task ${result.task.id} updated and sync status updated in state`,
 						);
 					} else {
-						logger.error(
-							`Failed to update task ${task.id} via API.`,
-						);
+						logger.error(`Failed to update task ${task.id} via API.`);
 						// Handle failure?
 					}
 					break;
@@ -232,8 +228,7 @@ export class TaskSyncService {
 						"[TaskSyncService.handleLocalChange] Calling internalApiService.deleteTask",
 						{ taskId: task.id },
 					);
-					const result =
-						await this.internalApiService.deleteTask(task);
+					const result = await this.internalApiService.deleteTask(task);
 					if (result.status) {
 						logger.trace(
 							"[TaskSyncService.handleLocalChange] Delete success. Removing task from baseTasksAtom",
@@ -244,9 +239,7 @@ export class TaskSyncService {
 							(t) => t.task.id !== task.id,
 						);
 						this.store.set(baseTasksAtom, updatedTasks);
-						logger.debug(
-							`TaskSyncService: Task ${task.id} deleted from store`,
-						);
+						logger.debug(`TaskSyncService: Task ${task.id} deleted from store`);
 					} else {
 						logger.error(
 							`[TaskSyncService.handleLocalChange] Failed to delete task ${task.id} via API.`,

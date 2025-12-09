@@ -3,8 +3,8 @@ import { observe } from "jotai-effect";
 import { Loader2 } from "lucide-react";
 import { App, ItemView, Notice, WorkspaceLeaf } from "obsidian";
 import React, { useEffect, useState } from "react";
-import { Root, createRoot } from "react-dom/client";
-import { SettingsContext, appSettings } from "./config/settings";
+import { createRoot, Root } from "react-dom/client";
+import { appSettings, SettingsContext } from "./config/settings";
 import {
 	baseTasksAtom,
 	changeTasksAtom,
@@ -60,8 +60,7 @@ const AppController: React.FC = () => {
 				logger.error("Error fetching tasks from the API.");
 			}
 		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : String(err);
+			const errorMessage = err instanceof Error ? err.message : String(err);
 			logger.error(`Error fetching tasks: ${errorMessage}`);
 			setError(errorMessage);
 		} finally {
@@ -102,8 +101,7 @@ const AppController: React.FC = () => {
 			setCrudService(service);
 			logger.debug("TaskUI: Loaded app and CRUD service successfully.");
 		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : String(err);
+			const errorMessage = err instanceof Error ? err.message : String(err);
 			setError(errorMessage);
 			logger.error(`Error initializing CRUD service: ${errorMessage}`);
 			setIsLoading(false);
@@ -175,12 +173,8 @@ export class MainView extends ItemView {
 							await this.taskSync.handleLocalChange(taskWithMeta);
 						} catch (error) {
 							const errorMessage =
-								error instanceof Error
-									? error.message
-									: String(error);
-							logger.error(
-								`Failed to sync task: ${errorMessage}`,
-							);
+								error instanceof Error ? error.message : String(error);
+							logger.error(`Failed to sync task: ${errorMessage}`);
 							new Notice(`Failed to sync task: ${errorMessage}`);
 						}
 					}

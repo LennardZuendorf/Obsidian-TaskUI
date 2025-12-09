@@ -1,6 +1,6 @@
 import React from "react";
-import { Input } from "../../../base/Input";
 import { cn } from "@/ui/utils";
+import { Input } from "../../../base/Input";
 
 export type DescInputProps = {
 	value: string;
@@ -28,10 +28,7 @@ export function DescInput({
 	return (
 		<div className={cn("flex flex-col w-full", className)}>
 			{showLabel && (
-				<label
-					htmlFor={id}
-					className="text-xs text-muted-foreground mb-1 ml-1"
-				>
+				<label htmlFor={id} className="text-xs text-muted-foreground mb-1 ml-1">
 					Task Description
 				</label>
 			)}
@@ -48,18 +45,14 @@ export function DescInput({
 					placeholder={placeholder}
 					autoFocus={autoFocus}
 					className="text-xl w-full"
-					aria-label={
-						disabled ? "Task Description" : "Edit Task Description"
-					}
+					aria-label={disabled ? "Task Description" : "Edit Task Description"}
 					aria-invalid={!!error}
 					disabled={disabled}
 					variant="bare"
 				/>
 			</div>
 			{error && (
-				<span className="text-xs text-destructive mt-1 ml-1">
-					{error}
-				</span>
+				<span className="text-xs text-destructive mt-1 ml-1">{error}</span>
 			)}
 		</div>
 	);

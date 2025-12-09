@@ -29,9 +29,7 @@ export const ErrorView: React.FC<ErrorProps> = ({
 						Oops! Something went wrong.
 					</h1>
 					<p className="text-lg text-gray-700 mb-2">{message}</p>
-					{details && (
-						<p className="text-sm text-gray-500 mb-4">{details}</p>
-					)}
+					{details && <p className="text-sm text-gray-500 mb-4">{details}</p>}
 					{onRetry && (
 						<button
 							onClick={onRetry}

@@ -57,17 +57,12 @@ export function PrioritySelect({
 						{(() => {
 							const activePriority = value;
 							if (activePriority) {
-								const displayInfo =
-									getPriorityDisplay(activePriority);
+								const displayInfo = getPriorityDisplay(activePriority);
 								const IconComponent = displayInfo.icon;
 								return (
 									<>
-										{IconComponent && (
-											<IconComponent className="h-4 w-4" />
-										)}
-										<span className="text-sm">
-											{displayInfo.label}
-										</span>
+										{IconComponent && <IconComponent className="h-4 w-4" />}
+										<span className="text-sm">{displayInfo.label}</span>
 									</>
 								);
 							}
@@ -97,14 +92,10 @@ export function PrioritySelect({
 				<PopoverContent className="w-[200px] p-0">
 					<Command>
 						<CommandList>
-							<CommandGroup
-								heading="Select Priority"
-								className="space-y-1"
-							>
+							<CommandGroup heading="Select Priority" className="space-y-1">
 								{/* Use the explicitly sorted array */}
 								{priorities.map((priority) => {
-									const displayInfo =
-										getPriorityDisplay(priority);
+									const displayInfo = getPriorityDisplay(priority);
 									const IconComponent = displayInfo.icon;
 									const isCurrent = priority === value;
 

@@ -1,10 +1,6 @@
 import { Table } from "@tanstack/react-table";
 import { Check, ChevronDown, Filter } from "lucide-react";
 import { useState } from "react";
-
-import { getColumnDisplay } from "../../../lib/displayConfig/columnDisplayConfig"; // Adjust path as needed
-import { priorityEnumToString } from "../../../lib/displayConfig/priorityDisplayConfig";
-import { statusEnumToString } from "../../../lib/displayConfig/statusDisplayConfig";
 // Adjust path as needed
 import { TaskPriority, TaskStatus } from "../../../../data/types/tasks"; // Adjust path as needed
 import { Badge } from "../../../base/Badge";
@@ -16,6 +12,9 @@ import {
 	CommandList,
 } from "../../../base/Command";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../base/Popover";
+import { getColumnDisplay } from "../../../lib/displayConfig/columnDisplayConfig"; // Adjust path as needed
+import { priorityEnumToString } from "../../../lib/displayConfig/priorityDisplayConfig";
+import { statusEnumToString } from "../../../lib/displayConfig/statusDisplayConfig";
 import { cn } from "../../../utils"; // Adjust path as needed
 
 interface DTableFilterByProps<TData> {
@@ -42,39 +41,38 @@ export function DTableFilterBy<TData>({ table }: DTableFilterByProps<TData>) {
 	const filterableColumns = getFilterableColumns(table);
 
 	// Define options for specific filter types
-	const filterOptionsMap: Record<string, { value: string; label: string }[]> =
-		{
-			status:
-				Object.values(TaskStatus).map((val) => ({
-					value: val,
-					label: statusEnumToString[val],
-				})) || [],
-			priority:
-				Object.values(TaskPriority).map((val) => ({
-					value: val,
-					label: priorityEnumToString[val],
-				})) || [],
-			scheduledDateCategory:
-				[
-					"Today",
-					"Tomorrow",
-					"This Week",
-					"Next Week",
-					"Later",
-					"No Date",
-					"Overdue", // Added Overdue
-				].map((val) => ({ value: val, label: val })) || [],
-			dueDateCategory:
-				[
-					"Today",
-					"Tomorrow",
-					"This Week",
-					"Next Week",
-					"Later",
-					"No Date",
-					"Overdue", // Added Overdue
-				].map((val) => ({ value: val, label: val })) || [],
-		};
+	const filterOptionsMap: Record<string, { value: string; label: string }[]> = {
+		status:
+			Object.values(TaskStatus).map((val) => ({
+				value: val,
+				label: statusEnumToString[val],
+			})) || [],
+		priority:
+			Object.values(TaskPriority).map((val) => ({
+				value: val,
+				label: priorityEnumToString[val],
+			})) || [],
+		scheduledDateCategory:
+			[
+				"Today",
+				"Tomorrow",
+				"This Week",
+				"Next Week",
+				"Later",
+				"No Date",
+				"Overdue", // Added Overdue
+			].map((val) => ({ value: val, label: val })) || [],
+		dueDateCategory:
+			[
+				"Today",
+				"Tomorrow",
+				"This Week",
+				"Next Week",
+				"Later",
+				"No Date",
+				"Overdue", // Added Overdue
+			].map((val) => ({ value: val, label: val })) || [],
+	};
 
 	const handleFilterSelect = (columnId: string, value: unknown) => {
 		const currentFilter = columnFilters.find((f) => f.id === columnId);
@@ -83,9 +81,7 @@ export function DTableFilterBy<TData>({ table }: DTableFilterByProps<TData>) {
 		// Need to handle potential type differences if value isn't just string
 		if (currentFilter?.value === value) {
 			// Remove filter if same value is selected again
-			table.setColumnFilters((prev) =>
-				prev.filter((f) => f.id !== columnId),
-			);
+			table.setColumnFilters((prev) => prev.filter((f) => f.id !== columnId));
 		} else {
 			// Set/Replace filter for this column
 			table.setColumnFilters((prev) => [
@@ -141,31 +137,20 @@ export function DTableFilterBy<TData>({ table }: DTableFilterByProps<TData>) {
 								const IconComponent = displayInfo.icon;
 								return (
 									<>
-										{IconComponent && (
-											<IconComponent className="h-4 w-4" />
-										)}
-										<span className="text-sm">
-											{displayInfo.label}
-										</span>
+										{IconComponent && <IconComponent className="h-4 w-4" />}
+										<span className="text-sm">{displayInfo.label}</span>
 									</>
 								);
 							} else if (columnFilters.length > 1) {
 								return (
 									<div className="flex items-center -space-x-0.25">
-										{columnFilters
-											.slice(0, 4)
-											.map((filter) => {
-												const displayInfo =
-													getColumnDisplay(filter.id);
-												const IconComponent =
-													displayInfo.icon;
-												return IconComponent ? (
-													<IconComponent
-														key={filter.id}
-														className="h-4 w-4"
-													/>
-												) : null;
-											})}
+										{columnFilters.slice(0, 4).map((filter) => {
+											const displayInfo = getColumnDisplay(filter.id);
+											const IconComponent = displayInfo.icon;
+											return IconComponent ? (
+												<IconComponent key={filter.id} className="h-4 w-4" />
+											) : null;
+										})}
 									</div>
 								);
 							}
@@ -203,9 +188,7 @@ export function DTableFilterBy<TData>({ table }: DTableFilterByProps<TData>) {
 							</div>
 							<div className="flex flex-wrap gap-1">
 								{columnFilters.map((filter) => {
-									const displayInfo = getColumnDisplay(
-										filter.id,
-									);
+									const displayInfo = getColumnDisplay(filter.id);
 									const IconComponent = displayInfo.icon;
 									const valueLabel = getFilterValueLabel(
 										filter.id,
@@ -218,10 +201,7 @@ export function DTableFilterBy<TData>({ table }: DTableFilterByProps<TData>) {
 											className="text-xs px-1.5 py-0.5"
 											onRemove={() =>
 												table.setColumnFilters((prev) =>
-													prev.filter(
-														(f) =>
-															f.id !== filter.id,
-													),
+													prev.filter((f) => f.id !== filter.id),
 												)
 											}
 											removeAriaLabel={`Remove filter ${displayInfo.label}: ${valueLabel}`}
@@ -245,64 +225,44 @@ export function DTableFilterBy<TData>({ table }: DTableFilterByProps<TData>) {
 								(() => {
 									const column =
 										filterableColumns.find(
-											(col) =>
-												col.id ===
-												selectedFilterColumnId,
+											(col) => col.id === selectedFilterColumnId,
 										) || null;
 
 									if (!column) return null;
 
 									const columnId = column.id;
 									const columnLabel =
-										getColumnDisplay(columnId).label ||
-										columnId;
-									const filterOptions =
-										filterOptionsMap[columnId] || [];
-									const currentFilterValue =
-										columnFilters.find(
-											(f) => f.id === columnId,
-										)?.value;
+										getColumnDisplay(columnId).label || columnId;
+									const filterOptions = filterOptionsMap[columnId] || [];
+									const currentFilterValue = columnFilters.find(
+										(f) => f.id === columnId,
+									)?.value;
 
 									return (
 										<CommandGroup heading={columnLabel}>
 											<CommandItem
-												onSelect={() =>
-													setSelectedFilterColumnId(
-														null,
-													)
-												}
+												onSelect={() => setSelectedFilterColumnId(null)}
 												className="text-muted-foreground"
 											>
 												&larr; Back
 											</CommandItem>
-											{filterOptions.map(
-												({ value, label }) => {
-													const isSelected =
-														currentFilterValue ===
-														value;
-													return (
-														<CommandItem
-															key={`${columnId}-${value}`}
-															onSelect={() =>
-																handleFilterSelect(
-																	columnId,
-																	value,
-																)
-															}
-														>
-															<Check
-																className={cn(
-																	"mr-2 h-4 w-4",
-																	isSelected
-																		? "opacity-100"
-																		: "opacity-0",
-																)}
-															/>
-															{label}
-														</CommandItem>
-													);
-												},
-											)}
+											{filterOptions.map(({ value, label }) => {
+												const isSelected = currentFilterValue === value;
+												return (
+													<CommandItem
+														key={`${columnId}-${value}`}
+														onSelect={() => handleFilterSelect(columnId, value)}
+													>
+														<Check
+															className={cn(
+																"mr-2 h-4 w-4",
+																isSelected ? "opacity-100" : "opacity-0",
+															)}
+														/>
+														{label}
+													</CommandItem>
+												);
+											})}
 										</CommandGroup>
 									);
 								})()
@@ -312,38 +272,27 @@ export function DTableFilterBy<TData>({ table }: DTableFilterByProps<TData>) {
 									<CommandGroup heading="Filter by Column">
 										{filterableColumns.map((col) => {
 											const columnId = col.id;
-											const displayInfo =
-												getColumnDisplay(columnId);
-											const IconComponent =
-												displayInfo.icon;
-											const columnLabel =
-												displayInfo.label;
+											const displayInfo = getColumnDisplay(columnId);
+											const IconComponent = displayInfo.icon;
+											const columnLabel = displayInfo.label;
 
 											if (!columnLabel) return null;
 
-											const currentFilter =
-												columnFilters.find(
-													(filter) =>
-														filter.id === columnId,
-												);
+											const currentFilter = columnFilters.find(
+												(filter) => filter.id === columnId,
+											);
 
 											return (
 												<CommandItem
 													key={columnId}
-													onSelect={() =>
-														setSelectedFilterColumnId(
-															columnId,
-														)
-													}
+													onSelect={() => setSelectedFilterColumnId(columnId)}
 													className="flex items-center justify-between w-full"
 												>
 													<div className="flex items-center mr-2">
 														{IconComponent && (
 															<IconComponent className="mr-2 h-4 w-4 text-muted-foreground" />
 														)}
-														<span>
-															{columnLabel}
-														</span>
+														<span>{columnLabel}</span>
 													</div>
 													{currentFilter && (
 														<span className="ml-auto text-xs text-muted-foreground">
@@ -359,12 +308,8 @@ export function DTableFilterBy<TData>({ table }: DTableFilterByProps<TData>) {
 									</CommandGroup>
 									<CommandGroup>
 										<CommandItem
-											disabled={
-												columnFilters.length === 0
-											}
-											onSelect={() =>
-												table.setColumnFilters([])
-											}
+											disabled={columnFilters.length === 0}
+											onSelect={() => table.setColumnFilters([])}
 											className="border-t border-input pt-2 mt-2 text-muted-foreground hover:text-foreground"
 										>
 											Clear All Filters

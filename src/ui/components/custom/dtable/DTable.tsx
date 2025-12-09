@@ -3,13 +3,13 @@ import {
 	ColumnFiltersState,
 	ExpandedState,
 	FilterFn,
+	GroupingState,
 	getCoreRowModel,
 	getExpandedRowModel,
 	getFilteredRowModel,
 	getGroupedRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
-	GroupingState,
 	OnChangeFn,
 	SortingState,
 	Table as TanstackTable,
@@ -79,6 +79,7 @@ const initialColumnVisibility: ColumnVisibility = {
 };
 
 // Minimal TanStack Table column definitions for Task
+// biome-ignore lint/suspicious/noExplicitAny: TanStack Table ColumnDef requires any for generic cell values
 const taskTableColumns: ColumnDef<Task, any>[] = [
 	{
 		accessorKey: "description",

@@ -23,9 +23,7 @@ function DateField<T extends DateValueRac>({
 }: DateFieldProps<T>) {
 	return (
 		<DateFieldRac
-			className={composeRenderProps(className, (className) =>
-				cn(className),
-			)}
+			className={composeRenderProps(className, (className) => cn(className))}
 			{...props}
 		>
 			{children}
@@ -40,9 +38,7 @@ function TimeField<T extends TimeValueRac>({
 }: TimeFieldProps<T>) {
 	return (
 		<TimeFieldRac
-			className={composeRenderProps(className, (className) =>
-				cn(className),
-			)}
+			className={composeRenderProps(className, (className) => cn(className))}
 			{...props}
 		>
 			{children}

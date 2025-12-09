@@ -16,10 +16,8 @@ export class InternalApiService implements ApiService {
 	private readonly dvApi: DataviewApiProvider;
 	private readonly taskMapper: TaskMapper;
 	private readonly eventEmitter: EventEmitter;
-	private readonly app: App;
 
 	constructor(app: App) {
-		this.app = app;
 		this.mdApi = new ObsidianApiProvider(app);
 		this.dvApi = new DataviewApiProvider();
 		this.taskMapper = new TaskMapper();
@@ -89,19 +87,17 @@ export class InternalApiService implements ApiService {
 				return { status: false };
 			}
 
-			logger.trace(
-				"[InternalApiService.editTask] Calling mdApi.editTask",
-				{ path: oldTask.path },
-			);
+			logger.trace("[InternalApiService.editTask] Calling mdApi.editTask", {
+				path: oldTask.path,
+			});
 			const updatedLine = await this.mdApi.editTask(
 				finalLineToWrite,
 				lineToLookup,
 				oldTask.path,
 			);
-			logger.trace(
-				"[InternalApiService.editTask] mdApi.editTask returned",
-				{ updatedLine },
-			);
+			logger.trace("[InternalApiService.editTask] mdApi.editTask returned", {
+				updatedLine,
+			});
 
 			if (updatedLine !== finalLineToWrite) {
 				logger.error(
@@ -121,15 +117,11 @@ export class InternalApiService implements ApiService {
 				validateTasks([returnedTask]);
 				return { status: true, task: returnedTask };
 			} catch (error) {
-				logger.error(
-					`Invalid task after merge/update: ${error.message}`,
-				);
+				logger.error(`Invalid task after merge/update: ${error.message}`);
 				return { status: false };
 			}
 		} catch (error) {
-			logger.error(
-				`Error in InternalApiService.editTask: ${error.message}`,
-			);
+			logger.error(`Error in InternalApiService.editTask: ${error.message}`);
 			return { status: false };
 		}
 	}
@@ -148,14 +140,11 @@ export class InternalApiService implements ApiService {
 				return { status: false };
 			}
 
-			logger.trace(
-				"[InternalApiService.deleteTask] Calling mdApi.deleteTask",
-				{ lineToLookup, path: task.path },
-			);
-			const deleted = await this.mdApi.deleteTask(
+			logger.trace("[InternalApiService.deleteTask] Calling mdApi.deleteTask", {
 				lineToLookup,
-				task.path,
-			);
+				path: task.path,
+			});
+			const deleted = await this.mdApi.deleteTask(lineToLookup, task.path);
 			logger.trace(
 				"[InternalApiService.deleteTask] mdApi.deleteTask returned",
 				{ deleted },
@@ -165,9 +154,7 @@ export class InternalApiService implements ApiService {
 				logger.trace("[InternalApiService.deleteTask] Success");
 				return { status: true, task };
 			} else {
-				logger.error(
-					`Deleting task with path ${task.path} failed in mdApi.`,
-				);
+				logger.error(`Deleting task with path ${task.path} failed in mdApi.`);
 				return { status: false };
 			}
 		} catch (error) {
@@ -189,9 +176,7 @@ export class InternalApiService implements ApiService {
 			try {
 				validateTasks([task]);
 			} catch (error) {
-				logger.error(
-					`Invalid task provided to createTask: ${error.message}`,
-				);
+				logger.error(`Invalid task provided to createTask: ${error.message}`);
 				return { status: false };
 			}
 
@@ -202,10 +187,11 @@ export class InternalApiService implements ApiService {
 				return { status: false };
 			}
 
-			logger.trace(
-				"[InternalApiService.createTask] Calling mdApi.createTask",
-				{ lineToWrite, path: task.path, heading },
-			);
+			logger.trace("[InternalApiService.createTask] Calling mdApi.createTask", {
+				lineToWrite,
+				path: task.path,
+				heading,
+			});
 			const responseLine = await this.mdApi.createTask(
 				lineToWrite,
 				task.path,
@@ -240,10 +226,9 @@ export class InternalApiService implements ApiService {
 			logger.trace("[InternalApiService] Initiating periodic task fetch");
 			const allDvTasks = await this.dvApi.getAllTasks();
 			if (allDvTasks) {
-				logger.trace(
-					"[InternalApiService] Fetched raw tasks from dvApi",
-					{ count: allDvTasks.length },
-				);
+				logger.trace("[InternalApiService] Fetched raw tasks from dvApi", {
+					count: allDvTasks.length,
+				});
 				try {
 					const mappedTasks = allDvTasks.map((dvTask) =>
 						this.taskMapper.mapDvToTaskType(dvTask),
@@ -252,15 +237,12 @@ export class InternalApiService implements ApiService {
 						count: mappedTasks.length,
 					});
 					validateTasks(mappedTasks);
-					logger.trace(
-						"[InternalApiService] Emitting tasksFetched event",
-						{ count: mappedTasks.length },
-					);
+					logger.trace("[InternalApiService] Emitting tasksFetched event", {
+						count: mappedTasks.length,
+					});
 					this.eventEmitter.emit("tasksFetched", mappedTasks);
 				} catch (error) {
-					logger.error(
-						`Invalid tasks in periodic fetch: ${error.message}`,
-					);
+					logger.error(`Invalid tasks in periodic fetch: ${error.message}`);
 				}
 			} else {
 				logger.trace(

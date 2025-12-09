@@ -16,8 +16,7 @@ const inputVariants = cva(
 	{
 		variants: {
 			variant: {
-				default:
-					"h-9 border border-input bg-secondary px-3 py-1 shadow-sm",
+				default: "h-9 border border-input bg-secondary px-3 py-1 shadow-sm",
 				bare: "h-12 border-0 shadow-none bg-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:text-primary text-primary",
 			},
 		},
@@ -75,9 +74,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 				)}
 			>
 				{icon && (
-					<span className="mr-2 flex items-center justify-center">
-						{icon}
-					</span>
+					<span className="mr-2 flex items-center justify-center">{icon}</span>
 				)}
 				<input
 					type={type}
@@ -176,9 +173,7 @@ export function DateInput({
 		<Input // Using the base Input component from this file
 			variant="default"
 			className={inputClassName}
-			icon={
-				<DateInputCalendarIcon className="w-4 h-4 text-muted-foreground" />
-			}
+			icon={<DateInputCalendarIcon className="w-4 h-4 text-muted-foreground" />}
 			type="text" // Masked input should be text
 			value={displayInputValue} // Pass the string state to base Input
 			onChange={handleBaseInputValueChange} // Pass the adapter function
@@ -193,10 +188,7 @@ export function DateInput({
 	if (label) {
 		return (
 			<div className={cn(wrapperClassName)}>
-				<label
-					htmlFor={id}
-					className="text-xs text-muted-foreground mb-1 ml-1"
-				>
+				<label htmlFor={id} className="text-xs text-muted-foreground mb-1 ml-1">
 					{label}
 				</label>
 				{inputElement}

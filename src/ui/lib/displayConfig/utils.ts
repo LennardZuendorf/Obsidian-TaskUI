@@ -1,17 +1,17 @@
-import { TaskPriority, TaskStatus } from "../../../data/types/tasks";
 import { format } from "date-fns";
 import { DateCategory } from "@/ui/lib/dateCategoryEnum";
-import {
-	PriorityDisplayConfig,
-	StatusDisplayConfig,
-	dateDisplayConfig,
-} from "./displayConfigTypes";
-import { getStatusDisplay } from "./statusDisplayConfig";
-import { getPriorityDisplay } from "./priorityDisplayConfig";
+import { TaskPriority, TaskStatus } from "../../../data/types/tasks";
 import {
 	dateToDateCategory,
 	getDateCategoryDisplay,
 } from "./dateDisplayConfig";
+import {
+	dateDisplayConfig,
+	PriorityDisplayConfig,
+	StatusDisplayConfig,
+} from "./displayConfigTypes";
+import { getPriorityDisplay } from "./priorityDisplayConfig";
+import { getStatusDisplay } from "./statusDisplayConfig";
 
 type DisplayConfigType =
 	| StatusDisplayConfig
@@ -76,9 +76,7 @@ export function getMatchingDisplay(
 		return getPriorityDisplay(input as TaskPriority) as DisplayConfigType;
 	}
 	if (Object.values(DateCategory).includes(input as DateCategory)) {
-		return getDateCategoryDisplay(
-			input as DateCategory,
-		) as DisplayConfigType;
+		return getDateCategoryDisplay(input as DateCategory) as DisplayConfigType;
 	}
 
 	throw new Error(`No display configuration found for enum: ${input}`);

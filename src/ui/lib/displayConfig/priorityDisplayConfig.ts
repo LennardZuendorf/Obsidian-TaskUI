@@ -5,8 +5,8 @@ import {
 	PiCaretUpBold,
 	PiMinusBold,
 } from "react-icons/pi";
-import { EnumDisplayConfig } from "../../../ui/lib/displayConfig/displayConfigTypes";
 import { TaskPriority } from "../../../data/types/tasks";
+import { EnumDisplayConfig } from "../../../ui/lib/displayConfig/displayConfigTypes";
 
 /**
  * Configuration map for task priority display properties.
@@ -78,10 +78,7 @@ export const priorityStringToEnum: Record<string, TaskPriority> =
  */
 export const priorityEnumToString: Record<TaskPriority, string> =
 	Object.fromEntries(
-		Object.entries(taskPriorityConfig).map(([key, { label }]) => [
-			key,
-			label,
-		]),
+		Object.entries(taskPriorityConfig).map(([key, { label }]) => [key, label]),
 	) as Record<TaskPriority, string>;
 
 /**

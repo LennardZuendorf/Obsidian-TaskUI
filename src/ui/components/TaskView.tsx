@@ -6,13 +6,14 @@ import {
 	ListCollapseIcon,
 	Plus,
 } from "lucide-react";
-import { Notice, type App } from "obsidian";
+import { type App, Notice } from "obsidian";
 import React from "react";
 import { storeOperation as str } from "../../data/types/operations"; // Adjusted path
 import type { Task } from "../../data/types/tasks"; // Adjusted path
 import type { TaskUpdate } from "../../service/taskSyncService"; // Adjusted path
 import { logger } from "../../utils/logger"; // Adjusted path
 import { Button } from "../base/Button";
+import { Separator } from "../base/Separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../base/Tabs";
 import { cn } from "../utils"; // Adjusted path
 import { useDTable } from "./custom/dtable/DTable"; // Updated import path
@@ -23,7 +24,6 @@ import { TaskModal } from "./shared/TaskModal"; // Keep for Add Task
 import { BoardView } from "./tabViews/BoardView"; // Adjusted path
 import { ListView } from "./tabViews/ListView"; // Adjusted path
 import { TableView } from "./tabViews/TableView"; // Adjusted path
-import { Separator } from "../base/Separator";
 
 // Props needed by TaskView (and passed down to useDTable)
 interface TaskViewProps {
@@ -79,9 +79,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 			};
 			changeTasks(update);
 			console.log("Called changeTasks with DELETE operation"); // Log state update call
-			new Notice(
-				`Task "${task.description.substring(0, 20)}..." deleted.`,
-			);
+			new Notice(`Task "${task.description.substring(0, 20)}..." deleted.`);
 		},
 		[changeTasks],
 	);
@@ -107,9 +105,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 	// Keep createTask function here as well
 	function createTask() {
 		if (!app) {
-			logger.error(
-				"[TaskView] App context not available for createTask.",
-			);
+			logger.error("[TaskView] App context not available for createTask.");
 			new Notice("Cannot create task: App context unavailable.");
 			return;
 		}
@@ -124,18 +120,13 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 					source: "local" as const,
 					timestamp: Date.now(),
 				};
-				logger.trace(
-					"[TaskView] Calling changeTasksAtom with LOCAL_ADD",
-					{ update },
-				);
+				logger.trace("[TaskView] Calling changeTasksAtom with LOCAL_ADD", {
+					update,
+				});
 				changeTasks(update);
-				new Notice(
-					`Task "${newTask.description.substring(0, 20)}..." added.`,
-				);
+				new Notice(`Task "${newTask.description.substring(0, 20)}..." added.`);
 			} else {
-				logger.trace(
-					"[TaskView] TaskModal closed without creating a task.",
-				);
+				logger.trace("[TaskView] TaskModal closed without creating a task.");
 			}
 		}).open();
 	}
@@ -152,10 +143,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 				{/* Tabs List */}
 				<TabsList className="gap-2">
 					<TabsTrigger value="overview">
-						<LayoutGrid
-							className="-ms-0.5 me-1.5 h-4 w-4"
-							aria-hidden="true"
-						/>
+						<LayoutGrid className="-ms-0.5 me-1.5 h-4 w-4" aria-hidden="true" />
 						Overview
 					</TabsTrigger>
 					<TabsTrigger value="list">
@@ -179,10 +167,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 						value="calendar"
 						disabled={true} // TODO: Implement Calendar
 					>
-						<Calendar
-							className="-ms-0.5 me-1.5 h-4 w-4"
-							aria-hidden="true"
-						/>
+						<Calendar className="-ms-0.5 me-1.5 h-4 w-4" aria-hidden="true" />
 						Calendar
 					</TabsTrigger>
 				</TabsList>
@@ -205,11 +190,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 						>
 							&nbsp;
 						</span>
-						<Button
-							variant="accent"
-							className="gap-1"
-							onClick={createTask}
-						>
+						<Button variant="accent" className="gap-1" onClick={createTask}>
 							<Plus className="h-4 w-4" />
 							<span className="text-sm">Add Task</span>
 						</Button>

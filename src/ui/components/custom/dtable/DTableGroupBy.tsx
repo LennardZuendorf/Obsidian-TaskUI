@@ -52,8 +52,7 @@ export function DTableGroupBy<TData>({ table }: DTableGroupByProps<TData>) {
 							const activeGroupId = grouping[0];
 
 							if (activeGroupId) {
-								const displayInfo =
-									getColumnDisplay(activeGroupId);
+								const displayInfo = getColumnDisplay(activeGroupId);
 								const IconComponent = displayInfo.icon;
 								const groupSortEntry = sorting.find(
 									(s) => s.id === activeGroupId,
@@ -61,12 +60,8 @@ export function DTableGroupBy<TData>({ table }: DTableGroupByProps<TData>) {
 
 								return (
 									<>
-										{IconComponent && (
-											<IconComponent className="h-4 w-4" />
-										)}
-										<span className="text-sm">
-											{displayInfo.label}
-										</span>
+										{IconComponent && <IconComponent className="h-4 w-4" />}
+										<span className="text-sm">{displayInfo.label}</span>
 										{groupSortEntry &&
 											(groupSortEntry.desc ? (
 												<ArrowDown className="h-4 w-4 ml-1 opacity-70" />
@@ -92,13 +87,10 @@ export function DTableGroupBy<TData>({ table }: DTableGroupByProps<TData>) {
 				<PopoverContent className="w-[200px] p-0">
 					<Command>
 						<CommandList>
-							<CommandGroup
-								heading={titleCase("Group By & Sort")}
-							>
+							<CommandGroup heading={titleCase("Group By & Sort")}>
 								{sortedDisplayGroupableColumns.map((col) => {
 									const columnId = col.id;
-									const displayInfo =
-										getColumnDisplay(columnId);
+									const displayInfo = getColumnDisplay(columnId);
 									const IconComponent = displayInfo.icon;
 									const columnLabel = displayInfo.label;
 
@@ -106,29 +98,22 @@ export function DTableGroupBy<TData>({ table }: DTableGroupByProps<TData>) {
 										grouping[0] === columnId;
 
 									const handleSelect = () => {
-										const currentActiveGroupId =
-											table.getState().grouping[0];
-										const currentTableSorting =
-											table.getState().sorting;
+										const currentActiveGroupId = table.getState().grouping[0];
+										const currentTableSorting = table.getState().sorting;
 										let newSortingState: SortingState = [];
 
 										// Find the sort entry specifically for the current active group, if any
-										const currentGroupSortEntry =
-											currentActiveGroupId
-												? currentTableSorting.find(
-														(s) =>
-															s.id ===
-															currentActiveGroupId,
-													)
-												: undefined;
+										const currentGroupSortEntry = currentActiveGroupId
+											? currentTableSorting.find(
+													(s) => s.id === currentActiveGroupId,
+												)
+											: undefined;
 										// Find any other sort that is not the active group sort (user's secondary preference)
-										const userSecondarySort =
-											currentTableSorting.find((s) =>
-												currentActiveGroupId
-													? s.id !==
-														currentActiveGroupId
-													: true,
-											);
+										const userSecondarySort = currentTableSorting.find((s) =>
+											currentActiveGroupId
+												? s.id !== currentActiveGroupId
+												: true,
+										);
 
 										if (columnId === currentActiveGroupId) {
 											// Scenario A: Clicked the currently active group column
@@ -145,15 +130,10 @@ export function DTableGroupBy<TData>({ table }: DTableGroupByProps<TData>) {
 												];
 												if (
 													userSecondarySort &&
-													userSecondarySort.id !==
-														columnId
+													userSecondarySort.id !== columnId
 												)
-													newSortingState.push(
-														userSecondarySort,
-													);
-												table.setSorting(
-													newSortingState.slice(0, 2),
-												);
+													newSortingState.push(userSecondarySort);
+												table.setSorting(newSortingState.slice(0, 2));
 												// Grouping [columnId] remains unchanged
 											} else if (
 												currentGroupSortEntry &&
@@ -162,14 +142,10 @@ export function DTableGroupBy<TData>({ table }: DTableGroupByProps<TData>) {
 												// Was active and DESC, clear grouping
 												table.setGrouping([]);
 												newSortingState =
-													userSecondarySort &&
-													userSecondarySort.id !==
-														columnId
+													userSecondarySort && userSecondarySort.id !== columnId
 														? [userSecondarySort]
 														: [];
-												table.setSorting(
-													newSortingState.slice(0, 2),
-												); // Ensure it's an array, max 2
+												table.setSorting(newSortingState.slice(0, 2)); // Ensure it's an array, max 2
 											} else {
 												// Group is active by columnId, but no matching sort or inconsistent state. Set to ASC.
 												newSortingState = [
@@ -180,51 +156,36 @@ export function DTableGroupBy<TData>({ table }: DTableGroupByProps<TData>) {
 												];
 												if (
 													userSecondarySort &&
-													userSecondarySort.id !==
-														columnId
+													userSecondarySort.id !== columnId
 												)
-													newSortingState.push(
-														userSecondarySort,
-													);
+													newSortingState.push(userSecondarySort);
 												table.setGrouping([columnId]); // Ensure grouping is set
-												table.setSorting(
-													newSortingState.slice(0, 2),
-												);
+												table.setSorting(newSortingState.slice(0, 2));
 											}
 										} else {
 											// Scenario B: Clicked a new or different column to group by
 											table.setGrouping([columnId]);
-											newSortingState = [
-												{ id: columnId, desc: false },
-											]; // New group sort is ASC
+											newSortingState = [{ id: columnId, desc: false }]; // New group sort is ASC
 											// Preserve the user's sort if it existed and is not the new group column
-											const previousUserSort =
-												currentTableSorting.find(
-													(s) =>
-														s.id !==
-														currentActiveGroupId,
-												); // This was the effective user sort
+											const previousUserSort = currentTableSorting.find(
+												(s) => s.id !== currentActiveGroupId,
+											); // This was the effective user sort
 											if (
 												previousUserSort &&
 												previousUserSort.id !== columnId
 											) {
-												newSortingState.push(
-													previousUserSort,
-												);
+												newSortingState.push(previousUserSort);
 											}
-											table.setSorting(
-												newSortingState.slice(0, 2),
-											);
+											table.setSorting(newSortingState.slice(0, 2));
 										}
 									};
 
 									// Determine icon for the popover item
 									let popoverItemIcon = null;
 									if (isCurrentlyGroupedByThisColumn) {
-										const groupSortEntryForThisItem =
-											sorting.find(
-												(s) => s.id === columnId,
-											);
+										const groupSortEntryForThisItem = sorting.find(
+											(s) => s.id === columnId,
+										);
 										if (
 											groupSortEntryForThisItem &&
 											!groupSortEntryForThisItem.desc
@@ -273,23 +234,17 @@ export function DTableGroupBy<TData>({ table }: DTableGroupByProps<TData>) {
 									aria-label="Clear the Grouping"
 									disabled={grouping.length === 0}
 									onSelect={() => {
-										const currentActiveGroupId =
-											table.getState().grouping[0];
-										const currentTableSorting =
-											table.getState().sorting;
+										const currentActiveGroupId = table.getState().grouping[0];
+										const currentTableSorting = table.getState().sorting;
 										table.setGrouping([]);
 										// Preserve user's secondary sort if it existed
-										const userSecondarySort =
-											currentTableSorting.find((s) =>
-												currentActiveGroupId
-													? s.id !==
-														currentActiveGroupId
-													: true,
-											);
+										const userSecondarySort = currentTableSorting.find((s) =>
+											currentActiveGroupId
+												? s.id !== currentActiveGroupId
+												: true,
+										);
 										table.setSorting(
-											userSecondarySort
-												? [userSecondarySort]
-												: [],
+											userSecondarySort ? [userSecondarySort] : [],
 										);
 									}}
 									className="border-t border-input pt-2 mt-2 text-muted-foreground hover:text-foreground"

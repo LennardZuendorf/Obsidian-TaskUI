@@ -1,8 +1,8 @@
 import "./styles.css";
 import { Plugin, WorkspaceLeaf } from "obsidian";
 import {
-	appSettings,
 	AppSettingsTab,
+	appSettings,
 	defaultSettings,
 } from "./config/settings";
 import { MainView, VIEW_TYPE_MAIN } from "./MainView";
@@ -12,11 +12,7 @@ export default class ShardsTaskUIPlugin extends Plugin {
 	settings: appSettings;
 
 	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			defaultSettings,
-			await this.loadData(),
-		);
+		this.settings = Object.assign({}, defaultSettings, await this.loadData());
 	}
 
 	async saveSettings() {

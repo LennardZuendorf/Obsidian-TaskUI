@@ -1,13 +1,13 @@
-import { DateCategory } from "../dateCategoryEnum";
 import {
-	LuCalendarClock,
 	LuCalendar1,
 	LuCalendarCheck,
+	LuCalendarClock,
 	LuCalendarDays,
 	LuCalendarFold,
 	LuCalendarOff,
 } from "react-icons/lu";
 import { dateDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
+import { DateCategory } from "../dateCategoryEnum";
 
 /**
  * Configuration for date-based categories used in task organization and filtering.

@@ -1,7 +1,7 @@
 import { format } from "date-fns";
-import { logger } from "../utils/logger";
 import { dvTaskType } from "../api/internalApi/dataviewApi";
 import { defaultSettings } from "../config/settings";
+import { logger } from "../utils/logger";
 import { TaskBuilder } from "./taskBuilder";
 import { Task, TaskPriority, TaskSource, TaskStatus } from "./types/tasks";
 import { parseDate } from "./utils/dateUtils";
@@ -29,18 +29,14 @@ export class TaskMapper {
 		const scheduled = task.scheduledDate
 			? `[scheduled:: ${this.formatDate(task.scheduledDate)}]`
 			: "";
-		const due = task.dueDate
-			? `[due:: ${this.formatDate(task.dueDate)}]`
-			: "";
+		const due = task.dueDate ? `[due:: ${this.formatDate(task.dueDate)}]` : "";
 		const completion = task.doneDate
 			? `[completion:: ${this.formatDate(task.doneDate)}]`
 			: "";
 		const tagsString =
 			task.tags && task.tags.length > 0 ? task.tags.join(" ") : "";
 		const subtaskStrings = task.subtasks
-			? task.subtasks
-					?.map((sub) => this.mapTaskToLineString(sub))
-					.join("\n\t")
+			? task.subtasks?.map((sub) => this.mapTaskToLineString(sub)).join("\n\t")
 			: "";
 
 		return `- [${this.reverseMapStatus(task.status)}] ${task.description}${tagsString ? " " + tagsString : ""} ${id} ${dependsOn} ${priority} ${recurs} ${created} ${start} ${scheduled} ${due} ${completion}${subtaskStrings ? `\n\t${subtaskStrings}` : ""}`
@@ -77,9 +73,7 @@ export class TaskMapper {
 			"\\[([a-zA-Z0-9_-]+)::\\s*[^\\]]+\\]", // Corrected regex escaping
 			"g",
 		);
-		const description = lineWithoutTags
-			.replace(attributeBlockRegex, "")
-			.trim();
+		const description = lineWithoutTags.replace(attributeBlockRegex, "").trim();
 
 		// --- Extract Attributes (from original lineString, includes tags if they were there) ---
 		const idMatch = lineString.match("\\[id:: ([^\\]]+)\\]");
@@ -90,9 +84,7 @@ export class TaskMapper {
 		const startMatch = lineString.match("\\[start:: ([^\\]]+)\\]");
 		const scheduledMatch = lineString.match("\\[scheduled:: ([^\\]]+)\\]");
 		const dueMatch = lineString.match("\\[due:: ([^\\]]+)\\]");
-		const completionMatch = lineString.match(
-			"\\[completion:: ([^\\]]+)\\]",
-		);
+		const completionMatch = lineString.match("\\[completion:: ([^\\]]+)\\]");
 
 		let taskBase: Partial<Task> | undefined = undefined;
 
@@ -118,9 +110,7 @@ export class TaskMapper {
 			.setRecurs(recursMatch ? recursMatch[1] : null)
 			.setCreatedDate(parseDate(createdMatch ? createdMatch[1] : null))
 			.setDueDate(parseDate(dueMatch ? dueMatch[1] : null))
-			.setScheduledDate(
-				parseDate(scheduledMatch ? scheduledMatch[1] : null),
-			)
+			.setScheduledDate(parseDate(scheduledMatch ? scheduledMatch[1] : null))
 			.setStartDate(parseDate(startMatch ? startMatch[1] : null))
 			.setBlocks(dependsOnMatch ? dependsOnMatch[1].split(" ") : []) // Simplified split
 			.setDoneDate(parseDate(completionMatch ? completionMatch[1] : null))
@@ -143,9 +133,7 @@ export class TaskMapper {
 
 		// Combine tags: ensure all tags start with '#'
 		const dvTags =
-			dvTask.tags?.map((t: string) =>
-				t.startsWith("#") ? t : `#${t}`,
-			) || [];
+			dvTask.tags?.map((t: string) => (t.startsWith("#") ? t : `#${t}`)) || [];
 		const textTags = mappedTask.tags || []; // Already have '#' from mapMdToTaskType
 		const combinedTags = Array.from(new Set([...textTags, ...dvTags]));
 		mappedTask.tags = combinedTags;
@@ -232,10 +220,7 @@ export class TaskMapper {
 	 * @param originalRawLine The original, unmodified line string from the file (MUST exist).
 	 * @returns The reconstructed line string with updates merged.
 	 */
-	public mergeTaskOntoRawLine(
-		newTask: Task,
-		originalRawLine: string,
-	): string {
+	public mergeTaskOntoRawLine(newTask: Task, originalRawLine: string): string {
 		// --- Extract components from originalRawLine ---
 		const statusMarkerRegex = /^\s*-\s*\[(.)\]\s*/;
 		const statusMarkerMatch = originalRawLine.match(statusMarkerRegex);

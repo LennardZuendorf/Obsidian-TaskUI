@@ -210,8 +210,7 @@ export class TaskBuilder {
 			id: this.partialTask.id,
 			rawTaskLine: "", // Placeholder for type check
 		} as Task;
-		const generatedLine =
-			this.mapper.mapTaskToLineString(tempTaskForString);
+		const generatedLine = this.mapper.mapTaskToLineString(tempTaskForString);
 		this.partialTask.rawTaskLine = generatedLine;
 		const { isValid, message } = validateTask(tempTaskForString);
 		if (!isValid) {

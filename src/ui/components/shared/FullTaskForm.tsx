@@ -12,25 +12,23 @@ import {
 } from "../../../data/taskAtoms";
 import { TaskBuilder } from "../../../data/taskBuilder";
 import {
+	Task,
+	TaskPriority,
+	TaskSource,
+	TaskStatus,
+} from "../../../data/types/tasks";
+import {
 	getPriorityDisplay,
 	getPriorityLabels,
 	priorityEnumToString,
 	priorityStringToEnum,
 } from "../../../ui/lib/displayConfig/priorityDisplayConfig";
-
 import {
 	getStatusDisplay,
 	getStatusLabels,
 	statusEnumToString,
 	statusStringToEnum,
 } from "../../../ui/lib/displayConfig/statusDisplayConfig";
-
-import {
-	Task,
-	TaskPriority,
-	TaskSource,
-	TaskStatus,
-} from "../../../data/types/tasks";
 
 import { logger } from "../../../utils/logger";
 import { Alert } from "../../base/Alert";
@@ -57,9 +55,6 @@ const formSchema = z.object({
 	dueDate: z.date().optional(),
 });
 
-// Type for form values (matching the schema)
-type TaskFormValues = z.infer<typeof formSchema>;
-
 interface TaskFormProps {
 	initialTask?: Task | null;
 	onSubmit: (task: Task) => void;
@@ -83,9 +78,7 @@ export default function FullTaskForm({
 	// Memoize the list of available tag names to avoid recalculating on every render
 	const availableTagNames = useMemo(() => {
 		const initialTags =
-			initialTask?.tags?.map((t) =>
-				t.startsWith("#") ? t.slice(1) : t,
-			) || [];
+			initialTask?.tags?.map((t) => (t.startsWith("#") ? t.slice(1) : t)) || [];
 		const globalTagNames = globalAvailableTags?.map((t) => t.label) || [];
 		// Combine initial tags, global tags, and some default system tags, ensuring uniqueness
 		const combined = new Set([
@@ -112,8 +105,7 @@ export default function FullTaskForm({
 				? (statusEnumToString[initialTask.status] ?? statusLabels[0])
 				: statusLabels[0],
 			priority: initialTask
-				? (priorityEnumToString[initialTask.priority] ??
-					priorityLabels[2])
+				? (priorityEnumToString[initialTask.priority] ?? priorityLabels[2])
 				: priorityLabels[2],
 			tags:
 				initialTask?.tags?.map((tag) =>
@@ -181,9 +173,7 @@ export default function FullTaskForm({
 			}
 
 			builder.setDescription(data.description);
-			builder.setStatus(
-				statusStringToEnum[data.status] ?? TaskStatus.TODO,
-			);
+			builder.setStatus(statusStringToEnum[data.status] ?? TaskStatus.TODO);
 			builder.setPriority(
 				priorityStringToEnum[data.priority] ?? TaskPriority.MEDIUM,
 			);
@@ -199,12 +189,10 @@ export default function FullTaskForm({
 			reset({
 				description: initialTask?.description || "",
 				status: initialTask
-					? (statusEnumToString[initialTask.status] ??
-						statusLabels[0])
+					? (statusEnumToString[initialTask.status] ?? statusLabels[0])
 					: statusLabels[0],
 				priority: initialTask
-					? (priorityEnumToString[initialTask.priority] ??
-						priorityLabels[2])
+					? (priorityEnumToString[initialTask.priority] ?? priorityLabels[2])
 					: priorityLabels[2],
 				tags:
 					initialTask?.tags?.map((tag) =>
@@ -224,12 +212,10 @@ export default function FullTaskForm({
 			reset({
 				description: initialTask?.description || "",
 				status: initialTask
-					? (statusEnumToString[initialTask.status] ??
-						statusLabels[0])
+					? (statusEnumToString[initialTask.status] ?? statusLabels[0])
 					: statusLabels[0],
 				priority: initialTask
-					? (priorityEnumToString[initialTask.priority] ??
-						priorityLabels[2])
+					? (priorityEnumToString[initialTask.priority] ?? priorityLabels[2])
 					: priorityLabels[2],
 				tags:
 					initialTask?.tags?.map((tag) =>
@@ -247,9 +233,7 @@ export default function FullTaskForm({
 					<Alert>
 						<div className="flex flex-row space-x-1 items-center">
 							<p className="font-bold"> Can't create task: </p>
-							<p className="text-wrap">
-								{errors.description.message}
-							</p>
+							<p className="text-wrap">{errors.description.message}</p>
 						</div>
 					</Alert>
 				)}
@@ -258,10 +242,7 @@ export default function FullTaskForm({
 						<label htmlFor="status-input" className="sr-only">
 							Status
 						</label>
-						<Popover
-							open={isStatusOpen}
-							onOpenChange={setIsStatusOpen}
-						>
+						<Popover open={isStatusOpen} onOpenChange={setIsStatusOpen}>
 							<PopoverTrigger asChild>
 								<Button
 									aria-label={`Select the Status. Currently: ${selectedStatusLabel}`}
@@ -269,23 +250,13 @@ export default function FullTaskForm({
 									size="icon"
 								>
 									{(() => {
-										const statusEnum =
-											statusStringToEnum[
-												selectedStatusLabel
-											];
-										if (!statusEnum)
-											return (
-												<Circle className="h-4 w-4" />
-											);
-										const config =
-											getStatusDisplay(statusEnum);
+										const statusEnum = statusStringToEnum[selectedStatusLabel];
+										if (!statusEnum) return <Circle className="h-4 w-4" />;
+										const config = getStatusDisplay(statusEnum);
 										const IconComponent = config.icon;
 										return (
 											<IconComponent
-												className={cn(
-													"h-4 w-4",
-													config.iconClassName,
-												)}
+												className={cn("h-4 w-4", config.iconClassName)}
 											/>
 										);
 									})()}
@@ -296,58 +267,36 @@ export default function FullTaskForm({
 									<CommandList>
 										<CommandGroup>
 											{statusLabels.map((statusLabel) => {
-												const statusEnum =
-													statusStringToEnum[
-														statusLabel
-													];
+												const statusEnum = statusStringToEnum[statusLabel];
 												if (!statusEnum) return null;
-												const config =
-													getStatusDisplay(
-														statusEnum,
-													);
-												const IconComponent =
-													config.icon;
+												const config = getStatusDisplay(statusEnum);
+												const IconComponent = config.icon;
 												return (
 													<CommandItem
 														key={statusLabel}
 														value={statusLabel}
 														onSelect={() => {
-															setValue(
-																"status",
-																statusLabel,
-																{
-																	shouldDirty:
-																		true,
-																	shouldTouch:
-																		true,
-																},
-															);
-															setIsStatusOpen(
-																false,
-															);
+															setValue("status", statusLabel, {
+																shouldDirty: true,
+																shouldTouch: true,
+															});
+															setIsStatusOpen(false);
 														}}
 													>
 														<div
 															className={cn(
 																"flex items-center gap-2 w-full",
-																selectedStatusLabel ===
-																	statusLabel
+																selectedStatusLabel === statusLabel
 																	? "font-medium"
 																	: "text-muted-foreground-foreground",
 																config.className,
 															)}
 														>
 															<IconComponent
-																className={cn(
-																	"h-4 w-4",
-																	config.iconClassName,
-																)}
+																className={cn("h-4 w-4", config.iconClassName)}
 															/>
-															<span>
-																{statusLabel}
-															</span>
-															{selectedStatusLabel ===
-																statusLabel && (
+															<span>{statusLabel}</span>
+															{selectedStatusLabel === statusLabel && (
 																<Check className="ml-auto h-4 w-4" />
 															)}
 														</div>
@@ -375,18 +324,14 @@ export default function FullTaskForm({
 								<Input
 									id="description-input"
 									value={field.value || ""}
-									onChange={(stringValue) =>
-										field.onChange(stringValue)
-									}
+									onChange={(stringValue) => field.onChange(stringValue)}
 									onBlur={field.onBlur}
 									ref={field.ref}
 									placeholder="What needs to be done?"
 									autoFocus
 									className="flex flex-shrink"
 									aria-label={`Set the Task Description`}
-									aria-invalid={
-										errors.description ? "true" : "false"
-									}
+									aria-invalid={errors.description ? "true" : "false"}
 								/>
 							)}
 						/>
@@ -409,19 +354,13 @@ export default function FullTaskForm({
 									aria-expanded={priorityOpen}
 									aria-label={`Select priority: ${selectedPriorityLabel}`}
 									size="fill"
-									endIcon={
-										<ChevronDownIcon className="h-4 w-4" />
-									}
+									endIcon={<ChevronDownIcon className="h-4 w-4" />}
 								>
 									{(() => {
 										const priorityEnum =
-											priorityStringToEnum[
-												selectedPriorityLabel
-											];
-										if (!priorityEnum)
-											return <span>Medium</span>;
-										const config =
-											getPriorityDisplay(priorityEnum);
+											priorityStringToEnum[selectedPriorityLabel];
+										if (!priorityEnum) return <span>Medium</span>;
+										const config = getPriorityDisplay(priorityEnum);
 										const IconComponent = config.icon;
 										return (
 											<div
@@ -436,9 +375,7 @@ export default function FullTaskForm({
 														config.iconClassName,
 													)}
 												/>
-												<span className="ml-1">
-													{config.label}
-												</span>
+												<span className="ml-1">{config.label}</span>
 											</div>
 										);
 									})()}
@@ -448,72 +385,46 @@ export default function FullTaskForm({
 								<Command>
 									<CommandList>
 										<CommandGroup>
-											{priorityLabels.map(
-												(priorityLabel) => {
-													const priorityEnum =
-														priorityStringToEnum[
-															priorityLabel
-														];
-													if (!priorityEnum)
-														return null;
-													const config =
-														getPriorityDisplay(
-															priorityEnum,
-														);
-													const IconComponent =
-														config.icon;
-													return (
-														<CommandItem
-															key={priorityLabel}
-															value={
-																priorityLabel
-															}
-															onSelect={() => {
-																setValue(
-																	"priority",
-																	priorityLabel,
-																	{
-																		shouldDirty:
-																			true,
-																		shouldTouch:
-																			true,
-																	},
-																);
-																setPriorityOpen(
-																	false,
-																);
-															}}
-														>
-															<div className="flex items-center w-full">
-																<IconComponent
-																	className={cn(
-																		"inline mr-2 h-4 w-4",
-																		config.iconClassName,
-																	)}
-																/>
-																<span
-																	className={
-																		config.className
-																	}
-																>
-																	{
-																		config.label
-																	}
-																</span>
-																<Check
-																	className={cn(
-																		"ml-auto h-4 w-4",
-																		selectedPriorityLabel ===
-																			priorityLabel
-																			? "opacity-100"
-																			: "opacity-0",
-																	)}
-																/>
-															</div>
-														</CommandItem>
-													);
-												},
-											)}
+											{priorityLabels.map((priorityLabel) => {
+												const priorityEnum =
+													priorityStringToEnum[priorityLabel];
+												if (!priorityEnum) return null;
+												const config = getPriorityDisplay(priorityEnum);
+												const IconComponent = config.icon;
+												return (
+													<CommandItem
+														key={priorityLabel}
+														value={priorityLabel}
+														onSelect={() => {
+															setValue("priority", priorityLabel, {
+																shouldDirty: true,
+																shouldTouch: true,
+															});
+															setPriorityOpen(false);
+														}}
+													>
+														<div className="flex items-center w-full">
+															<IconComponent
+																className={cn(
+																	"inline mr-2 h-4 w-4",
+																	config.iconClassName,
+																)}
+															/>
+															<span className={config.className}>
+																{config.label}
+															</span>
+															<Check
+																className={cn(
+																	"ml-auto h-4 w-4",
+																	selectedPriorityLabel === priorityLabel
+																		? "opacity-100"
+																		: "opacity-0",
+																)}
+															/>
+														</div>
+													</CommandItem>
+												);
+											})}
 										</CommandGroup>
 									</CommandList>
 								</Command>
@@ -522,9 +433,7 @@ export default function FullTaskForm({
 					</div>
 
 					<div className="flex flex-col col-span-1 w-full">
-						<div className="text-xs text-muted-foreground mb-1 ml-1">
-							Tags
-						</div>
+						<div className="text-xs text-muted-foreground mb-1 ml-1">Tags</div>
 						<Controller
 							name="tags"
 							control={control}
@@ -541,10 +450,7 @@ export default function FullTaskForm({
 							)}
 						/>
 						{errors.tags && (
-							<p
-								role="alert"
-								className="text-xs text-destructive mt-1"
-							>
+							<p role="alert" className="text-xs text-destructive mt-1">
 								{errors.tags.message}
 							</p>
 						)}
@@ -584,11 +490,7 @@ export default function FullTaskForm({
 				</div>
 
 				<div className="flex flex-row justify-end pt-4 gap-2">
-					<Button
-						type="button"
-						onClick={handleCancel}
-						aria-label="Cancel"
-					>
+					<Button type="button" onClick={handleCancel} aria-label="Cancel">
 						Cancel
 					</Button>
 

@@ -1,5 +1,5 @@
-import { useContext, createContext } from "react";
 import { App } from "obsidian";
+import { createContext, useContext } from "react";
 
 /**
  * Context to provide the Obsidian App to all components. This is necessary so the obsidian API can be used in the components easily.

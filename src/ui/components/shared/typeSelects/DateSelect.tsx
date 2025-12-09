@@ -1,10 +1,10 @@
 import { CalendarClock, ChevronDown } from "lucide-react";
 import React from "react";
 import { Button, ButtonProps } from "../../../base/Button";
-import { Popover, PopoverContent, PopoverTrigger } from "../../../base/Popover";
 import { OptionCalendar } from "../../../base/OptionCalendar";
-import { cn } from "../../../utils";
+import { Popover, PopoverContent, PopoverTrigger } from "../../../base/Popover";
 import { getMatchingDisplay } from "../../../lib/displayConfig/utils";
+import { cn } from "../../../utils";
 
 export type DateSelectProps = {
 	value: Date | null;
@@ -53,18 +53,10 @@ export function DateSelect({
 									<>
 										{IconComponent && (
 											<IconComponent
-												className={cn(
-													"h-4 w-4",
-													displayInfo.iconClassName,
-												)}
+												className={cn("h-4 w-4", displayInfo.iconClassName)}
 											/>
 										)}
-										<span
-											className={cn(
-												"text-sm",
-												displayInfo.className,
-											)}
-										>
+										<span className={cn("text-sm", displayInfo.className)}>
 											{displayInfo.label}
 										</span>
 									</>

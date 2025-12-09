@@ -6,9 +6,7 @@ import { logger } from "../../utils/logger";
  */
 function findTaskLineIndex(lines: string[], lineToFind: string): number {
 	let taskLineIndex = -1;
-	logger.debug(
-		`[findTaskLineIndex] Attempting to find line: "${lineToFind}"`,
-	);
+	logger.debug(`[findTaskLineIndex] Attempting to find line: "${lineToFind}"`);
 
 	// Attempt 1: Exact match (useful if raw line was passed)
 	taskLineIndex = lines.findIndex((line) => line === lineToFind);
@@ -53,9 +51,7 @@ function findTaskLineIndex(lines: string[], lineToFind: string): number {
 			`[findTaskLineIndex] Found via trimmed match at index: ${taskLineIndex}`,
 		);
 	} else {
-		logger.debug(
-			`[findTaskLineIndex] Trimmed match failed. Line not found.`,
-		);
+		logger.debug(`[findTaskLineIndex] Trimmed match failed. Line not found.`);
 	}
 
 	// Return index (or -1 if not found)
@@ -125,8 +121,7 @@ export class ObsidianApiProvider {
 					const content = await this.obsidianApp.vault.read(file);
 					const lines = content.split("\n");
 					let headingIndex = lines.findIndex(
-						(currentLine) =>
-							currentLine.trim() === mdHeading.trim(),
+						(currentLine) => currentLine.trim() === mdHeading.trim(),
 					);
 
 					// If heading can't be found, add the heading at the end
@@ -193,9 +188,7 @@ export class ObsidianApiProvider {
 
 			return newLineString; // Return the string that was written
 		} catch (error) {
-			logger.error(
-				`Error editing task via Obsidian API: ${error.message}`,
-			);
+			logger.error(`Error editing task via Obsidian API: ${error.message}`);
 			return null;
 		}
 	}
@@ -238,9 +231,7 @@ export class ObsidianApiProvider {
 
 			return true;
 		} catch (error) {
-			logger.error(
-				`Error while trying to delete a task: ${error.message}`,
-			);
+			logger.error(`Error while trying to delete a task: ${error.message}`);
 			return false;
 		}
 	}
@@ -290,13 +281,7 @@ export class ObsidianApiProvider {
 
 	async processDataviewQuery(filePath: string): Promise<Task[]> {
 		const tasksWithSource: Task[] = [];
-		try {
-			// ... existing code ...
-		} catch (e: Error) {
-			logger.error(
-				`[ObsidianApi] Error processing data view query for ${filePath}: ${e.message}`,
-			);
-		}
+		// ... existing code ...
 		return tasksWithSource;
 	}
 }

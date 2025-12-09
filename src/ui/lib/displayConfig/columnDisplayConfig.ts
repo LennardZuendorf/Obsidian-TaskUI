@@ -1,4 +1,3 @@
-import { ColumnDisplayInfo } from "@/ui/lib/displayConfig/displayConfigTypes";
 import {
 	CalendarCheck,
 	CalendarClock,
@@ -7,6 +6,7 @@ import {
 	TagIcon,
 	Text,
 } from "lucide-react";
+import { ColumnDisplayInfo } from "@/ui/lib/displayConfig/displayConfigTypes";
 
 /**
  * Configuration map for column display properties.

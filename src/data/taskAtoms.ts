@@ -91,10 +91,9 @@ export const changeTasksAtom = atom(
 					},
 				}));
 				const finalState = [...tasksWithMeta, ...newTasksWithMeta];
-				logger.trace(
-					"[changeTasksAtom] Setting new state for LOCAL_ADD",
-					{ count: finalState.length },
-				);
+				logger.trace("[changeTasksAtom] Setting new state for LOCAL_ADD", {
+					count: finalState.length,
+				});
 				set(baseTasksAtom, finalState);
 				break;
 			}
@@ -117,8 +116,7 @@ export const changeTasksAtom = atom(
 					const taskWithPreservedRawLine = {
 						...matchingTask, // Start with the updated fields from the UI/local change
 						rawTaskLine:
-							matchingTask.rawTaskLine ??
-							previousVersion.rawTaskLine, // Keep old raw line if new one isn't provided
+							matchingTask.rawTaskLine ?? previousVersion.rawTaskLine, // Keep old raw line if new one isn't provided
 					};
 
 					return {
@@ -132,10 +130,9 @@ export const changeTasksAtom = atom(
 						},
 					};
 				});
-				logger.trace(
-					"[changeTasksAtom] Setting new state for LOCAL_UPDATE",
-					{ count: updatedTasks.length },
-				);
+				logger.trace("[changeTasksAtom] Setting new state for LOCAL_UPDATE", {
+					count: updatedTasks.length,
+				});
 				set(baseTasksAtom, updatedTasks);
 				break;
 			}
@@ -160,10 +157,9 @@ export const changeTasksAtom = atom(
 						},
 					};
 				});
-				logger.trace(
-					"[changeTasksAtom] Setting new state for LOCAL_DELETE",
-					{ count: updatedTasks.length },
-				);
+				logger.trace("[changeTasksAtom] Setting new state for LOCAL_DELETE", {
+					count: updatedTasks.length,
+				});
 				set(baseTasksAtom, updatedTasks);
 				break;
 			}
@@ -193,12 +189,8 @@ export const changeTasksAtom = atom(
 						);
 						if (localIndex !== -1) {
 							// Found by secondary matching, update ID and treat as update
-							if (
-								updatedTasks[localIndex].task.id !==
-								remoteTask.id
-							) {
-								updatedTasks[localIndex].task.id =
-									remoteTask.id;
+							if (updatedTasks[localIndex].task.id !== remoteTask.id) {
+								updatedTasks[localIndex].task.id = remoteTask.id;
 								hasChanged = true; // ID change counts as a change
 							}
 							remoteTaskIds.add(remoteTask.id);
@@ -213,8 +205,7 @@ export const changeTasksAtom = atom(
 							// Check if remote task is actually different before marking changed
 							// Simple check: compare rawTaskLine or a few key fields if rawTaskLine isn't reliable
 							if (
-								JSON.stringify(previousVersion) !==
-								JSON.stringify(remoteTask)
+								JSON.stringify(previousVersion) !== JSON.stringify(remoteTask)
 							) {
 								// Basic change detection
 								updatedTasks[localIndex] = {
@@ -230,10 +221,7 @@ export const changeTasksAtom = atom(
 								hasChanged = true;
 							} else {
 								// Even if data is identical, we might need to update metadata (e.g., lastSynced)
-								if (
-									localTaskWithMeta.metadata.lastSynced !==
-									now
-								) {
+								if (localTaskWithMeta.metadata.lastSynced !== now) {
 									updatedTasks[localIndex] = {
 										...localTaskWithMeta,
 										metadata: {
@@ -272,10 +260,7 @@ export const changeTasksAtom = atom(
 				});
 
 				// Only update the atom if the length changed or if an add/update occurred
-				if (
-					hasChanged ||
-					finalTasks.length !== originalTasksWithMeta.length
-				) {
+				if (hasChanged || finalTasks.length !== originalTasksWithMeta.length) {
 					logger.trace(
 						"[changeTasksAtom] Setting new state for REMOTE_UPDATE",
 						{ count: finalTasks.length },
@@ -363,9 +348,7 @@ export const todoTasksAtom = atom((get) =>
  * Derived atom to filter tasks by status (in progress)
  */
 export const inProgressTasksAtom = atom((get) =>
-	get(changeTasksAtom).filter(
-		(todo) => todo.status === TaskStatus.IN_PROGRESS,
-	),
+	get(changeTasksAtom).filter((todo) => todo.status === TaskStatus.IN_PROGRESS),
 );
 
 /**
@@ -374,8 +357,7 @@ export const inProgressTasksAtom = atom((get) =>
 export const doneTasksAtom = atom((get) =>
 	get(changeTasksAtom).filter(
 		(todo) =>
-			todo.status === TaskStatus.DONE ||
-			todo.status === TaskStatus.CANCELLED,
+			todo.status === TaskStatus.DONE || todo.status === TaskStatus.CANCELLED,
 	),
 );
 
