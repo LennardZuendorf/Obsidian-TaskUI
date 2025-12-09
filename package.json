@@ -7,8 +7,8 @@
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"version": "node ./build/version-bump.mjs",
-		"dev": "npx cpy manifest.json build/taskui-plugin && node esbuild.config.mjs",
-		"build": "npm run format && node esbuild.config.mjs --production && npx cpy manifest.json build/taskui-plugin && rm build/taskui-plugin/main.css && rm build/taskui-plugin/styles.js",
+		"dev": "vite build --watch --mode development",
+		"build": "npm run format && vite build --mode production",
 		"build-release": "npm run build && npm run version",
 		"lint-staged": "lint-staged"
 	},
@@ -21,11 +21,9 @@
 		"@types/react-dom": "18.3.1",
 		"@typescript-eslint/eslint-plugin": "8.15.0",
 		"@typescript-eslint/parser": "8.15.0",
+		"@vitejs/plugin-react": "^5.1.2",
 		"autoprefixer": "^10.4.20",
 		"builtin-modules": "3.3.0",
-		"cpy-cli": "^5.0.0",
-		"esbuild": "0.24.0",
-		"esbuild-plugin-tailwindcss": "^1.2.1",
 		"eslint": "9.14.0",
 		"eslint-config-prettier": "^9.1.0",
 		"husky": "^9.1.6",
@@ -36,7 +34,8 @@
 		"prettier": "3.3.3",
 		"tailwindcss": "^3.4.14",
 		"tslib": "2.4.0",
-		"typescript": "4.8.4"
+		"typescript": "4.8.4",
+		"vite": "^7.2.7"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.3.1",
@@ -66,7 +65,6 @@
 		"cmdk": "^1.1.1",
 		"date-fns": "^4.1.0",
 		"emblor": "^1.4.8",
-		"esbuild-style-plugin": "^1.6.3",
 		"events": "^3.3.0",
 		"jotai": "^2.12.3",
 		"jotai-devtools": "^0.10.1",

@@ -1,6 +1,6 @@
 import { StatusDisplayConfig } from "@//lib/displayConfig/displayConfigTypes";
 import { CheckCircle, Circle, PlayCircle, XCircle } from "lucide-react";
-import { TaskStatus } from "src/data/types/tasks";
+import { TaskStatus } from "../../../data/types/tasks";
 
 /**
  * Configuration map for task status display properties.

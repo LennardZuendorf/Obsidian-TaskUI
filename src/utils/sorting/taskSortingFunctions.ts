@@ -1,7 +1,7 @@
 import { getOrderedTaskPriorities } from "@//lib/displayConfig/priorityDisplayConfig";
 import { getOrderedTaskStatuses } from "@//lib/displayConfig/statusDisplayConfig";
 import { Row } from "@tanstack/react-table";
-import { Task, TaskPriority, TaskStatus } from "src/data/types/tasks";
+import { Task, TaskPriority, TaskStatus } from "../../data/types/tasks";
 
 // Define the new SortingFn type
 export type SortingFn<TData> = (

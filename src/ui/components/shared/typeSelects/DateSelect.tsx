@@ -8,7 +8,7 @@ import { getMatchingDisplay } from "../../../lib/displayConfig/utils";
 
 export type DateSelectProps = {
 	value: Date | null;
-  type: "dueDate" | "scheduledDate"
+	type: "dueDate" | "scheduledDate";
 	onChange: (date: Date) => void;
 	disabled?: boolean;
 	className?: string;
@@ -45,30 +45,46 @@ export function DateSelect({
 						disabled={disabled}
 						onClick={() => setDSelectOpen(true)}
 					>
-            {(() => {
-              if (value) {
-                const displayInfo = getMatchingDisplay(value);
-                const IconComponent = displayInfo.icon;
-                return (
-                  <>
-                    {IconComponent && <IconComponent className={cn("h-4 w-4", displayInfo.iconClassName)} />}
-                    <span className={cn("text-sm", displayInfo.className)}>{displayInfo.label}</span>
-                  </>
-                );
-              }
-              // Default view when no value is set
-              return (
-                <>
-                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Select Date</span>
-                </>
-              );
-            })()}
+						{(() => {
+							if (value) {
+								const displayInfo = getMatchingDisplay(value);
+								const IconComponent = displayInfo.icon;
+								return (
+									<>
+										{IconComponent && (
+											<IconComponent
+												className={cn(
+													"h-4 w-4",
+													displayInfo.iconClassName,
+												)}
+											/>
+										)}
+										<span
+											className={cn(
+												"text-sm",
+												displayInfo.className,
+											)}
+										>
+											{displayInfo.label}
+										</span>
+									</>
+								);
+							}
+							// Default view when no value is set
+							return (
+								<>
+									<CalendarClock className="h-4 w-4 text-muted-foreground" />
+									<span className="text-sm text-muted-foreground">
+										Select Date
+									</span>
+								</>
+							);
+						})()}
 						<ChevronDown className="h-4 w-4 opacity-50 ml-auto" />
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent className="p-0">
-          <OptionCalendar />
+					<OptionCalendar />
 				</PopoverContent>
 			</Popover>
 		</div>

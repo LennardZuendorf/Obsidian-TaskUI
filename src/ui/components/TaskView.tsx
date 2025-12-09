@@ -217,7 +217,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 				</div>
 			</div>
 
-      <Separator />
+			<Separator />
 
 			{/* View Content Area */}
 			<TabsContent

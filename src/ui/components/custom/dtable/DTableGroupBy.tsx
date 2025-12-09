@@ -92,7 +92,9 @@ export function DTableGroupBy<TData>({ table }: DTableGroupByProps<TData>) {
 				<PopoverContent className="w-[200px] p-0">
 					<Command>
 						<CommandList>
-							<CommandGroup heading={titleCase("Group By & Sort")}>
+							<CommandGroup
+								heading={titleCase("Group By & Sort")}
+							>
 								{sortedDisplayGroupableColumns.map((col) => {
 									const columnId = col.id;
 									const displayInfo =

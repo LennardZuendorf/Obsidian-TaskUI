@@ -48,7 +48,9 @@ export function DescInput({
 					placeholder={placeholder}
 					autoFocus={autoFocus}
 					className="text-xl w-full"
-					aria-label={disabled ? "Task Description" : "Edit Task Description"}
+					aria-label={
+						disabled ? "Task Description" : "Edit Task Description"
+					}
 					aria-invalid={!!error}
 					disabled={disabled}
 					variant="bare"

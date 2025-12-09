@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { logger } from "src/utils/logger";
+import { logger } from "../utils/logger";
 import { dvTaskType } from "../api/internalApi/dataviewApi";
 import { defaultSettings } from "../config/settings";
 import { TaskBuilder } from "./taskBuilder";

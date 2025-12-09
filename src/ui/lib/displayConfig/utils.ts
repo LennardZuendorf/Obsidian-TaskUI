@@ -1,4 +1,4 @@
-import { TaskPriority, TaskStatus } from "src/data/types/tasks";
+import { TaskPriority, TaskStatus } from "../../../data/types/tasks";
 import { format } from "date-fns";
 import { DateCategory } from "@//lib/dateCategoryEnum";
 import {
@@ -8,7 +8,10 @@ import {
 } from "./displayConfigTypes";
 import { getStatusDisplay } from "./statusDisplayConfig";
 import { getPriorityDisplay } from "./priorityDisplayConfig";
-import { dateToDateCategory, getDateCategoryDisplay } from "./dateDisplayConfig";
+import {
+	dateToDateCategory,
+	getDateCategoryDisplay,
+} from "./dateDisplayConfig";
 
 type DisplayConfigType =
 	| StatusDisplayConfig
@@ -34,21 +37,22 @@ type EnumType = TaskStatus | TaskPriority | DateCategory;
 export function getMatchingDisplay(
 	input: string | EnumType | Date | null | undefined,
 ): DisplayConfigType {
+	if (input === null || input === undefined) {
+		return {
+			label: "None",
+			icon: () => null,
+			className: "text-muted-foreground",
+			enum: DateCategory.NO_DATE,
+		} as dateDisplayConfig;
+	}
 
-  if (input === null || input === undefined) {
-    return {
-      label: "None",
-      icon: () => null,
-      className: "text-muted-foreground",
-      enum: DateCategory.NO_DATE,
-    } as dateDisplayConfig;
-  }
-
-  if (input instanceof Date) {
-    const displayConfig = getDateCategoryDisplay(dateToDateCategory(input)) as DisplayConfigType;
-    displayConfig.label = format(input, "EEE, do 'of' MMMM yyyy");
-    return displayConfig;
-  }
+	if (input instanceof Date) {
+		const displayConfig = getDateCategoryDisplay(
+			dateToDateCategory(input),
+		) as DisplayConfigType;
+		displayConfig.label = format(input, "EEE, do 'of' MMMM yyyy");
+		return displayConfig;
+	}
 
 	if (typeof input === "string") {
 		// Try each config type

@@ -6,7 +6,7 @@
  */
 
 import { DateCategory } from "@//lib/dateCategoryEnum";
-import { TaskPriority, TaskStatus } from "src/data/types/tasks";
+import { TaskPriority, TaskStatus } from "../../../data/types/tasks";
 
 /**
  * Configuration interface for enum-based display components.

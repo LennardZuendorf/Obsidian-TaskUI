@@ -25,7 +25,7 @@ const TaskCard = ({
 			<CardContent className="p-4">
 				{/* Row 1: Status, Title, Tags */}
 				<div className="flex flex-row items-center justify-between gap-2">
-          {/* Status, Title, Tags */}
+					{/* Status, Title, Tags */}
 					<div className="flex flex-grow items-center justify-start gap-4 ">
 						<StatusSelect
 							value={task.status}
@@ -78,15 +78,14 @@ const TaskCard = ({
 					{/* Dates in the middle */}
 					<div className="flex items-center gap-4 ml-4">
 						{task.dueDate && (
-              <DateSelect
-                value={task.dueDate}
-                type="dueDate"
-                onChange={(date: Date) =>
-                  onUpdateTask({ ...task, dueDate: date })
-                }
-              />
+							<DateSelect
+								value={task.dueDate}
+								type="dueDate"
+								onChange={(date: Date) =>
+									onUpdateTask({ ...task, dueDate: date })
+								}
+							/>
 						)}
-
 
 						{task.scheduledDate && (
 							<div className="flex items-center gap-1 text-sm">
@@ -96,9 +95,7 @@ const TaskCard = ({
 								<span>{scheduledDateFormatted}</span>
 							</div>
 						)}
-
-          </div>
-
+					</div>
 
 					{/* Actions on the far right */}
 					<div className="flex items-center gap-2 ml-auto">

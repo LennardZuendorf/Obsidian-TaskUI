@@ -62,10 +62,7 @@ function TabsContent({
 	return (
 		<TabsPrimitive.Content
 			data-slot="tabs-content"
-			className={cn(
-				"flex-grow overflow-auto rounded-md",
-				className,
-			)}
+			className={cn("flex-grow overflow-auto rounded-md", className)}
 			{...props}
 		/>
 	);

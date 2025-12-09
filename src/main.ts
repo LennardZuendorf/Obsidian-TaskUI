@@ -1,3 +1,4 @@
+import "./styles.css";
 import { Plugin, WorkspaceLeaf } from "obsidian";
 import {
 	appSettings,
