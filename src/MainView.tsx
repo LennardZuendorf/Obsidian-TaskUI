@@ -1,6 +1,5 @@
 import { getDefaultStore, useAtom } from "jotai";
 import { observe } from "jotai-effect";
-import { Loader2 } from "lucide-react";
 import { App, ItemView, Notice, WorkspaceLeaf } from "obsidian";
 import React, { useEffect, useState } from "react";
 import { createRoot, Root } from "react-dom/client";
@@ -16,23 +15,13 @@ import { TaskService as CrudService } from "./service/taskService";
 import { TaskSyncService, TaskUpdate } from "./service/taskSyncService";
 import "./styles.css";
 import { ErrorView } from "./ui/components/ErrorView";
+import { LoadingScreen } from "./ui/components/LoadingScreen";
 import { TaskView } from "./ui/components/TaskView";
 import { showNotice } from "./ui/lib/notice";
 import { AppContext, useApp } from "./utils/context";
 import { logger } from "./utils/logger";
 
 export const VIEW_TYPE_MAIN = "react-view";
-
-const LoadingScreen: React.FC = () => (
-	<div className="flex items-center justify-center min-h-screen">
-		<div className="flex flex-col items-center space-y-4">
-			<Loader2 className="h-8 w-8 animate-spin text-accent" />
-			<p className="text-sm text-muted-foreground">
-				Initializing App - Loading Tasks...
-			</p>
-		</div>
-	</div>
-);
 
 const AppController: React.FC = () => {
 	const [, changeTasksState] = useAtom(changeTasksAtom);
@@ -127,7 +116,7 @@ const AppController: React.FC = () => {
 	}
 
 	if (isLoading) {
-		return <LoadingScreen />;
+		return <LoadingScreen message="Initializing App - Loading Tasks..." />;
 	}
 
 	return <TaskView app={app as App} changeTasks={changeTasksState} />;

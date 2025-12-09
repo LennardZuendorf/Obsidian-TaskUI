@@ -1,10 +1,11 @@
-import { CalendarClock, ChevronDown } from "lucide-react";
 import React from "react";
-import { Button, ButtonProps } from "../../../base/Button";
-import { OptionCalendar } from "../../../base/OptionCalendar";
+import type { ButtonProps } from "../../../base/Button";
+import { OptionCalendar } from "../../custom/OptionCalendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../base/Popover";
+import { Button } from "../../../base/Button";
 import { getMatchingDisplay } from "../../../lib/displayConfig/utils";
 import { cn } from "../../../utils";
+import { ChevronDown } from "lucide-react";
 
 export type DateSelectProps = {
 	value: Date | null;
@@ -16,6 +17,10 @@ export type DateSelectProps = {
 	showLabel?: boolean;
 };
 
+/**
+ * DateSelect component for selecting dates with a calendar interface.
+ * Unlike other selects, this uses a calendar picker rather than enum options.
+ */
 export function DateSelect({
 	value,
 	onChange,
@@ -35,7 +40,7 @@ export function DateSelect({
 						value == null ? "opacity-0" : "opacity-100",
 					)}
 				>
-					Priority
+					Date
 				</span>
 			)}
 			<Popover open={dSelectOpen} onOpenChange={setDSelectOpen}>
@@ -65,7 +70,6 @@ export function DateSelect({
 							// Default view when no value is set
 							return (
 								<>
-									<CalendarClock className="h-4 w-4 text-muted-foreground" />
 									<span className="text-sm text-muted-foreground">
 										Select Date
 									</span>

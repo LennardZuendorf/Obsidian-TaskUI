@@ -4,7 +4,6 @@ import { Check, ChevronDownIcon, Circle } from "lucide-react";
 
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
 import { defaultTags } from "../../../data/defaultData";
 import {
 	availableTagsAtom,
@@ -44,22 +43,38 @@ import { DateInput, Input } from "../../base/Input";
 import { Popover, PopoverContent, PopoverTrigger } from "../../base/Popover";
 import { cn } from "../../utils";
 import { TagInput } from "./TagInput";
-import { type TaskFormValues } from "./TaskFormSchema";
-
-// Define the schema for the form validation using raw tag names
-const formSchema = z.object({
-	description: z.string().min(1, { message: "Description is required." }),
-	status: z.enum([getStatusLabels[0], ...getStatusLabels.slice(1)]),
-	priority: z.enum([getPriorityLabels[0], ...getPriorityLabels.slice(1)]),
-	tags: z.array(z.string()).optional(),
-	dueDate: z.date().optional(),
-});
+import { taskFormSchema, type TaskFormValues } from "./TaskFormSchema";
 
 interface TaskFormProps {
 	initialTask?: Task | null;
 	onSubmit: (task: Task) => void;
 	onCancel?: () => void;
 	onDelete?: () => void;
+}
+
+/**
+ * Helper function to get default form values from an initial task.
+ * Reduces duplication in form reset logic.
+ */
+function getDefaultFormValues(
+	initialTask: Task | null | undefined,
+	statusLabels: string[],
+	priorityLabels: string[],
+): TaskFormValues {
+	return {
+		description: initialTask?.description || "",
+		status: initialTask
+			? (statusEnumToString[initialTask.status] ?? statusLabels[0])
+			: statusLabels[0],
+		priority: initialTask
+			? (priorityEnumToString[initialTask.priority] ?? priorityLabels[2])
+			: priorityLabels[2],
+		tags:
+			initialTask?.tags?.map((tag) =>
+				tag.startsWith("#") ? tag.slice(1) : tag,
+			) || [],
+		dueDate: initialTask?.dueDate || undefined,
+	};
 }
 
 export default function FullTaskForm({
@@ -98,21 +113,12 @@ export default function FullTaskForm({
 		getValues,
 		formState: { errors, isDirty },
 	} = useForm<TaskFormValues>({
-		resolver: zodResolver(formSchema),
-		defaultValues: {
-			description: initialTask?.description || "",
-			status: initialTask
-				? (statusEnumToString[initialTask.status] ?? statusLabels[0])
-				: statusLabels[0],
-			priority: initialTask
-				? (priorityEnumToString[initialTask.priority] ?? priorityLabels[2])
-				: priorityLabels[2],
-			tags:
-				initialTask?.tags?.map((tag) =>
-					tag.startsWith("#") ? tag.slice(1) : tag,
-				) || [],
-			dueDate: initialTask?.dueDate || undefined,
-		},
+		resolver: zodResolver(taskFormSchema),
+		defaultValues: getDefaultFormValues(
+			initialTask,
+			statusLabels,
+			priorityLabels,
+		),
 	});
 
 	const selectedStatusLabel = watch("status");
@@ -186,20 +192,7 @@ export default function FullTaskForm({
 			logger.trace("FullTaskForm: Built task object", { task });
 			logger.trace("FullTaskForm: Calling onSubmit prop");
 			onSubmit(task);
-			reset({
-				description: initialTask?.description || "",
-				status: initialTask
-					? (statusEnumToString[initialTask.status] ?? statusLabels[0])
-					: statusLabels[0],
-				priority: initialTask
-					? (priorityEnumToString[initialTask.priority] ?? priorityLabels[2])
-					: priorityLabels[2],
-				tags:
-					initialTask?.tags?.map((tag) =>
-						tag.startsWith("#") ? tag.slice(1) : tag,
-					) || [],
-				dueDate: initialTask?.dueDate || undefined,
-			});
+			reset(getDefaultFormValues(initialTask, statusLabels, priorityLabels));
 		} catch (error) {
 			logger.error("FullTaskForm: Error building task:", error);
 		}
@@ -209,20 +202,7 @@ export default function FullTaskForm({
 		if (onCancel) {
 			onCancel();
 		} else {
-			reset({
-				description: initialTask?.description || "",
-				status: initialTask
-					? (statusEnumToString[initialTask.status] ?? statusLabels[0])
-					: statusLabels[0],
-				priority: initialTask
-					? (priorityEnumToString[initialTask.priority] ?? priorityLabels[2])
-					: priorityLabels[2],
-				tags:
-					initialTask?.tags?.map((tag) =>
-						tag.startsWith("#") ? tag.slice(1) : tag,
-					) || [],
-				dueDate: initialTask?.dueDate || undefined,
-			});
+			reset(getDefaultFormValues(initialTask, statusLabels, priorityLabels));
 		}
 	};
 

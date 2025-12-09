@@ -68,8 +68,6 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 
 	const handleDeleteTask = React.useCallback(
 		(task: Task) => {
-			console.log("handleDeleteTask called in TaskView for:", task); // Log entry
-			console.log("Delete requested for:", task.id); // Log request
 			logger.trace("[TaskView] Deleting task", { task });
 			const update: TaskUpdate = {
 				operation: str.LOCAL_DELETE,
@@ -78,7 +76,6 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 				timestamp: Date.now(),
 			};
 			changeTasks(update);
-			console.log("Called changeTasks with DELETE operation"); // Log state update call
 			new Notice(`Task "${task.description.substring(0, 20)}..." deleted.`);
 		},
 		[changeTasks],
