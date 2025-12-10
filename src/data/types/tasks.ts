@@ -72,6 +72,9 @@ export interface TaskMetadata {
 	toBeSyncedAction?: TaskSyncAction;
 	previousVersion?: Task; // Use Task interface
 	isEditing?: boolean; // Flag to indicate if the task is being edited in the UI
+	retryCount?: number;
+	syncFailed?: boolean;
+	errorMessage?: string;
 }
 
 /**

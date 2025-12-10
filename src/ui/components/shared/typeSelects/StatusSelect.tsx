@@ -32,6 +32,8 @@ export function StatusSelect({
 			className={className}
 			buttonSize={buttonSize}
 			showLabel={showLabel}
+			showInnerLabel={buttonSize !== "icon" && buttonSize !== "iconsm"}
+			showChevron={buttonSize !== "icon" && buttonSize !== "iconsm"}
 			label="Status"
 			placeholder="Select Status"
 			groupHeading="Status"

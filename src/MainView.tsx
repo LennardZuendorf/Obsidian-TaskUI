@@ -59,7 +59,7 @@ const AppController: React.FC = () => {
 		if (!error) {
 			showNotice("<span>Tasks loaded successfully!</span>");
 		} else {
-			showNotice(`<span>Error loading tasks: ${error}</span>`, 5000);
+			showNotice(`<span>Error loading tasks: ${error}</span>`, false, 5);
 		}
 	}
 
@@ -149,25 +149,40 @@ export class MainView extends ItemView {
 
 			this.taskSync = new TaskSyncService(this.app);
 
+			let syncTimeout: NodeJS.Timeout | null = null;
+
 			const unobserve = observe((get) => {
 				const unsyncedTasks = get(unsyncedTasksAtom);
 				const tasksWithMeta = get(baseTasksAtom) as TaskWithMetadata[];
 
-				unsyncedTasks.forEach(async (unsyncedTask) => {
-					const taskWithMeta = tasksWithMeta.find(
-						(t: TaskWithMetadata) => t.task.id === unsyncedTask.id,
-					);
-					if (taskWithMeta && this.taskSync) {
-						try {
-							await this.taskSync.handleLocalChange(taskWithMeta);
-						} catch (error) {
-							const errorMessage =
-								error instanceof Error ? error.message : String(error);
-							logger.error(`Failed to sync task: ${errorMessage}`);
-							new Notice(`Failed to sync task: ${errorMessage}`);
+				if (syncTimeout) {
+					clearTimeout(syncTimeout);
+				}
+
+				syncTimeout = setTimeout(async () => {
+					for (const unsyncedTask of unsyncedTasks) {
+						const taskWithMeta = tasksWithMeta.find(
+							(t: TaskWithMetadata) => t.task.id === unsyncedTask.id,
+						);
+
+						if (taskWithMeta && this.taskSync) {
+							try {
+								await this.taskSync.handleLocalChange(taskWithMeta);
+							} catch (error) {
+								const errorMessage =
+									error instanceof Error ? error.message : String(error);
+								logger.error(`Failed to sync task: ${errorMessage}`);
+								// Don't show notice for every retry failure to avoid spamming
+								if (
+									taskWithMeta.metadata.retryCount &&
+									taskWithMeta.metadata.retryCount >= 3
+								) {
+									new Notice(`Failed to sync task: ${errorMessage}`);
+								}
+							}
 						}
 					}
-				});
+				}, 500); // 500ms debounce
 			}, getDefaultStore());
 
 			this.cleanup = unobserve;

@@ -37,8 +37,8 @@ export class TaskModal extends Modal {
 
 	// Wrapper function to handle submit from React component
 	private handleFormSubmit = (task: Task) => {
-		this.close(); // Close the modal first
 		this.onSubmitCallback(task); // Call the original callback
+		this.close(); // Close the modal first
 	};
 
 	// Wrapper function to handle cancel from React component

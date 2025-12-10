@@ -130,8 +130,8 @@ export function ListView<TData extends Task>({
 							>
 								<TaskCard
 									DtableRow={row as unknown as Row<Task>}
-									onEditTask={() => handleEditTask(row.original)}
-									onDeleteTask={() => handleDeleteTask(row.original)}
+									onEditTask={handleEditTask}
+									onDeleteTask={handleDeleteTask}
 									onUpdateTask={(taskFromCard) =>
 										handleUpdateTask(taskFromCard as unknown as TData)
 									}

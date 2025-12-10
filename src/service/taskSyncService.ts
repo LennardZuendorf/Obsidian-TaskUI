@@ -156,6 +156,9 @@ export class TaskSyncService {
 							lastSynced: Date.now(),
 							needsSync: false,
 							toBeSyncedAction: null,
+							retryCount: 0,
+							syncFailed: false,
+							errorMessage: undefined,
 						};
 						logger.trace(
 							"[TaskSyncService.handleLocalChange] Create success. Updating metadata",
@@ -170,8 +173,7 @@ export class TaskSyncService {
 							`TaskSyncService: Task ${result.task.id} created and sync status updated in state`,
 						);
 					} else {
-						logger.error(`Failed to create task ${task.id} via API.`);
-						// Handle failure? Maybe reset needsSync via updateTaskMetadataAtom?
+						throw new Error(`Failed to create task ${task.id} via API.`);
 					}
 					break;
 				}
@@ -191,6 +193,7 @@ export class TaskSyncService {
 						logger.error(
 							`TaskSyncService: Cannot edit task ${task.id}. Previous version is missing from metadata.`,
 						);
+						// Can't retry this fatal error
 						break;
 					}
 
@@ -203,6 +206,9 @@ export class TaskSyncService {
 							lastSynced: Date.now(),
 							needsSync: false,
 							toBeSyncedAction: null,
+							retryCount: 0,
+							syncFailed: false,
+							errorMessage: undefined,
 						};
 						logger.trace(
 							"[TaskSyncService.handleLocalChange] Edit success. Updating metadata",
@@ -217,8 +223,7 @@ export class TaskSyncService {
 							`TaskSyncService: Task ${result.task.id} updated and sync status updated in state`,
 						);
 					} else {
-						logger.error(`Failed to update task ${task.id} via API.`);
-						// Handle failure?
+						throw new Error(`Failed to update task ${task.id} via API.`);
 					}
 					break;
 				}
@@ -241,7 +246,7 @@ export class TaskSyncService {
 						this.store.set(baseTasksAtom, updatedTasks);
 						logger.debug(`TaskSyncService: Task ${task.id} deleted from store`);
 					} else {
-						logger.error(
+						throw new Error(
 							`[TaskSyncService.handleLocalChange] Failed to delete task ${task.id} via API.`,
 						);
 					}
@@ -255,11 +260,26 @@ export class TaskSyncService {
 					break;
 			}
 		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
 			logger.error(
-				`TaskSyncService: Failed to sync task ${task.id}: ${error.message}`,
+				`TaskSyncService: Failed to sync task ${task.id}: ${errorMessage}`,
 			);
-			// We might want to implement retry logic here in the future
-			throw error;
+
+			// Update retry metadata
+			const currentRetryCount = metadata.retryCount || 0;
+			const newRetryCount = currentRetryCount + 1;
+			const syncFailed = newRetryCount >= 3;
+
+			this.store.set(updateTaskMetadataAtom, {
+				taskId: task.id,
+				metadataUpdates: {
+					retryCount: newRetryCount,
+					syncFailed: syncFailed,
+					errorMessage: errorMessage,
+				},
+			});
+
+			throw error; // Re-throw to be caught by the caller (MainView observer)
 		}
 	}
 

@@ -36,7 +36,7 @@ const TaskCard = ({
 							disabled={true}
 							value={task.description}
 							onChange={(desc) => onUpdateTask({ ...task, description: desc })}
-							className="w-full h-full"
+							className="flex-1 h-full"
 						/>
 					</div>
 
@@ -95,7 +95,7 @@ const TaskCard = ({
 						<Button
 							size="sm"
 							variant="destructive"
-							onClick={() => onDeleteTask(task.id)}
+							onClick={() => onDeleteTask(task)}
 							className="text-destructive hover:text-destructive hover:bg-destructive/10"
 							aria-label="Delete Task"
 						>
@@ -112,7 +112,7 @@ const TaskCard = ({
 interface TaskRowProps {
 	DtableRow: Row<Task>;
 	onEditTask: (task: Task) => void;
-	onDeleteTask: (taskId: string) => void;
+	onDeleteTask: (task: Task) => void;
 	onUpdateTask: (task: Task) => void;
 }
 

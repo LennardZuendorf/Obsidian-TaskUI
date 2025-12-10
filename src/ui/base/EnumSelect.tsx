@@ -14,6 +14,8 @@ export interface EnumSelectProps<TEnum> {
 	className?: string;
 	buttonSize?: ButtonProps["size"];
 	showLabel?: boolean;
+	showInnerLabel?: boolean;
+	showChevron?: boolean;
 	label?: string;
 	placeholder?: string;
 	groupHeading?: string;
@@ -31,6 +33,8 @@ export function EnumSelect<TEnum>({
 	className,
 	buttonSize = "default",
 	showLabel = false,
+	showInnerLabel = true,
+	showChevron = true,
 	label = "Select",
 	placeholder = "Select option",
 	groupHeading,
@@ -71,9 +75,11 @@ export function EnumSelect<TEnum>({
 										className={cn("h-4 w-4", selectedDisplay.iconClassName)}
 									/>
 								)}
-								<span className={cn("text-sm", selectedDisplay.className)}>
-									{selectedDisplay.label}
-								</span>
+								{showInnerLabel && (
+									<span className={cn("text-sm", selectedDisplay.className)}>
+										{selectedDisplay.label}
+									</span>
+								)}
 							</>
 						) : (
 							<>
@@ -82,7 +88,7 @@ export function EnumSelect<TEnum>({
 								</span>
 							</>
 						)}
-						<ChevronDown className="h-4 w-4 opacity-50 ml-auto" />
+						{showChevron && <ChevronDown className="h-4 w-4 opacity-50 ml-auto" />}
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent className="w-[200px] p-0">
