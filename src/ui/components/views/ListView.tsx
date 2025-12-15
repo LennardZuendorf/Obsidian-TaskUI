@@ -10,6 +10,7 @@ import { logger } from "@/utils/logger";
 import { Button } from "@/ui/base/Button";
 import { TaskListCard } from "@/ui/components/task/TaskListCard";
 import type { TabViewProps } from "@/ui/components/TaskView";
+import { TabView } from "./TabView";
 
 const NoTasksMessage = React.memo(() => {
 	return (
@@ -64,12 +65,16 @@ export function ListView<TData extends Task>({
 	);
 
 	if (!rows?.length) {
-		return <NoTasksMessage />;
+		return (
+			<TabView className="flex-1">
+				<NoTasksMessage />
+			</TabView>
+		);
 	}
 
 	return (
-		<div className="overflow-auto p-2 align-center justify-items-center w-full">
-			<div className="flex flex-col justify-center px-6 w-full space-y-3">
+		<TabView>
+			<div className="flex flex-col justify-center w-full h-fit gap-2 p-4">
 				{rows.map((row: Row<TData>) => {
 					if (grouping.length > 0 && row.getIsGrouped()) {
 						const groupDisplay = getGroupDisplay(row, grouping[0]);
@@ -133,9 +138,6 @@ export function ListView<TData extends Task>({
 					}
 				})}
 			</div>
-			<div className="flex justify-end pt-4">
-				<DataTablePagination table={table} />
-			</div>
-		</div>
+		</TabView>
 	);
 }

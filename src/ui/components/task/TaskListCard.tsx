@@ -71,7 +71,7 @@ const TaskListCard = <TData extends Task = Task>({
 
 	if (isEditMode) {
 		return (
-			<Card className="border w-full transition-all">
+			<Card className="border border-border shadow-lg w-full transition-all">
 				<TaskForm
 					variant="inline"
 					initialTask={task}

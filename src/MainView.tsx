@@ -9,7 +9,6 @@ import {
 	unsyncedTasksAtom,
 	updateTaskAtom,
 } from "@/data/taskAtoms";
-import { storeOperation as str } from "@/data/types/operations";
 import { TaskWithMetadata } from "@/data/types/tasks";
 import { createRemoteUpdate } from "@/data/utils/taskUpdateHelpers";
 import { TaskService as CrudService } from "@/service/taskService";
@@ -134,8 +133,12 @@ export class MainView extends ItemView {
 		return VIEW_TYPE_MAIN;
 	}
 
+	getIcon() {
+		return "list-todo";
+	}
+
 	getDisplayText() {
-		return "TaskUI";
+		return "Shards Task UI";
 	}
 
 	async onOpen() {

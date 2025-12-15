@@ -2,6 +2,7 @@ import * as TabsPrimitive from "@radix-ui/react-tabs";
 import * as React from "react";
 
 import { cn } from "@/ui/utils";
+import { buttonVariants } from "./Button";
 
 function Tabs({
 	className,
@@ -32,21 +33,28 @@ function TabsList({
 	);
 }
 
+interface TabsTriggerProps
+	extends React.ComponentProps<typeof TabsPrimitive.Trigger> {
+	variant?: "default" | "icon";
+}
+
 function TabsTrigger({
 	className,
+	variant = "default",
 	...props
-}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+}: TabsTriggerProps) {
 	return (
 		<TabsPrimitive.Trigger
 			data-slot="tabs-trigger"
 			className={cn(
-				"inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-lg font-medium",
-				"!bg-transparent !border-none text-muted-foreground !shadow-none",
-				"hover:text-foreground hover:ring-2 hover:ring-hover hover:bg-hover",
-				"data-[state=active]:text-foreground data-[state=active]:ring-2 data-[state=active]:ring-hover",
-				"data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:bottom-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-hover",
-				"disabled:pointer-events-none disabled:text-muted-foreground",
-				className,
+				buttonVariants({
+					variant: "default",
+					className: cn(
+						"data-[state=active]:ring-2 data-[state=active]:ring-hover",
+						"disabled:pointer-events-none",
+						className,
+					),
+				}),
 			)}
 			{...props}
 		/>
@@ -60,7 +68,7 @@ function TabsContent({
 	return (
 		<TabsPrimitive.Content
 			data-slot="tabs-content"
-			className={cn("flex-grow overflow-auto rounded-md", className)}
+			className={cn("flex-grow h-fit overflow-auto w-full", className)}
 			{...props}
 		/>
 	);

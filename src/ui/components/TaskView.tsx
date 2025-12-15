@@ -25,6 +25,8 @@ import { TaskModal } from "./forms/TaskModal";
 import { BoardView } from "./views/BoardView";
 import { ListView } from "./views/ListView";
 import { TableView } from "./views/TableView";
+import { titleCase } from "title-case";
+import { DataTablePagination } from "./table/DTablePagination";
 
 // Props needed by TaskView (and passed down to useDTable)
 interface TaskViewProps {
@@ -110,102 +112,119 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 		}).open();
 	}, [app, changeTasks]);
 
-	// 4. Render the main layout with Tabs, Controls, and View Content
+	// 4. Render the main layout with Controls at Top, Tabs and Content Side by Side
 	return (
-		<Tabs
-			defaultValue="list" // Default to List view
-			className="w-full h-full flex flex-col bg-background"
-			activationMode="manual"
-		>
-			{/* Top section: Tabs and Controls */}
-			<div className="flex flex-wrap items-end justify-between pt-0 gap-8 shrink-0 border-none pb-4">
-				{/* Tabs List */}
-				<TabsList className="gap-2">
-					<TabsTrigger value="table">
-						<LayoutGrid className="-ms-0.5 me-1.5 h-4 w-4" aria-hidden="true" />
-						Table
-					</TabsTrigger>
-					<TabsTrigger value="list">
-						<ListCollapseIcon
-							className="-ms-0.5 me-1.5 h-4 w-4"
-							aria-hidden="true"
-						/>
-						List
-					</TabsTrigger>
-					<TabsTrigger
-						value="board"
-						// disabled={true} // Enable when BoardView is ready
-					>
-						<KanbanSquare
-							className="-ms-0.5 me-1.5 h-4 w-4"
-							aria-hidden="true"
-						/>
-						Board
-					</TabsTrigger>
-				</TabsList>
-
-				{/* Shared Controls + Add Task Button */}
-				<div className="flex space-x-6 py-2 sm:py-0 sm:ms-auto shrink-0">
-					{/* Group, Sort, Filter Controls */}
-					<div className="flex space-x-2">
-						<DTableGroupBy table={table} />
-						<DTableSortBy table={table} />
-						<DTableFilterBy table={table} />
-					</div>
-
-					{/* Add Task Button */}
-					<div className="flex flex-col">
-						{/* Invisible spacer label */}
-						<span
-							className="text-xs text-muted-foreground mb-1 ml-1 opacity-0"
-							aria-hidden="true"
-						>
-							&nbsp;
-						</span>
-						<Button variant="accent" className="gap-1" onClick={createTask}>
-							<Plus className="h-4 w-4" />
-							<span className="text-sm">Add Task</span>
-						</Button>
-					</div>
+		<div className="w-full h-full flex flex-col bg-background">
+			{/* Top Controls Bar */}
+			<div className="flex items-end justify-end gap-4 pb-4 shrink-0">
+				{/* Group, Sort, Filter Controls */}
+				<div className="flex gap-2">
+					<DTableGroupBy table={table} />
+					<DTableSortBy table={table} />
+					<DTableFilterBy table={table} />
 				</div>
+
+				{/* Add Task Button */}
+				<Button variant="accent" className="gap-1" onClick={createTask}>
+					<Plus className="h-4 w-4" />
+					<span className="text-sm">Add Task</span>
+				</Button>
 			</div>
 
-			<Separator />
+			{/* Tabs and Content Area - Side by Side */}
+			<Tabs
+				defaultValue="list" // Default to List view
+				className="flex-1 flex flex-row gap-4"
+				activationMode="manual"
+			>
+				{/* Left Vertical Tabs Navigation */}
+				<div className="flex flex-col gap-2">
 
-			{/* View Content Area */}
-			<TabsContent
-				value="table"
-				className={cn(" w-11/12 justify-center items-center")}
-			>
-				<TableView
-					table={table}
-					handleEditTask={handleEditTask}
-					handleDeleteTask={handleDeleteTask}
-					handleUpdateTask={handleUpdateTask}
-					handleCreateTask={createTask}
-				/>
-			</TabsContent>
-			<TabsContent
-				value="list"
-				className={cn("flex flex-col w-11/12 items-center mx-auto")}
-			>
-				<ListView
-					table={table}
-					handleEditTask={handleEditTask}
-					handleDeleteTask={handleDeleteTask}
-					handleUpdateTask={handleUpdateTask}
-					handleCreateTask={createTask}
-				/>
-			</TabsContent>
-			<TabsContent
-				value="board"
-				className={cn(
-					"data-[state=active]:block w-11/12 justify-center items-center",
-				)}
-			>
-				<BoardView table={table} />
-			</TabsContent>
-		</Tabs>
+					<div className="flex flex-col p-2">
+						<span
+							className={cn(
+								"text-xs text-muted-foreground mb-1 ml-1",
+							)}
+						>
+							{titleCase("Views:")}
+						</span>
+						<TabsList
+							id="view-options-tabs"
+							className="flex flex-col gap-2 h-fit rounded-lg border-none border-0 p-2"
+						>
+							<TabsTrigger
+								value="table"
+								aria-label="Switch to Table view"
+								title="Table view"
+							>
+								<LayoutGrid className="h-5 w-5" aria-hidden="true" />
+								<span className="sr-only">Table</span>
+							</TabsTrigger>
+							<TabsTrigger
+								value="list"
+								aria-label="Switch to List view"
+								title="List view"
+							>
+								<ListCollapseIcon className="h-5 w-5" aria-hidden="true" />
+								<span className="sr-only">List</span>
+							</TabsTrigger>
+							<TabsTrigger
+								value="board"
+								aria-label="Switch to Board view"
+								title="Board view"
+								// disabled={true} // Enable when BoardView is ready
+							>
+								<KanbanSquare className="h-5 w-5" aria-hidden="true" />
+								<span className="sr-only">Board</span>
+							</TabsTrigger>
+						</TabsList>
+					</div>
+				</div>
+
+				{/* Right Content Area */}
+				<div className="flex-1 flex flex-col">
+					<TabsContent
+						value="table"
+						className={cn("flex-1 justify-center items-center")}
+					>
+						<TableView
+							table={table}
+							handleEditTask={handleEditTask}
+							handleDeleteTask={handleDeleteTask}
+							handleUpdateTask={handleUpdateTask}
+							handleCreateTask={createTask}
+						/>
+						<div className="flex justify-end pt-4">
+							<DataTablePagination table={table} />
+						</div>
+					</TabsContent>
+					<TabsContent
+						value="list"
+						className={cn("flex flex-col flex-1 items-center")}
+					>
+						<ListView
+							table={table}
+							handleEditTask={handleEditTask}
+							handleDeleteTask={handleDeleteTask}
+							handleUpdateTask={handleUpdateTask}
+							handleCreateTask={createTask}
+						/>
+						<div className="flex justify-end pt-4">
+							<DataTablePagination table={table} />
+						</div>
+					</TabsContent>
+					<TabsContent
+						value="board"
+						className={cn("flex-1 justify-center items-center")}
+					>
+						<BoardView table={table} />
+						<div className="flex justify-end pt-4">
+							<DataTablePagination table={table} />
+						</div>
+					</TabsContent>
+				</div>
+			</Tabs>
+		</div>
 	);
 }
 

@@ -1,4 +1,6 @@
-import { Table as TanstackTable } from "@tanstack/react-table";
+import { Row, Table as TanstackTable } from "@tanstack/react-table";
+import { TabView } from "./TabView";
+import { cn } from "@/ui/utils";
 
 // Define props, expecting the table instance
 interface BoardViewProps<TData> {
@@ -10,12 +12,10 @@ export function BoardView<TData>({ table }: BoardViewProps<TData>) {
 	// Use table.getRowModel().rows, table.getState().grouping, etc.
 
 	return (
-		<div className="p-4 text-center text-muted-foreground">
-			Board View Placeholder
-			{/* Temporary: Display row count */}
-			<p className="text-xs mt-2">
-				(Tasks count: {table.getRowModel().rows.length})
-			</p>
-		</div>
+		<TabView>
+			<div className="flex flex-col justify-center w-full h-fit gap-2 p-4">
+				Board View Placeholder
+			</div>
+		</TabView>
 	);
 }
