@@ -1,15 +1,63 @@
-# Step 1: Run lint-staged
-echo "Running lint & format on staged files..."
-pnpm run check
-if [ $? -ne 0 ]; then
-  echo "build failed. Aborting push."
-  exit 1
+#!/bin/sh
+# . "$(dirname "$0")/_/husky.sh" # Uncomment this if you use husky's path mechanism
+
+echo "Preparing to test the last committed version (HEAD)..."
+
+STASH_MADE=0
+# Check for unstaged changes or untracked files.
+# git status --porcelain will output lines if there are changes.
+if [ -n "$(git status --porcelain)" ]; then
+  echo "Stashing uncommitted changes..."
+  git stash push -q -u -m "husky-pre-push-stash"
+  if [ $? -ne 0 ]; then
+    echo "Failed to stash changes. Aborting push."
+    exit 1
+  fi
+  STASH_MADE=1
+  echo "Uncommitted changes stashed."
+else
+  echo "No uncommitted changes to stash. Testing current HEAD."
 fi
 
-# Step 1: Run lint-staged
-echo "Running lint & format on staged files..."
+# Function to pop stash if it was made
+pop_stash() {
+  if [ "$STASH_MADE" -eq 1 ]; then
+    echo "Restoring stashed changes..."
+    # Attempt to pop the stash. -q for quiet.
+    git stash pop -q
+    if [ $? -ne 0 ]; then
+      echo "WARNING: Failed to automatically pop stash (likely due to conflicts)."
+      echo "Your changes are still stashed. Use 'git stash list' to see stashes and 'git stash pop' or 'git stash apply' to restore."
+      echo "You may need to resolve conflicts manually after applying the stash."
+      # You might want to exit 1 here if a clean pop is critical,
+      # but for a pre-push, usually, the main concern is the check/build result.
+    else
+      echo "Stashed changes restored."
+    fi
+  fi
+}
+
+# Set up a trap to ensure stash is popped on exit (0), error (non-zero exit), or interrupt
+trap pop_stash EXIT
+
+# Step 1: Run lint & format on HEAD
+echo "Running lint & format on HEAD..."
+pnpm run check
+if [ $? -ne 0 ]; then
+  echo "Lint/format failed on HEAD. Aborting push."
+  exit 1 # pop_stash will be called by EXIT trap
+fi
+echo "Lint & format on HEAD passed."
+
+# Step 2: Run build on HEAD
+echo "Running build on HEAD..."
 pnpm run build
 if [ $? -ne 0 ]; then
-  echo "build failed. Aborting push."
-  exit 1
+  echo "Build failed on HEAD. Aborting push."
+  exit 1 # pop_stash will be called by EXIT trap
 fi
+echo "Build on HEAD passed."
+
+echo "All checks on HEAD passed. Proceeding with push."
+# pop_stash will be called by the EXIT trap, ensuring changes are restored.
+exit 0

@@ -9,9 +9,16 @@
 		"dev": "vite build --watch --mode development",
 		"build": "npm run check && vite build --mode production",
 		"build-release": "npm run build && npm run version",
-		"lint-staged": "lint-staged"
+		"lint-staged": "lint-staged",
+		"prepare": "husky"
 	},
-	"keywords": ["Obsidian", "Task Management", "Typescript", "React", "TailwindCSS"],
+	"keywords": [
+		"Obsidian",
+		"Task Management",
+		"Typescript",
+		"React",
+		"TailwindCSS"
+	],
 	"homepage": "https://shards.ignitr.dev",
 	"author": "Lennard Zündorf",
 	"license": "MIT",
@@ -23,7 +30,7 @@
 		"@vitejs/plugin-react": "^5.1.2",
 		"autoprefixer": "^10.4.20",
 		"builtin-modules": "3.3.0",
-		"husky": "^9.1.6",
+		"husky": "^9.1.7",
 		"lint-staged": "^15.2.10",
 		"obsidian": "^1.7.2",
 		"obsidian-dataview": "^0.5.68",
@@ -83,11 +90,6 @@
 		"use-mask-input": "^3.4.2",
 		"uuid": "^11.1.0",
 		"zod": "^3.24.3"
-	},
-	"husky": {
-		"hooks": {
-			"pre-commit": "lint-staged"
-		}
 	},
 	"lint-staged": {
 		"*.{js,ts,tsx,json}": [
