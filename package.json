@@ -1,7 +1,7 @@
 {
-	"name": "shards-taskui",
-	"version": "0.0.1",
-	"description": "Shards TaskUI helps users visually manage tasks by extending the popular tasks plugin.",
+	"name": "shards",
+	"version": "0.2",
+	"description": "Shards helps users visually manage tasks in Obsidian.",
 	"main": "main.js",
 	"scripts": {
 		"check": "biome check --write ./src",
@@ -11,8 +11,9 @@
 		"build-release": "npm run build && npm run version",
 		"lint-staged": "lint-staged"
 	},
-	"keywords": [],
-	"author": "",
+	"keywords": ["Obsidian", "Task Management", "Typescript", "React", "TailwindCSS"],
+	"homepage": "https://shards.ignitr.dev",
+	"author": "Lennard Zündorf",
 	"license": "MIT",
 	"devDependencies": {
 		"@biomejs/biome": "2.3.8",
@@ -55,6 +56,7 @@
 		"@tanstack/react-table": "^8.21.3",
 		"@tanstack/zod-form-adapter": "^0.42.1",
 		"@types/uuid": "^10.0.0",
+		"chrono-node": "^2.7.7",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
 		"cmdk": "^1.1.1",
@@ -92,5 +94,5 @@
 			"biome check --write --no-errors-on-unmatched"
 		]
 	},
-	"packageManager": "pnpm@9.15.2+sha512.93e57b0126f0df74ce6bff29680394c0ba54ec47246b9cf321f0121d8d9bb03f750a705f24edc3c1180853afd7c2c3b94196d0a3d53d3e069d9e2793ef11f321"
+	"packageManager": "pnpm@9.15.2"
 }

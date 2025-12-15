@@ -13,9 +13,9 @@ const buttonVariants = cva(
 				accent:
 					"!bg-accent text-accent-foreground hover:ring-2 hover:ring-hover",
 				destructive:
-					"!bg-destructive/50 text-primary-foreground hover:bg-destructive/50",
+					"!bg-destructive text-primary-foreground hover:bg-destructive/50",
 				outline:
-					"border border-input border-1 !bg-transparent hover:ring-2 hover:ring-hover disabled:text-primary-foreground text-primary-foreground",
+					"border border-input border-1 !bg-transparent hover:ring-2 hover:ring-hover disabled:text-primary-foreground text-primary-foreground shadow-none",
 				secondary: "!bg-secondary text-secondary-foreground",
 				ghost:
 					"!bg-transparent hover:ring-2 hover:ring-hover !shadow-none border-secom disabled:text-primary text-primary",
@@ -26,7 +26,7 @@ const buttonVariants = cva(
 				sm: "h-8 px-3",
 				lg: "h-12 px-8 py-4",
 				fill: "h-full w-full",
-				icon: "h-10 w-10",
+				icon: "h-12 w-12",
 				iconsm: "h-8 w-8",
 			},
 		},

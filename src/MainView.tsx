@@ -6,8 +6,8 @@ import { createRoot, Root } from "react-dom/client";
 import { appSettings, SettingsContext } from "./config/settings";
 import {
 	baseTasksAtom,
-	changeTasksAtom,
 	unsyncedTasksAtom,
+	updateTaskAtom,
 } from "./data/taskAtoms";
 import { storeOperation as str } from "./data/types/operations";
 import { TaskWithMetadata } from "./data/types/tasks";
@@ -24,7 +24,7 @@ import { logger } from "./utils/logger";
 export const VIEW_TYPE_MAIN = "react-view";
 
 const AppController: React.FC = () => {
-	const [, changeTasksState] = useAtom(changeTasksAtom);
+	const [, updateTaskState] = useAtom(updateTaskAtom);
 	const app = useApp();
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -43,7 +43,7 @@ const AppController: React.FC = () => {
 					source: "remote" as const,
 					timestamp: Date.now(),
 				};
-				changeTasksState(update);
+				updateTaskState(update);
 				logger.debug("Tasks fetched and state updated successfully.");
 			} else {
 				logger.error("Error fetching tasks from the API.");
@@ -66,7 +66,7 @@ const AppController: React.FC = () => {
 	useEffect(() => {
 		const handleTasksUpdate = (event: CustomEvent) => {
 			const update = event.detail as TaskUpdate;
-			changeTasksState(update);
+			updateTaskState(update);
 		};
 
 		const container = document.querySelector(".workspace-leaf-content");
@@ -81,7 +81,7 @@ const AppController: React.FC = () => {
 				handleTasksUpdate as EventListener,
 			);
 		};
-	}, [changeTasksState]);
+	}, [updateTaskState]);
 
 	useEffect(() => {
 		try {
@@ -119,7 +119,7 @@ const AppController: React.FC = () => {
 		return <LoadingScreen message="Initializing App - Loading Tasks..." />;
 	}
 
-	return <TaskView app={app as App} changeTasks={changeTasksState} />;
+	return <TaskView app={app as App} changeTasks={updateTaskState} />;
 };
 
 export class MainView extends ItemView {

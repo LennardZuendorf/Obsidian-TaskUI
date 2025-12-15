@@ -1,158 +1,133 @@
-import { Plus, Tag as TagIcon } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
-import { ControllerRenderProps } from "react-hook-form";
-import { Input } from "../../base/Input";
+import * as React from "react";
+import { Badge } from "../../base/Badge";
+import { inputVariants } from "../../base/Input";
+import { cn } from "../../utils";
+
+export type Tag = {
+	id: string;
+	text: string;
+};
 
 interface TagInputProps {
-	field: ControllerRenderProps<{ tags: string[] }, "tags">;
-	availableTags: string[]; // List of available tag names
-	onTagCreate?: (tagName: string) => void; // Optional: Callback when a new tag is created
+	tags: Tag[];
+	setTags: (tags: Tag[]) => void;
+	activeTagIndex: number | null;
+	setActiveTagIndex: (index: number | null) => void;
 	placeholder?: string;
+	className?: string;
 }
 
+/**
+ * Custom TagInput component built on Input component structure.
+ * Uses Badge components for tags and a borderless input field.
+ * Tags match Badge accent variant, container matches Input component.
+ */
 export function TagInput({
-	field,
-	availableTags,
-	onTagCreate,
+	tags,
+	setTags,
+	activeTagIndex,
+	setActiveTagIndex,
 	placeholder = "Add tags...",
+	className,
 }: TagInputProps) {
-	const [inputValue, setInputValue] = useState("");
-	const [searchResults, setSearchResults] = useState<string[]>([]);
-	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-	const containerRef = useRef<HTMLDivElement>(null);
+	const inputRef = React.useRef<HTMLInputElement>(null);
+	const [inputValue, setInputValue] = React.useState("");
 
-	// We still need selectedTags to filter search results correctly
-	const selectedTags: string[] = field.value || [];
+	const handleAddTag = (tagText: string) => {
+		const trimmedText = tagText.trim();
+		if (!trimmedText) return;
 
-	// --- Tag Search ---
-	useEffect(() => {
-		if (inputValue.trim() === "") {
-			setSearchResults([]);
-			setIsDropdownOpen(false);
+		// Check for duplicates by text field
+		const isDuplicate = tags.some(
+			(tag) => tag.text.toLowerCase() === trimmedText.toLowerCase(),
+		);
+		if (isDuplicate) {
+			setInputValue("");
 			return;
 		}
 
-		const lowerInput = inputValue.toLowerCase();
-		const results = availableTags.filter(
-			(tag) =>
-				tag.toLowerCase().includes(lowerInput) && !selectedTags.includes(tag), // Exclude already selected tags
-		);
-		setSearchResults(results);
-		setIsDropdownOpen(
-			results.length > 0 ||
-				(!availableTags.includes(inputValue.trim()) &&
-					!selectedTags.includes(inputValue.trim())), // Open if results or creatable and not already selected/available
-		);
-	}, [inputValue, availableTags, selectedTags]);
+		// Create new tag
+		const newTag: Tag = {
+			id: trimmedText,
+			text: trimmedText,
+		};
 
-	// --- Event Handlers ---
-	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setInputValue(e.target.value);
+		setTags([...tags, newTag]);
+		setInputValue("");
 	};
 
-	const addTag = (tagName: string) => {
-		const trimmedName = tagName.trim();
-		if (trimmedName && !selectedTags.includes(trimmedName)) {
-			field.onChange([...selectedTags, trimmedName]); // Update RHF state
+	const handleRemoveTag = (index: number) => {
+		const newTags = tags.filter((_, i) => i !== index);
+		setTags(newTags);
+		// Reset active tag index if the removed tag was active
+		if (activeTagIndex === index) {
+			setActiveTagIndex(null);
+		} else if (activeTagIndex !== null && activeTagIndex > index) {
+			// Adjust active tag index if a tag before it was removed
+			setActiveTagIndex(activeTagIndex - 1);
 		}
-		setInputValue("");
-		setIsDropdownOpen(false);
-	};
-
-	const createNewTag = () => {
-		const newTagName = inputValue.trim();
-		if (
-			newTagName &&
-			!availableTags.includes(newTagName) &&
-			!selectedTags.includes(newTagName)
-		) {
-			// Optionally call the creation callback
-			onTagCreate?.(newTagName);
-			addTag(newTagName); // Add the newly created tag
-		} else if (newTagName && availableTags.includes(newTagName)) {
-			// If tag exists in available but not selected, just add it
-			addTag(newTagName);
-		}
-		setInputValue("");
-		setIsDropdownOpen(false);
 	};
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === "Enter") {
 			e.preventDefault();
-			if (searchResults.length > 0) {
-				addTag(searchResults[0]); // Add the top search result
-			} else if (inputValue.trim()) {
-				createNewTag(); // Attempt to create a new tag
-			}
+			handleAddTag(inputValue);
+		} else if (e.key === ",") {
+			e.preventDefault();
+			handleAddTag(inputValue);
+		} else if (e.key === "Backspace" && inputValue === "" && tags.length > 0) {
+			// Remove last tag when backspace is pressed on empty input
+			const lastIndex = tags.length - 1;
+			handleRemoveTag(lastIndex);
+			setActiveTagIndex(lastIndex - 1 >= 0 ? lastIndex - 1 : null);
 		}
 	};
 
-	// --- Close dropdown on outside click ---
-	useEffect(() => {
-		function handleClickOutside(event: MouseEvent) {
-			if (
-				containerRef.current &&
-				!containerRef.current.contains(event.target as Node)
-			) {
-				setIsDropdownOpen(false);
-			}
-		}
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
-		};
-	}, [containerRef]);
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setInputValue(e.target.value);
+	};
 
 	return (
-		<div className="flex flex-col" ref={containerRef}>
-			<div className="relative">
-				{/* Remove layout and focus styles from the wrapper div, keeping only flex items-center */}
-				<div className="flex items-center">
-					{/* Input takes full space */}
-					<Input
-						icon={<TagIcon className="h-4 w-4 text-muted" />}
-						id="description-input"
-						placeholder="Add Tags..."
-						onChange={handleInputChange}
-						onKeyDown={handleKeyDown}
-						value={inputValue}
-						aria-label="task-tag-input"
-					/>
-				</div>
+		<>
+			{/* Style tag to force placeholder color - overrides Obsidian CSS */}
+			<style>{`
+				.tag-input-wrapper input::placeholder {
+					color: var(--text-muted) !important;
+				}
+			`}</style>
+			<div
+				className={cn(
+					inputVariants({ variant: "default" }),
+					"flex items-center gap-2 flex-wrap tag-input-wrapper",
+					className,
+				)}
+				onClick={() => inputRef.current?.focus()}
+			>
+				{tags.map((tag, index) => (
+					<Badge
+						key={tag.id}
+						variant="accent"
+						size="sm"
+						onRemove={() => handleRemoveTag(index)}
+						removeAriaLabel={`Remove tag ${tag.text}`}
+					>
+						{tag.text}
+					</Badge>
+				))}
 
-				{/* Suggestions Dropdown */}
-				{isDropdownOpen &&
-					(searchResults.length > 0 ||
-						(inputValue.trim() &&
-							!availableTags.includes(inputValue.trim()) &&
-							!selectedTags.includes(inputValue.trim()))) && (
-						<div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-popover shadow-lg">
-							<ul className="py-1 max-h-60 overflow-auto">
-								{searchResults.map((tag) => (
-									<li
-										key={tag}
-										onClick={() => addTag(tag)}
-										className="flex items-center justify-between gap-2 px-3 py-1.5 text-sm cursor-pointer hover:bg-secondary"
-									>
-										<span>{tag}</span>
-									</li>
-								))}
-								{inputValue.trim() &&
-									!availableTags.includes(inputValue.trim()) &&
-									!selectedTags.includes(inputValue.trim()) && (
-										<li
-											className="px-3 py-2 text-sm cursor-pointer hover:bg-secondary flex items-center gap-2"
-											onClick={createNewTag}
-										>
-											<Plus className="h-4 w-4" />
-											Create tag "{inputValue.trim()}"
-										</li>
-									)}
-							</ul>
-						</div>
+				{/* Input field on the right */}
+				<input
+					ref={inputRef}
+					type="text"
+					value={inputValue}
+					onChange={handleInputChange}
+					onKeyDown={handleKeyDown}
+					placeholder={placeholder}
+					className={cn(
+						"!text-primary-foreground !bg-transparent !border-none !ring-0 !shadow-none !focus:ring-0 !focus:shadow-none !focus:border-none flex-1 min-w-[60px] outline-none !placeholder:text-muted-foreground",
 					)}
+				/>
 			</div>
-		</div>
+		</>
 	);
 }

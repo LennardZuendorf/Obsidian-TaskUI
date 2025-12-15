@@ -61,7 +61,7 @@ export const resetStateAtom = atom(null, (get, set) => {
  * - REMOTE_UPDATE: Updates tasks from remote source, preserving local changes
  * - RESET: Clears all tasks
  */
-export const changeTasksAtom = atom(
+export const updateTaskAtom = atom(
 	// Getter - returns only the tasks without metadata
 	(get) => get(baseTasksAtom).map((t) => t.task),
 	(
@@ -341,21 +341,21 @@ export const unsyncedTasksAtom = atom((get) => {
  * Derived atom to filter tasks by status (to do)
  */
 export const todoTasksAtom = atom((get) =>
-	get(changeTasksAtom).filter((todo) => todo.status === TaskStatus.TODO),
+	get(updateTaskAtom).filter((todo) => todo.status === TaskStatus.TODO),
 );
 
 /**
  * Derived atom to filter tasks by status (in progress)
  */
 export const inProgressTasksAtom = atom((get) =>
-	get(changeTasksAtom).filter((todo) => todo.status === TaskStatus.IN_PROGRESS),
+	get(updateTaskAtom).filter((todo) => todo.status === TaskStatus.IN_PROGRESS),
 );
 
 /**
  * Derived atom to filter tasks by status (done/cancelled)
  */
 export const doneTasksAtom = atom((get) =>
-	get(changeTasksAtom).filter(
+	get(updateTaskAtom).filter(
 		(todo) =>
 			todo.status === TaskStatus.DONE || todo.status === TaskStatus.CANCELLED,
 	),
@@ -386,7 +386,7 @@ export const availableTagsAtom = atom<TaskTag[]>((get) => {
  */
 export const debugStateAtom = atom((get) => ({
 	internalState: get(baseTasksAtom),
-	allTasks: get(changeTasksAtom),
+	allTasks: get(updateTaskAtom),
 	unsyncedTasks: get(unsyncedTasksAtom),
 }));
 

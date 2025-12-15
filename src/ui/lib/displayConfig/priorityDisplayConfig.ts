@@ -7,6 +7,13 @@ import {
 } from "react-icons/pi";
 import { TaskPriority } from "../../../data/types/tasks";
 import { EnumDisplayConfig } from "../../../ui/lib/displayConfig/displayConfigTypes";
+import {
+	LowestPriorityIcon,
+	LowPriorityIcon,
+	MediumPriorityIcon,
+	HighPriorityIcon,
+	HighestPriorityIcon,
+} from "../../components/shared/PriorityFlagIcons";
 
 /**
  * Configuration map for task priority display properties.
@@ -17,41 +24,46 @@ import { EnumDisplayConfig } from "../../../ui/lib/displayConfig/displayConfigTy
  */
 const taskPriorityConfig: Record<
 	TaskPriority,
-	EnumDisplayConfig<typeof PiMinusBold>
+	EnumDisplayConfig<typeof HighestPriorityIcon> & { enum: TaskPriority }
 > = {
 	[TaskPriority.HIGHEST]: {
+		enum: TaskPriority.HIGHEST,
 		label: "Highest",
-		icon: PiCaretDoubleUpBold,
-		className: "text-destructive-foreground",
-		iconClassName: "text-destructive-foreground",
+		icon: HighestPriorityIcon,
+		className: "text-destructive",
+		iconClassName: "text-destructive",
 		order: 1,
 	},
 	[TaskPriority.HIGH]: {
+		enum: TaskPriority.HIGH,
 		label: "High",
-		icon: PiCaretUpBold,
-		className: "text-primary-foreground",
-		iconClassName: "text-primary-foreground",
+		icon: HighPriorityIcon,
+		className: "text-destructive",
+		iconClassName: "text-destructive",
 		order: 2,
 	},
 	[TaskPriority.MEDIUM]: {
+		enum: TaskPriority.MEDIUM,
 		label: "Medium",
-		icon: PiMinusBold,
+		icon: MediumPriorityIcon,
 		className: "text-primary-foreground",
 		iconClassName: "text-primary-foreground",
 		order: 3,
 	},
 	[TaskPriority.LOW]: {
+		enum: TaskPriority.LOW,
 		label: "Low",
-		icon: PiCaretDownBold,
+		icon: LowPriorityIcon,
 		className: "text-primary-foreground",
 		iconClassName: "text-primary-foreground",
 		order: 4,
 	},
 	[TaskPriority.LOWEST]: {
+		enum: TaskPriority.LOWEST,
 		label: "Lowest",
-		icon: PiCaretDoubleDownBold,
-		className: "text-primary-foreground",
-		iconClassName: "text-primary-foreground",
+		icon: LowestPriorityIcon,
+		className: "text-muted-foreground",
+		iconClassName: "text-muted-foreground",
 		order: 5,
 	},
 };
@@ -90,7 +102,7 @@ export const priorityEnumToString: Record<TaskPriority, string> =
  */
 export const getPriorityDisplay = (
 	priority: TaskPriority | null | undefined,
-): EnumDisplayConfig<typeof PiMinusBold> => {
+): EnumDisplayConfig<typeof HighestPriorityIcon> => {
 	return (
 		taskPriorityConfig[priority ?? TaskPriority.MEDIUM] ||
 		taskPriorityConfig[TaskPriority.MEDIUM]
@@ -102,9 +114,9 @@ export const getPriorityDisplay = (
  *
  * @returns {EnumDisplayConfig<typeof PiMinusBold>[]} Array of priority display configurations, ordered by their display order
  */
-export const getPriorityDisplayConfig = (): EnumDisplayConfig<
-	typeof PiMinusBold
->[] => {
+export const getPriorityDisplayConfig = (): (EnumDisplayConfig<
+	typeof HighestPriorityIcon
+> & { enum: TaskPriority })[] => {
 	return Object.values(taskPriorityConfig);
 };
 

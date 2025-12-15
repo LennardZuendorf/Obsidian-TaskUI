@@ -8,22 +8,22 @@ import {
 } from "lucide-react";
 import { type App, Notice } from "obsidian";
 import React from "react";
-import { storeOperation as str } from "../../data/types/operations"; // Adjusted path
-import type { Task } from "../../data/types/tasks"; // Adjusted path
-import type { TaskUpdate } from "../../service/taskSyncService"; // Adjusted path
-import { logger } from "../../utils/logger"; // Adjusted path
+import { storeOperation as str } from "../../data/types/operations";
+import type { Task } from "../../data/types/tasks";
+import type { TaskUpdate } from "../../service/taskSyncService";
+import { logger } from "../../utils/logger";
 import { Button } from "../base/Button";
 import { Separator } from "../base/Separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../base/Tabs";
-import { cn } from "../utils"; // Adjusted path
-import { useDTable } from "./custom/dtable/DTable"; // Updated import path
-import { DTableFilterBy } from "./custom/dtable/DTableFilterBy"; // Adjusted path
-import { DTableGroupBy } from "./custom/dtable/DTableGroupBy"; // Adjusted path
-import { DTableSortBy } from "./custom/dtable/DTableSortBy"; // Adjusted path
-import { TaskModal } from "./shared/TaskModal"; // Keep for Add Task
-import { BoardView } from "./tabViews/BoardView"; // Adjusted path
-import { ListView } from "./tabViews/ListView"; // Adjusted path
-import { TableView } from "./tabViews/TableView"; // Adjusted path
+import { cn } from "../utils";
+import { useDTable } from "./custom/dtable/DTable";
+import { DTableFilterBy } from "./custom/dtable/DTableFilterBy";
+import { DTableGroupBy } from "./custom/dtable/DTableGroupBy";
+import { DTableSortBy } from "./custom/dtable/DTableSortBy";
+import { TaskModal } from "./shared/TaskModal";
+import { BoardView } from "./tabViews/BoardView";
+import { ListView } from "./tabViews/ListView";
+import { TableView } from "./tabViews/TableView";
 
 // Props needed by TaskView (and passed down to useDTable)
 interface TaskViewProps {
@@ -96,7 +96,6 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 
 	const table = useDTable({
 		app,
-		changeTasks,
 	});
 
 	// Keep createTask function here as well
@@ -139,9 +138,9 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 			<div className="flex flex-wrap items-end justify-between pt-0 gap-8 shrink-0 border-none pb-4">
 				{/* Tabs List */}
 				<TabsList className="gap-2">
-					<TabsTrigger value="overview">
+					<TabsTrigger value="table">
 						<LayoutGrid className="-ms-0.5 me-1.5 h-4 w-4" aria-hidden="true" />
-						Overview
+						Table
 					</TabsTrigger>
 					<TabsTrigger value="list">
 						<ListCollapseIcon
@@ -199,7 +198,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 
 			{/* View Content Area */}
 			<TabsContent
-				value="overview"
+				value="table"
 				className={cn(" w-11/12 justify-center items-center")}
 			>
 				<TableView

@@ -1,8 +1,7 @@
 import { flexRender } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight, Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import type { Task } from "../../../data/types/tasks";
 import { formatDate } from "../../../data/utils/dateUtils";
-import { Button } from "../../base/Button";
 import {
 	Table,
 	TableBody,
@@ -12,6 +11,7 @@ import {
 	TableRow,
 } from "../../base/Table";
 import { DataTablePagination } from "../custom/dtable/DTablePagination";
+import { SettingsButton } from "../shared/SettingsButton";
 import type { TabViewProps } from "../TaskView";
 
 export function TableView<TData extends Task>({
@@ -19,6 +19,7 @@ export function TableView<TData extends Task>({
 	handleEditTask,
 	handleDeleteTask,
 	handleUpdateTask,
+	handleCreateTask,
 }: TabViewProps<TData>) {
 	const grouping = table.getState().grouping;
 
@@ -100,25 +101,11 @@ export function TableView<TData extends Task>({
 										})}
 										{/* Extra cell for actions */}
 										<TableCell key="actions-cell" className="text-right">
-											<div className="flex justify-end space-x-1">
-												<Button
-													variant="ghost"
-													size="icon"
-													onClick={() => handleEditTask(row.original)}
-													className="text-muted-foreground hover:text-foreground"
-													aria-label="Edit Task"
-												>
-													<Pencil className="h-4 w-4" />
-												</Button>
-												<Button
-													variant="ghost"
-													size="icon"
-													onClick={() => handleDeleteTask(row.original)}
-													className="text-destructive/80 hover:text-destructive hover:bg-destructive/10"
-													aria-label="Delete Task"
-												>
-													<Trash2 className="h-4 w-4" />
-												</Button>
+											<div className="flex justify-end">
+												<SettingsButton
+													onViewDetails={() => handleEditTask(row.original)}
+													onDelete={() => handleDeleteTask(row.original)}
+												/>
 											</div>
 										</TableCell>
 									</TableRow>

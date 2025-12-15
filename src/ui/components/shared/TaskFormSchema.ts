@@ -10,7 +10,8 @@ export const taskFormSchema = z.object({
 	status: z.enum([getStatusLabels[0], ...getStatusLabels.slice(1)]),
 	priority: z.enum([getPriorityLabels[0], ...getPriorityLabels.slice(1)]),
 	tags: z.array(z.string()).optional(),
-	dueDate: z.date().optional(),
+	dueDate: z.date().nullable().optional(),
+	scheduledDate: z.date().nullable().optional(),
 });
 
 /**

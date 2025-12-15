@@ -3,8 +3,8 @@ import { App } from "obsidian";
 import { InternalApiService } from "../api/internalApiService";
 import {
 	baseTasksAtom,
-	changeTasksAtom,
 	unsyncedTasksAtom,
+	updateTaskAtom,
 	updateTaskMetadataAtom,
 } from "../data/taskAtoms";
 import { storeOperation } from "../data/types/operations";
@@ -67,7 +67,7 @@ export class TaskSyncService {
 			validateTasks(update.tasks);
 
 			logger.trace("TaskSyncService: Updating state", update);
-			this.store.set(changeTasksAtom, update);
+			this.store.set(updateTaskAtom, update);
 			logger.trace("TaskSyncService: State updated successfully");
 		} catch (error) {
 			logger.error(
@@ -260,7 +260,8 @@ export class TaskSyncService {
 					break;
 			}
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : String(error);
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
 			logger.error(
 				`TaskSyncService: Failed to sync task ${task.id}: ${errorMessage}`,
 			);

@@ -5,7 +5,7 @@ import * as React from "react";
 import { cn } from "@/ui/utils";
 
 const badgeVariants = cva(
-	"inline-flex items-center rounded-full border-0 border-none px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 gap-1",
+	"inline-flex items-center rounded-full border-0 border-none font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 gap-1",
 	{
 		variants: {
 			variant: {
@@ -18,9 +18,14 @@ const badgeVariants = cva(
 				accent: "text-xs text-accent ring-1 ring-accent",
 				outline: "text-foreground",
 			},
+			size: {
+				default: "px-2.5 py-0.5 text-xs",
+				sm: "px-1.5 py-0 text-xs",
+			},
 		},
 		defaultVariants: {
 			variant: "default",
+			size: "default",
 		},
 	},
 );
@@ -36,6 +41,7 @@ export interface BadgeProps
 function Badge({
 	className,
 	variant,
+	size,
 	icon,
 	onRemove,
 	removeAriaLabel = "Remove",
@@ -43,7 +49,7 @@ function Badge({
 	...props
 }: BadgeProps) {
 	return (
-		<div className={cn(badgeVariants({ variant }), className)} {...props}>
+		<div className={cn(badgeVariants({ variant, size }), className)} {...props}>
 			{icon && <span className="flex-shrink-0">{icon}</span>}
 			<span className="flex-grow">{children}</span>
 			{onRemove && (

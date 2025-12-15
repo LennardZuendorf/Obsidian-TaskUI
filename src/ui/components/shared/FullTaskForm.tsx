@@ -1,13 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAtomValue, useSetAtom } from "jotai";
-import { Check, ChevronDownIcon, Circle } from "lucide-react";
-
-import { useEffect, useMemo, useState } from "react";
+import { Trash } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { defaultTags } from "../../../data/defaultData";
+import { format } from "date-fns";
+import { defaultSettings, useSettings } from "../../../config/settings";
 import {
 	availableTagsAtom,
 	updateTaskMetadataAtom,
+	updateTaskAtom,
 } from "../../../data/taskAtoms";
 import { TaskBuilder } from "../../../data/taskBuilder";
 import {
@@ -19,30 +20,26 @@ import {
 import {
 	getPriorityDisplay,
 	getPriorityLabels,
+	getPriorityDisplayConfig,
 	priorityEnumToString,
 	priorityStringToEnum,
 } from "../../../ui/lib/displayConfig/priorityDisplayConfig";
 import {
 	getStatusDisplay,
 	getStatusLabels,
+	getStatusDisplayConfig,
 	statusEnumToString,
 	statusStringToEnum,
 } from "../../../ui/lib/displayConfig/statusDisplayConfig";
-
+import { formatDate } from "../../../data/utils/dateUtils";
 import { logger } from "../../../utils/logger";
 import { Alert } from "../../base/Alert";
-import { Badge } from "../../base/Badge";
 import { Button } from "../../base/Button";
-import {
-	Command,
-	CommandGroup,
-	CommandItem,
-	CommandList,
-} from "../../base/Command";
-import { DateInput, Input } from "../../base/Input";
-import { Popover, PopoverContent, PopoverTrigger } from "../../base/Popover";
+import { Input } from "../../base/Input";
+import { DatePickerInput } from "../../base/DatePickerInput";
+import { EnumIconSelect } from "../../base/EnumSelect";
 import { cn } from "../../utils";
-import { TagInput } from "./TagInput";
+import { TagInput, type Tag } from "./TagInput";
 import { taskFormSchema, type TaskFormValues } from "./TaskFormSchema";
 
 interface TaskFormProps {
@@ -50,6 +47,23 @@ interface TaskFormProps {
 	onSubmit: (task: Task) => void;
 	onCancel?: () => void;
 	onDelete?: () => void;
+}
+
+/**
+ * Helper function to convert Tag[] (from TagInput) to string[] (for form)
+ */
+function tagsToStringArray(tags: Tag[]): string[] {
+	return tags.map((tag) => tag.text);
+}
+
+/**
+ * Helper function to convert string[] (from form) to Tag[] (for TagInput)
+ */
+function stringArrayToTags(tags: string[]): Tag[] {
+	return tags.map((text) => ({
+		id: text,
+		text,
+	}));
 }
 
 /**
@@ -73,7 +87,8 @@ function getDefaultFormValues(
 			initialTask?.tags?.map((tag) =>
 				tag.startsWith("#") ? tag.slice(1) : tag,
 			) || [],
-		dueDate: initialTask?.dueDate || undefined,
+		dueDate: initialTask?.dueDate ?? null,
+		scheduledDate: initialTask?.scheduledDate ?? null,
 	};
 }
 
@@ -86,6 +101,8 @@ export default function FullTaskForm({
 	const updateTaskMetadata = useSetAtom(updateTaskMetadataAtom);
 	const taskId = initialTask?.id;
 	const globalAvailableTags = useAtomValue(availableTagsAtom);
+	const allTasks = useAtomValue(updateTaskAtom);
+	const settings = useSettings();
 
 	const statusLabels = getStatusLabels;
 	const priorityLabels = getPriorityLabels;
@@ -99,10 +116,15 @@ export default function FullTaskForm({
 		const combined = new Set([
 			...initialTags,
 			...globalTagNames,
-			...defaultTags, // Add some defaults
 		]);
 		return Array.from(combined);
 	}, [globalAvailableTags, initialTask?.tags]);
+
+	// Find tasks that are blocked by this task
+	const blockedTasks = useMemo(() => {
+		if (!initialTask?.id) return [];
+		return allTasks.filter((task) => task.blocks?.includes(initialTask.id));
+	}, [allTasks, initialTask?.id]);
 
 	const {
 		handleSubmit,
@@ -111,7 +133,7 @@ export default function FullTaskForm({
 		reset,
 		control,
 		getValues,
-		formState: { errors, isDirty },
+		formState: { errors, isDirty, isValid },
 	} = useForm<TaskFormValues>({
 		resolver: zodResolver(taskFormSchema),
 		defaultValues: getDefaultFormValues(
@@ -119,14 +141,35 @@ export default function FullTaskForm({
 			statusLabels,
 			priorityLabels,
 		),
+		mode: "onChange", // Validate on change for better UX
 	});
 
 	const selectedStatusLabel = watch("status");
 	const selectedPriorityLabel = watch("priority");
+	const selectedStatusEnum = statusStringToEnum[selectedStatusLabel] ?? TaskStatus.TODO;
+	const selectedPriorityEnum = priorityStringToEnum[selectedPriorityLabel] ?? TaskPriority.MEDIUM;
 	const selectedTags = watch("tags") || [];
 
-	const [isStatusOpen, setIsStatusOpen] = useState(false);
-	const [priorityOpen, setPriorityOpen] = useState(false);
+	const [editTags, setEditTags] = useState<Tag[]>(
+		stringArrayToTags(selectedTags),
+	);
+	const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
+
+	// Update tags state when form tags change
+	useEffect(() => {
+		setEditTags(stringArrayToTags(selectedTags));
+	}, [selectedTags]);
+
+	// Reset form when initialTask changes
+	useEffect(() => {
+		const defaultValues = getDefaultFormValues(
+			initialTask,
+			statusLabels,
+			priorityLabels,
+		);
+		reset(defaultValues);
+		setEditTags(stringArrayToTags(defaultValues.tags || []));
+	}, [initialTask?.id, reset, statusLabels, priorityLabels]);
 
 	useEffect(() => {
 		if (taskId) {
@@ -144,30 +187,13 @@ export default function FullTaskForm({
 		return undefined;
 	}, [taskId, updateTaskMetadata]);
 
-	const handleTagCreate = (newTagName: string) => {
-		logger.trace(
-			`New tag created: ${newTagName}. Consider updating global state.`,
-		);
-		// Example: addNewGlobalTag({ label: newTagName, value: newTagName.toLowerCase() });
-		// For now, the new tag is just available within this form instance via availableTagNames
-		// If you want it reflected immediately in availableTagNames, you'd need state management here
-	};
-
-	const removeTag = (tagToRemove: string) => {
-		const currentTags = getValues("tags") || [];
-		setValue(
-			"tags",
-			currentTags.filter((tag) => tag !== tagToRemove),
-			{ shouldDirty: true, shouldTouch: true },
-		);
-	};
-
 	const submitForm = (data: TaskFormValues) => {
 		logger.trace("FullTaskForm: Form values submitted", { data });
 
-		const processedTags = (data.tags || []).map((tagName) =>
-			tagName.startsWith("#") ? tagName : `#${tagName}`,
-		);
+		// Convert tags to task format (with # prefix)
+		const processedTags = data.tags?.map((tag) =>
+			tag.startsWith("#") ? tag : `#${tag}`,
+		) || [];
 
 		try {
 			let builder: TaskBuilder;
@@ -176,17 +202,18 @@ export default function FullTaskForm({
 			} else {
 				builder = TaskBuilder.create();
 				builder.setSource(TaskSource.SHARDS);
+				// Set default path for new tasks
+				const defaultPath =
+					settings?.defaultPath || defaultSettings.defaultPath;
+				builder.setPath(defaultPath);
 			}
 
 			builder.setDescription(data.description);
-			builder.setStatus(statusStringToEnum[data.status] ?? TaskStatus.TODO);
-			builder.setPriority(
-				priorityStringToEnum[data.priority] ?? TaskPriority.MEDIUM,
-			);
+			builder.setStatus(selectedStatusEnum ?? TaskStatus.TODO);
+			builder.setPriority(selectedPriorityEnum ?? TaskPriority.MEDIUM);
 			builder.setTags(processedTags);
-			if (data.dueDate) {
-				builder.setDueDate(data.dueDate);
-			}
+			builder.setDueDate(data.dueDate ?? null);
+			builder.setScheduledDate(data.scheduledDate ?? null);
 
 			const task = builder.build();
 			logger.trace("FullTaskForm: Built task object", { task });
@@ -206,279 +233,297 @@ export default function FullTaskForm({
 		}
 	};
 
+	const handleDelete = () => {
+		if (onDelete && initialTask) {
+			onDelete();
+		}
+	};
+
+	const statusDisplay = getStatusDisplay(selectedStatusEnum);
+	const priorityDisplay = getPriorityDisplay(selectedPriorityEnum);
+
+	// Memoize onChange handlers to prevent unnecessary re-renders
+	const handleStatusChange = useCallback((status: TaskStatus) => {
+		const label = statusEnumToString[status];
+		setValue("status", label, {
+			shouldDirty: true,
+			shouldTouch: true,
+		});
+	}, [setValue]);
+
+	const handlePriorityChange = useCallback((priority: TaskPriority) => {
+		const label = priorityEnumToString[priority];
+		setValue("priority", label, {
+			shouldDirty: true,
+			shouldTouch: true,
+		});
+	}, [setValue]);
+
+	// Get default path for display
+	const displayPath =
+		initialTask?.path ||
+		settings?.defaultPath ||
+		defaultSettings.defaultPath;
+
 	return (
-		<div className="w-full mx-auto bg-card p-0">
-			<form onSubmit={handleSubmit(submitForm)} className="space-y-6 p-6">
+		<div className="w-full mx-auto bg-card p-0 overflow-visible">
+			<form onSubmit={handleSubmit(submitForm)} className="space-y-6 p-6 overflow-visible">
+				{/* Validation Error Alert */}
 				{errors.description && (
 					<Alert>
 						<div className="flex flex-row space-x-1 items-center">
-							<p className="font-bold"> Can't create task: </p>
+							<p className="font-bold">Can't save task: </p>
 							<p className="text-wrap">{errors.description.message}</p>
 						</div>
 					</Alert>
 				)}
-				<div className="flex items-end gap-3">
-					<div className="flex flex-col">
-						<label htmlFor="status-input" className="sr-only">
-							Status
-						</label>
-						<Popover open={isStatusOpen} onOpenChange={setIsStatusOpen}>
-							<PopoverTrigger asChild>
-								<Button
-									aria-label={`Select the Status. Currently: ${selectedStatusLabel}`}
-									variant="ghost"
-									size="icon"
-								>
-									{(() => {
-										const statusEnum = statusStringToEnum[selectedStatusLabel];
-										if (!statusEnum) return <Circle className="h-4 w-4" />;
-										const config = getStatusDisplay(statusEnum);
-										const IconComponent = config.icon;
-										return (
-											<IconComponent
-												className={cn("h-4 w-4", config.iconClassName)}
-											/>
-										);
-									})()}
-								</Button>
-							</PopoverTrigger>
-							<PopoverContent className="w-auto">
-								<Command>
-									<CommandList>
-										<CommandGroup>
-											{statusLabels.map((statusLabel) => {
-												const statusEnum = statusStringToEnum[statusLabel];
-												if (!statusEnum) return null;
-												const config = getStatusDisplay(statusEnum);
-												const IconComponent = config.icon;
-												return (
-													<CommandItem
-														key={statusLabel}
-														value={statusLabel}
-														onSelect={() => {
-															setValue("status", statusLabel, {
-																shouldDirty: true,
-																shouldTouch: true,
-															});
-															setIsStatusOpen(false);
-														}}
-													>
-														<div
-															className={cn(
-																"flex items-center gap-2 w-full",
-																selectedStatusLabel === statusLabel
-																	? "font-medium"
-																	: "text-muted-foreground-foreground",
-																config.className,
-															)}
-														>
-															<IconComponent
-																className={cn("h-4 w-4", config.iconClassName)}
-															/>
-															<span>{statusLabel}</span>
-															{selectedStatusLabel === statusLabel && (
-																<Check className="ml-auto h-4 w-4" />
-															)}
-														</div>
-													</CommandItem>
-												);
-											})}
-										</CommandGroup>
-									</CommandList>
-								</Command>
-							</PopoverContent>
-						</Popover>
-					</div>
 
-					<div className="flex flex-col w-full">
-						<label
-							htmlFor="description-input"
-							className="text-xs text-muted-foreground mb-1 ml-1"
-						>
-							Task Description
-						</label>
-						<Controller
-							name="description"
-							control={control}
-							render={({ field }) => (
-								<Input
-									id="description-input"
-									value={field.value || ""}
-									onChange={(stringValue) => field.onChange(stringValue)}
-									onBlur={field.onBlur}
-									ref={field.ref}
-									placeholder="What needs to be done?"
-									autoFocus
-									className="flex flex-shrink"
-									aria-label={`Set the Task Description`}
-									aria-invalid={errors.description ? "true" : "false"}
-								/>
-							)}
-						/>
-					</div>
-				</div>
-
-				<div className="grid grid-cols-3 gap-2 justify-items-start">
-					<div className="flex flex-col col-span-1 w-full">
-						<div className="text-xs text-muted-foreground-foreground-foreground mb-1 ml-1">
-							Priority
-						</div>
-						<Popover
-							open={priorityOpen}
-							onOpenChange={setPriorityOpen}
-							modal={true}
-						>
-							<PopoverTrigger asChild className="w-full">
-								<Button
-									aria-haspopup="listbox"
-									aria-expanded={priorityOpen}
-									aria-label={`Select priority: ${selectedPriorityLabel}`}
-									size="fill"
-									endIcon={<ChevronDownIcon className="h-4 w-4" />}
-								>
-									{(() => {
-										const priorityEnum =
-											priorityStringToEnum[selectedPriorityLabel];
-										if (!priorityEnum) return <span>Medium</span>;
-										const config = getPriorityDisplay(priorityEnum);
-										const IconComponent = config.icon;
-										return (
-											<div
-												className={cn(
-													"flex justify-items-start items-center",
-													config.className,
-												)}
-											>
-												<IconComponent
-													className={cn(
-														"inline mr-1 h-4 w-4",
-														config.iconClassName,
-													)}
-												/>
-												<span className="ml-1">{config.label}</span>
-											</div>
-										);
-									})()}
-								</Button>
-							</PopoverTrigger>
-							<PopoverContent className="w-[var(--radix-popover-trigger-width)]">
-								<Command>
-									<CommandList>
-										<CommandGroup>
-											{priorityLabels.map((priorityLabel) => {
-												const priorityEnum =
-													priorityStringToEnum[priorityLabel];
-												if (!priorityEnum) return null;
-												const config = getPriorityDisplay(priorityEnum);
-												const IconComponent = config.icon;
-												return (
-													<CommandItem
-														key={priorityLabel}
-														value={priorityLabel}
-														onSelect={() => {
-															setValue("priority", priorityLabel, {
-																shouldDirty: true,
-																shouldTouch: true,
-															});
-															setPriorityOpen(false);
-														}}
-													>
-														<div className="flex items-center w-full">
-															<IconComponent
-																className={cn(
-																	"inline mr-2 h-4 w-4",
-																	config.iconClassName,
-																)}
-															/>
-															<span className={config.className}>
-																{config.label}
-															</span>
-															<Check
-																className={cn(
-																	"ml-auto h-4 w-4",
-																	selectedPriorityLabel === priorityLabel
-																		? "opacity-100"
-																		: "opacity-0",
-																)}
-															/>
-														</div>
-													</CommandItem>
-												);
-											})}
-										</CommandGroup>
-									</CommandList>
-								</Command>
-							</PopoverContent>
-						</Popover>
-					</div>
-
-					<div className="flex flex-col col-span-1 w-full">
-						<div className="text-xs text-muted-foreground mb-1 ml-1">Tags</div>
-						<Controller
-							name="tags"
-							control={control}
-							render={({ field }) => (
-								<TagInput
-									field={{
-										...field,
-										value: field.value || [],
-									}}
-									availableTags={availableTagNames}
-									onTagCreate={handleTagCreate}
-									placeholder="Add or create tags..."
-								/>
-							)}
-						/>
-						{errors.tags && (
-							<p role="alert" className="text-xs text-destructive mt-1">
-								{errors.tags.message}
-							</p>
-						)}
-					</div>
-				</div>
-
-				{selectedTags.length > 0 && (
-					<div className="flex flex-wrap gap-2">
-						{selectedTags.map((tag) => (
-							<Badge
-								key={tag}
-								variant="accent"
-								onRemove={() => removeTag(tag)}
-								removeAriaLabel={`Remove tag ${tag}`}
-							>
-								{tag.startsWith("#") ? tag : `#${tag}`}
-							</Badge>
-						))}
-					</div>
-				)}
-
-				<div className="flex flex-col w-full">
-					<Controller
-						name="dueDate"
-						control={control}
-						render={({ field }) => (
-							<DateInput
-								label="Due Date"
-								value={field.value || new Date()}
-								onChange={(date: Date) => field.onChange(date)}
-								validation="any"
-								aria-label="Set the Task Due Date"
-								placeholder="Select a due date"
+				{/* Section 1: Status, Priority, Title, and Tags */}
+				<div className="flex flex-col gap-3">
+					<div className="flex items-start gap-2 flex-row flex-wrap">
+						{/* Status Icon Button */}
+						<div className="flex flex-col flex-shrink-0">
+							<label className="text-xs text-muted-foreground mb-1 ml-1">
+								Status
+							</label>
+							<EnumIconSelect
+								value={selectedStatusEnum}
+								onChange={handleStatusChange}
+								options={getStatusDisplayConfig()}
+								size="icon"
+								iconSize="h-4 w-4"
+								variant="default"
+								className="flex-shrink-0 px-2"
+								groupHeading="Status"
+								ariaLabel={`Status: ${statusDisplay.label}. Click to change status.`}
 							/>
-						)}
-					/>
+						</div>
+
+						{/* Priority Icon Button */}
+						<div className="flex flex-col flex-shrink-0">
+							<label className="text-xs text-muted-foreground mb-1 ml-1">
+								Priority
+							</label>
+							<EnumIconSelect
+								value={selectedPriorityEnum}
+								onChange={handlePriorityChange}
+								options={getPriorityDisplayConfig()}
+								size="icon"
+								iconSize="h-4 w-4"
+								variant="default"
+								className="flex-shrink-0 px-2"
+								groupHeading="Priority"
+								ariaLabel={`Priority: ${priorityDisplay.label}. Click to change priority.`}
+							/>
+						</div>
+
+						{/* Description Input */}
+						<div className="flex flex-col min-w-40 flex-1 basis-0">
+							<label className="text-xs text-muted-foreground mb-1 ml-1">
+								Task Description
+							</label>
+							<Controller
+								name="description"
+								control={control}
+								render={({ field }) => (
+									<Input
+										value={field.value || ""}
+										onChange={(stringValue) => field.onChange(stringValue)}
+										onBlur={field.onBlur}
+										ref={field.ref}
+										className="w-full min-w-0"
+										placeholder="What needs to be done?"
+										autoFocus
+										aria-label="Set the Task Description"
+										aria-invalid={errors.description ? "true" : "false"}
+									/>
+								)}
+							/>
+						</div>
+
+						{/* Tags Input - Full width on wrap */}
+						<div className="flex flex-col w-full min-w-0 basis-full">
+							<label className="text-xs text-muted-foreground mb-1 ml-1">
+								Tags
+							</label>
+							<Controller
+								name="tags"
+								control={control}
+								render={({ field }) => (
+									<TagInput
+										tags={editTags}
+										setTags={(newTags: Tag[]) => {
+											setEditTags(newTags);
+											const taskTags = tagsToStringArray(newTags);
+											setValue("tags", taskTags, {
+												shouldDirty: true,
+												shouldTouch: true,
+											});
+										}}
+										activeTagIndex={activeTagIndex}
+										setActiveTagIndex={setActiveTagIndex}
+										placeholder="Add Tags..."
+										className="w-full min-w-0"
+									/>
+								)}
+							/>
+						</div>
+					</div>
 				</div>
 
+				{/* Separator */}
+				<div className="border-t border-border" />
+
+				{/* Section 2: Dates */}
+				<div className="flex flex-col gap-3">
+					<div className="flex flex-col gap-2 items-start">
+						<Controller
+							name="dueDate"
+							control={control}
+							render={({ field }) => (
+								<DatePickerInput
+									label="Due Date"
+									className="w-full"
+									value={field.value ?? null}
+									onChange={(date) => field.onChange(date ?? null)}
+									wrapperClassName="w-full"
+								/>
+							)}
+						/>
+
+						{/* Scheduled Date Input */}
+						<Controller
+							name="scheduledDate"
+							control={control}
+							render={({ field }) => (
+								<DatePickerInput
+									label="Scheduled"
+									className="w-full"
+									value={field.value ?? null}
+									onChange={(date) => field.onChange(date ?? null)}
+									wrapperClassName="w-full"
+								/>
+							)}
+						/>
+					</div>
+				</div>
+
+				{/* Separator */}
+				<div className="border-t border-border" />
+
+				{/* Section 3: Task Relations (Display Only) */}
+				<div className="flex flex-col gap-3">
+					<div className="text-sm font-medium">Task Relations</div>
+					
+					{/* Tasks Blocked by This */}
+					<div className="flex flex-col gap-1 min-w-0">
+						<label className="text-xs text-muted-foreground">
+							Tasks Blocked by This
+						</label>
+						<div className="text-sm text-muted-foreground pl-2 break-words">
+							{blockedTasks.length > 0 ? (
+								<ul className="list-disc list-inside space-y-1">
+									{blockedTasks.map((task) => (
+										<li key={task.id} className="break-words">{task.description}</li>
+									))}
+								</ul>
+							) : (
+								<span className="italic">None</span>
+							)}
+						</div>
+					</div>
+
+					{/* Subtasks */}
+					<div className="flex flex-col gap-1 min-w-0">
+						<label className="text-xs text-muted-foreground">Subtasks</label>
+						<div className="text-sm text-muted-foreground pl-2 break-words">
+							{initialTask?.subtasks && initialTask.subtasks.length > 0 ? (
+								<ul className="list-disc list-inside space-y-1">
+									{initialTask.subtasks.map((subtask) => (
+										<li key={subtask.id} className="break-words">{subtask.description}</li>
+									))}
+								</ul>
+							) : (
+								<span className="italic">None</span>
+							)}
+						</div>
+					</div>
+				</div>
+
+				{/* Separator */}
+				<div className="border-t border-border" />
+
+				{/* Section 4: Metadata (Display Only) */}
+				<div className="flex flex-col gap-3">
+					<div className="text-sm font-medium">Metadata</div>
+					
+					<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+						{/* Obsidian File Path */}
+						<div className="flex flex-col gap-1 min-w-0">
+							<label className="text-xs text-muted-foreground">
+								File Path
+							</label>
+							<div className="text-sm text-muted-foreground pl-2 break-words">
+								{displayPath}
+							</div>
+						</div>
+
+						{/* Created Date */}
+						<div className="flex flex-col gap-1 min-w-0">
+							<label className="text-xs text-muted-foreground">
+								Created Date
+							</label>
+							<div className="text-sm text-muted-foreground pl-2 break-words">
+								{initialTask?.createdDate
+									? format(initialTask.createdDate, "MMM d, yyyy")
+									: "—"}
+							</div>
+						</div>
+
+						{/* Symbol */}
+						<div className="flex flex-col gap-1 min-w-0">
+							<label className="text-xs text-muted-foreground">Symbol</label>
+							<div className="text-sm text-muted-foreground pl-2 break-words">
+								{initialTask?.symbol || "—"}
+							</div>
+						</div>
+					</div>
+				</div>
+
+				{/* Separator */}
+				<div className="border-t border-border" />
+
+				{/* Section 5: Action Buttons */}
 				<div className="flex flex-row justify-end pt-4 gap-2">
-					<Button type="button" onClick={handleCancel} aria-label="Cancel">
+					{/* Delete Button - Only show when editing existing task */}
+					{initialTask && onDelete && (
+						<Button
+							type="button"
+							size="sm"
+							variant="outline"
+							onClick={handleDelete}
+							aria-label="Delete task"
+						>
+							<Trash className="h-4 w-4 mr-2" />
+							Delete
+						</Button>
+					)}
+
+					<Button
+						type="button"
+						size="sm"
+						variant="outline"
+						onClick={handleCancel}
+						aria-label="Cancel"
+					>
 						Cancel
 					</Button>
 
 					<Button
 						type="submit"
+						size="sm"
 						aria-label="Save task"
-						onClick={handleSubmit(submitForm)}
-						disabled={!isDirty && !!initialTask}
+						disabled={!isValid || (!isDirty && !!initialTask)}
 					>
 						{initialTask ? "Save Changes" : "Create Task"}
 					</Button>

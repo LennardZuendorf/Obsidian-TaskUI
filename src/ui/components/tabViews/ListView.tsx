@@ -10,7 +10,6 @@ import { Button } from "../../base/Button";
 import { TaskCard } from "../shared/TaskCard";
 import type { TabViewProps } from "../TaskView";
 
-// Helper function to render the "No tasks found" message
 function NoTasksMessage() {
 	return (
 		<div className="text-center py-10 border rounded-md mt-4">
@@ -107,18 +106,10 @@ export function ListView<TData extends Task>({
 										</span>
 										{row.subRows && (
 											<span className="text-muted-foreground ml-auto">
-												({row.subRows.length} items)
+												({row.subRows.length} {row.subRows.length>1? "items" : "item"})
 											</span>
 										)}
 									</div>
-									<Button
-										variant="outline"
-										disabled={true}
-										onClick={handleCreateTask}
-									>
-										<Plus className="h-4 w-4" />
-										<span className="text-sm">Add Task</span>
-									</Button>
 								</div>
 							</div>
 						);
@@ -130,8 +121,8 @@ export function ListView<TData extends Task>({
 							>
 								<TaskCard
 									DtableRow={row as unknown as Row<Task>}
-									onEditTask={handleEditTask}
-									onDeleteTask={handleDeleteTask}
+									onEditTask={() => handleEditTask(row.original)}
+									onDeleteTask={() => handleDeleteTask(row.original)}
 									onUpdateTask={(taskFromCard) =>
 										handleUpdateTask(taskFromCard as unknown as TData)
 									}

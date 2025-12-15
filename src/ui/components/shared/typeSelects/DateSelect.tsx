@@ -1,6 +1,6 @@
 import React from "react";
 import type { ButtonProps } from "../../../base/Button";
-import { OptionCalendar } from "../../custom/OptionCalendar";
+import { Calendar } from "../../../base/Calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../base/Popover";
 import { Button } from "../../../base/Button";
 import { getMatchingDisplay } from "../../../lib/displayConfig/utils";
@@ -43,46 +43,55 @@ export function DateSelect({
 					Date
 				</span>
 			)}
-			<Popover open={dSelectOpen} onOpenChange={setDSelectOpen}>
-				<PopoverTrigger asChild>
-					<Button
-						size={buttonSize}
-						disabled={disabled}
-						onClick={() => setDSelectOpen(true)}
-					>
-						{(() => {
-							if (value) {
-								const displayInfo = getMatchingDisplay(value);
-								const IconComponent = displayInfo.icon;
-								return (
-									<>
-										{IconComponent && (
-											<IconComponent
-												className={cn("h-4 w-4", displayInfo.iconClassName)}
-											/>
-										)}
-										<span className={cn("text-sm", displayInfo.className)}>
-											{displayInfo.label}
-										</span>
-									</>
-								);
-							}
-							// Default view when no value is set
+		<Popover modal={false} open={dSelectOpen} onOpenChange={setDSelectOpen}>
+			<PopoverTrigger asChild>
+				<Button
+					size={buttonSize}
+					disabled={disabled}
+					onClick={() => setDSelectOpen(true)}
+				>
+					{(() => {
+						if (value) {
+							const displayInfo = getMatchingDisplay(value);
+							const IconComponent = displayInfo.icon;
 							return (
 								<>
-									<span className="text-sm text-muted-foreground">
-										Select Date
+									{IconComponent && (
+										<IconComponent
+											className={cn("h-4 w-4", displayInfo.iconClassName)}
+										/>
+									)}
+									<span className={cn("text-sm", displayInfo.className)}>
+										{displayInfo.label}
 									</span>
 								</>
 							);
-						})()}
-						<ChevronDown className="h-4 w-4 opacity-50 ml-auto" />
-					</Button>
-				</PopoverTrigger>
-				<PopoverContent className="p-0">
-					<OptionCalendar />
-				</PopoverContent>
-			</Popover>
+						}
+						// Default view when no value is set
+						return (
+							<>
+								<span className="text-sm text-muted-foreground">
+									Select Date
+								</span>
+							</>
+						);
+					})()}
+					<ChevronDown className="h-4 w-4 opacity-50 ml-auto" />
+				</Button>
+			</PopoverTrigger>
+			<PopoverContent className="w-auto p-0">
+				<Calendar
+					mode="single"
+					selected={value || undefined}
+					onSelect={(date) => {
+						if (date) {
+							onChange(date);
+							setDSelectOpen(false);
+						}
+					}}
+				/>
+			</PopoverContent>
+		</Popover>
 		</div>
 	);
 }

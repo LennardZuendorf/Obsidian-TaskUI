@@ -11,6 +11,7 @@ import {
 	getPaginationRowModel,
 	getSortedRowModel,
 	OnChangeFn,
+	PaginationState,
 	SortingState,
 	Table as TanstackTable,
 	useReactTable,
@@ -19,7 +20,7 @@ import { useAtom, useAtomValue } from "jotai";
 import { type App } from "obsidian";
 import React, { useState } from "react";
 import {
-	changeTasksAtom,
+	updateTaskAtom,
 	expandedAtom,
 	groupingAtom,
 	paginationAtom,
@@ -45,7 +46,6 @@ type ColumnVisibility = Record<string, boolean>;
 // Props interface for the hook - Add action handlers
 interface UseDTableProps {
 	app: App;
-	changeTasks: (update: TaskUpdate) => void;
 	handleEditTask?: (task: Task) => void;
 	handleDeleteTask?: (task: Task) => void;
 }
@@ -181,9 +181,8 @@ const taskTableColumns: ColumnDef<Task, any>[] = [
 // Rename the component function to useDTable
 export function useDTable({
 	app,
-	changeTasks,
 }: UseDTableProps): TanstackTable<Task> {
-	const tasks = useAtomValue(changeTasksAtom);
+	const tasks = useAtomValue(updateTaskAtom);
 	const [sorting, setSorting] = useAtom(sortingAtom);
 	const [grouping, setGrouping] = useAtom(groupingAtom);
 	const [expanded, setExpanded] = useAtom(expandedAtom);
@@ -249,10 +248,15 @@ export function useDTable({
 		setColumnFilters(newFilters);
 	};
 
-	const pageCount = React.useMemo(
-		() => Math.ceil(tasks.length / pagination.pageSize),
-		[tasks.length, pagination.pageSize],
-	);
+	const handlePaginationChange: OnChangeFn<PaginationState> = (updater) => {
+		const newPaginationState =
+			typeof updater === "function" ? updater(pagination) : updater;
+		logger.trace(
+			{ prev: pagination, next: newPaginationState },
+			"useDTable: Updating persistent pagination state",
+		);
+		setPagination(newPaginationState);
+	};
 
 	const table = useReactTable({
 		data: tasks,
@@ -267,8 +271,7 @@ export function useDTable({
 			pagination,
 		},
 		meta: {
-			app,
-			changeTasks,
+			app,	
 		},
 		onSortingChange: handleSortingChange,
 		onGlobalFilterChange: setGlobalFilter,
@@ -276,6 +279,7 @@ export function useDTable({
 		onExpandedChange: handleExpandedChange,
 		onColumnVisibilityChange: setColumnVisibility,
 		onColumnFiltersChange: handleColumnFiltersChange,
+		onPaginationChange: handlePaginationChange,
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
@@ -284,9 +288,7 @@ export function useDTable({
 		getPaginationRowModel: getPaginationRowModel(),
 		enableColumnResizing: false,
 		autoResetExpanded: false,
-		manualPagination: true,
-		pageCount: pageCount,
-		onPaginationChange: setPagination,
+		autoResetPageIndex: false,
 		filterFns: {
 			status: statusFilterFn,
 			priority: priorityFilterFn,

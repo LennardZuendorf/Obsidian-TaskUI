@@ -33,7 +33,7 @@ export const ErrorView: React.FC<ErrorProps> = ({
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<Alert variant="destructive">
+					<Alert variant="error">
 						<p className="text-lg">{message}</p>
 						{details && <p className="text-sm mt-2">{details}</p>}
 					</Alert>
