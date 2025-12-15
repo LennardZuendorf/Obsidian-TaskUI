@@ -6,7 +6,7 @@
 	"scripts": {
 		"check": "biome check --write ./src",
 		"version": "node ./build/version-bump.mjs",
-		"dev": "vite build --watch --mode development",
+		"dev": "ENABLE_DEV_VAULT_COPY=true vite build --watch --mode development",
 		"build": "npm run check && vite build --mode production",
 		"build-release": "npm run build && npm run version",
 		"lint-staged": "lint-staged",
