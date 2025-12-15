@@ -23,7 +23,7 @@ export interface PriorityStatusCheckboxProps {
  * - Click: Cycles through status states
  * - Right-click: Opens priority picker popover
  */
-export function PriorityStatusCheckbox({
+export function PriorityStatusCommand({
 	status,
 	priority,
 	onStatusChange,
