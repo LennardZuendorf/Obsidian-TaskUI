@@ -6,6 +6,7 @@ import {
 	LuCalendarFold,
 	LuCalendarOff,
 } from "react-icons/lu";
+import { logger } from "@/utils/logger";
 import { DateDisplayConfig } from "./types";
 import { DateCategory } from "./dateCategory";
 
@@ -155,7 +156,7 @@ export const dateToDateCategory = (
 		return DateCategory.FUTURE;
 	}
 
-	console.warn("Date category calculation fell through for date:", date);
+		logger.warn("Date category calculation fell through for date:", date);
 	return DateCategory.FUTURE;
 };
 

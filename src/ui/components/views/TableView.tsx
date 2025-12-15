@@ -12,7 +12,7 @@ import {
 } from "@/ui/base/Table";
 import { DataTablePagination } from "@/ui/components/table/DTablePagination";
 import { SettingsButton } from "@/ui/components/task/SettingsButton";
-import type { TabViewProps } from "@/ui/components/views/TaskView";
+import type { TabViewProps } from "@/ui/components/TaskView";
 
 export function TableView<TData extends Task>({
 	table,

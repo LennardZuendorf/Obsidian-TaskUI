@@ -1,16 +1,18 @@
 import { getDefaultStore } from "jotai";
 import { App } from "obsidian";
-import { InternalApiService } from "../api/internalApiService";
+import { InternalApiService } from "@/api/internalApiService";
 import {
 	baseTasksAtom,
 	unsyncedTasksAtom,
 	updateTaskAtom,
 	updateTaskMetadataAtom,
-} from "../data/taskAtoms";
-import { storeOperation } from "../data/types/operations";
-import { Task, TaskWithMetadata } from "../data/types/tasks";
-import { validateTasks } from "../data/utils/validateTask";
-import { logger } from "../utils/logger";
+} from "@/data/taskAtoms";
+import { storeOperation } from "@/data/types/operations";
+import { Task, TaskWithMetadata } from "@/data/types/tasks";
+import { createRemoteUpdate } from "@/data/utils/taskUpdateHelpers";
+import { validateTasks } from "@/data/utils/validateTask";
+import { getErrorMessage } from "@/utils/errorUtils";
+import { logger } from "@/utils/logger";
 
 export interface TaskUpdate {
 	operation: storeOperation;
@@ -100,12 +102,7 @@ export class TaskSyncService {
 				"[TaskSyncService.remoteUpdateHandler] Validated remote tasks successfully.",
 			);
 
-			const update: TaskUpdate = {
-				operation: storeOperation.REMOTE_UPDATE,
-				tasks: remoteTasks,
-				source: "remote",
-				timestamp: Date.now(),
-			};
+			const update = createRemoteUpdate(remoteTasks);
 			logger.trace(
 				"[TaskSyncService.remoteUpdateHandler] Prepared REMOTE_UPDATE payload",
 				{ update },
@@ -260,8 +257,7 @@ export class TaskSyncService {
 					break;
 			}
 		} catch (error) {
-			const errorMessage =
-				error instanceof Error ? error.message : String(error);
+			const errorMessage = getErrorMessage(error);
 			logger.error(
 				`TaskSyncService: Failed to sync task ${task.id}: ${errorMessage}`,
 			);

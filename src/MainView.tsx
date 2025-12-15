@@ -3,23 +3,25 @@ import { observe } from "jotai-effect";
 import { App, ItemView, Notice, WorkspaceLeaf } from "obsidian";
 import React, { useEffect, useState } from "react";
 import { createRoot, Root } from "react-dom/client";
-import { appSettings, SettingsContext } from "./config/settings";
+import { appSettings, SettingsContext } from "@/config/settings";
 import {
 	baseTasksAtom,
 	unsyncedTasksAtom,
 	updateTaskAtom,
-} from "./data/taskAtoms";
-import { storeOperation as str } from "./data/types/operations";
-import { TaskWithMetadata } from "./data/types/tasks";
-import { TaskService as CrudService } from "./service/taskService";
-import { TaskSyncService, TaskUpdate } from "./service/taskSyncService";
-import "./styles.css";
-import { ErrorView } from "./ui/components/ErrorView";
-import { LoadingScreen } from "./ui/components/LoadingScreen";
-import { TaskView } from "./ui/components/TaskView";
-import { showNotice } from "./ui/lib/obsidian/notice";
-import { AppContext, useApp } from "./utils/context";
-import { logger } from "./utils/logger";
+} from "@/data/taskAtoms";
+import { storeOperation as str } from "@/data/types/operations";
+import { TaskWithMetadata } from "@/data/types/tasks";
+import { createRemoteUpdate } from "@/data/utils/taskUpdateHelpers";
+import { TaskService as CrudService } from "@/service/taskService";
+import { TaskSyncService, TaskUpdate } from "@/service/taskSyncService";
+import "@/styles.css";
+import { ErrorView } from "@/ui/components/ErrorView";
+import { LoadingScreen } from "@/ui/components/LoadingScreen";
+import { TaskView } from "@/ui/components/TaskView";
+import { showNotice } from "@/ui/lib/obsidian/notice";
+import { AppContext, useApp } from "@/utils/context";
+import { getErrorMessage } from "@/utils/errorUtils";
+import { logger } from "@/utils/logger";
 
 export const VIEW_TYPE_MAIN = "react-view";
 
@@ -37,19 +39,14 @@ const AppController: React.FC = () => {
 			}
 			const response = await crudService.loadTasks();
 			if (response.status && response.tasks) {
-				const update: TaskUpdate = {
-					operation: str.REMOTE_UPDATE,
-					tasks: response.tasks,
-					source: "remote" as const,
-					timestamp: Date.now(),
-				};
+				const update = createRemoteUpdate(response.tasks);
 				updateTaskState(update);
 				logger.debug("Tasks fetched and state updated successfully.");
 			} else {
 				logger.error("Error fetching tasks from the API.");
 			}
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : String(err);
+			const errorMessage = getErrorMessage(err);
 			logger.error(`Error fetching tasks: ${errorMessage}`);
 			setError(errorMessage);
 		} finally {
@@ -90,7 +87,7 @@ const AppController: React.FC = () => {
 			setCrudService(service);
 			logger.debug("TaskUI: Loaded app and CRUD service successfully.");
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : String(err);
+			const errorMessage = getErrorMessage(err);
 			setError(errorMessage);
 			logger.error(`Error initializing CRUD service: ${errorMessage}`);
 			setIsLoading(false);
@@ -169,8 +166,7 @@ export class MainView extends ItemView {
 							try {
 								await this.taskSync.handleLocalChange(taskWithMeta);
 							} catch (error) {
-								const errorMessage =
-									error instanceof Error ? error.message : String(error);
+								const errorMessage = getErrorMessage(error);
 								logger.error(`Failed to sync task: ${errorMessage}`);
 								// Don't show notice for every retry failure to avoid spamming
 								if (
@@ -200,8 +196,7 @@ export class MainView extends ItemView {
 
 			logger.debug("MainView: Rendered successfully with sync effect.");
 		} catch (error) {
-			const errorMessage =
-				error instanceof Error ? error.message : String(error);
+			const errorMessage = getErrorMessage(error);
 			logger.error(`Error in onOpen: ${errorMessage}`);
 			this.containerEl.children[1].innerHTML = `<div class="error-notice">Failed to initialize TaskUI view: ${errorMessage}</div>`;
 		}

@@ -9,6 +9,7 @@ import {
 import { type App, Notice } from "obsidian";
 import React from "react";
 import { storeOperation as str } from "@/data/types/operations";
+import { createLocalUpdate } from "@/data/utils/taskUpdateHelpers";
 import type { Task } from "@/data/types/tasks";
 import type { TaskUpdate } from "@/service/taskSyncService";
 import { logger } from "@/utils/logger";
@@ -34,7 +35,7 @@ interface TaskViewProps {
 export function TaskView({ app, changeTasks }: TaskViewProps) {
 	const handleEditTask = React.useCallback(
 		(task: Task) => {
-			console.log("handleEditTask called in TaskView for:", task); // Log entry
+			logger.trace("[TaskView] handleEditTask called", { task });
 			if (!app) {
 				logger.error(
 					"[TaskView] App context not available for handleEditTask.",
@@ -45,16 +46,13 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 			new TaskModal(
 				app,
 				(updatedTask: Task | null) => {
-					console.log("TaskModal callback received:", updatedTask); // Log callback
+					logger.trace("[TaskView] TaskModal callback received", {
+						updatedTask,
+					});
 					if (updatedTask) {
-						const update: TaskUpdate = {
-							operation: str.LOCAL_UPDATE,
-							tasks: [updatedTask],
-							source: "local",
-							timestamp: Date.now(),
-						};
+						const update = createLocalUpdate(str.LOCAL_UPDATE, [updatedTask]);
 						changeTasks(update);
-						console.log("Called changeTasks with UPDATE operation"); // Log state update call
+						logger.trace("[TaskView] Called changeTasks with UPDATE operation");
 						new Notice(
 							`Task "${updatedTask.description.substring(0, 20)}..." updated.`,
 						);
@@ -69,12 +67,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 	const handleDeleteTask = React.useCallback(
 		(task: Task) => {
 			logger.trace("[TaskView] Deleting task", { task });
-			const update: TaskUpdate = {
-				operation: str.LOCAL_DELETE,
-				tasks: [task],
-				source: "local",
-				timestamp: Date.now(),
-			};
+			const update = createLocalUpdate(str.LOCAL_DELETE, [task]);
 			changeTasks(update);
 			new Notice(`Task "${task.description.substring(0, 20)}..." deleted.`);
 		},
@@ -83,12 +76,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 
 	const handleUpdateTask = React.useCallback(
 		(updatedTask: Task) => {
-			const update: TaskUpdate = {
-				operation: str.LOCAL_UPDATE,
-				tasks: [updatedTask],
-				source: "local",
-				timestamp: Date.now(),
-			};
+			const update = createLocalUpdate(str.LOCAL_UPDATE, [updatedTask]);
 			changeTasks(update);
 		},
 		[changeTasks],
@@ -99,7 +87,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 	});
 
 	// Keep createTask function here as well
-	function createTask() {
+	const createTask = React.useCallback(() => {
 		if (!app) {
 			logger.error("[TaskView] App context not available for createTask.");
 			new Notice("Cannot create task: App context unavailable.");
@@ -110,12 +98,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 				logger.trace("[TaskView] TaskModal closed with new task", {
 					task: newTask,
 				});
-				const update: TaskUpdate = {
-					operation: str.LOCAL_ADD,
-					tasks: [newTask],
-					source: "local" as const,
-					timestamp: Date.now(),
-				};
+				const update = createLocalUpdate(str.LOCAL_ADD, [newTask]);
 				logger.trace("[TaskView] Calling changeTasksAtom with LOCAL_ADD", {
 					update,
 				});
@@ -125,7 +108,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 				logger.trace("[TaskView] TaskModal closed without creating a task.");
 			}
 		}).open();
-	}
+	}, [app, changeTasks]);
 
 	// 4. Render the main layout with Tabs, Controls, and View Content
 	return (

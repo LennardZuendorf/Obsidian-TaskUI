@@ -12,12 +12,12 @@ import { PriorityFlags } from "@/ui/lib/components/PriorityFlags";
 import TaskForm, { TaskFormInline } from "@/ui/components/forms/TaskForm";
 import { cn } from "@/ui/utils";
 
-const TaskListCard = ({
+const TaskListCard = <TData extends Task = Task>({
 	DtableRow,
 	onEditTask,
 	onUpdateTask,
 	onDeleteTask,
-}: TaskRowProps) => {
+}: TaskRowProps<TData>) => {
 	const task = DtableRow.original;
 
 	const [isEditMode, setIsEditMode] = React.useState(false);
@@ -189,8 +189,8 @@ const TaskListCard = ({
 	);
 };
 
-interface TaskRowProps {
-	DtableRow: Row<Task>;
+interface TaskRowProps<TData extends Task = Task> {
+	DtableRow: Row<TData>;
 	onEditTask: (task: Task) => void; // opens modal
 	onDeleteTask: (task: Task) => void;
 	onUpdateTask: (task: Task) => void;

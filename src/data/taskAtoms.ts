@@ -7,16 +7,18 @@ import {
 	GroupingState,
 	SortingState,
 } from "@tanstack/react-table";
+import type { Getter, Setter } from "jotai";
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import { logger } from "../utils/logger";
-import { storeOperation, UpdateMetadataPayload } from "./types/operations";
+import { storeOperation, UpdateMetadataPayload } from "@/data/types/operations";
 import {
 	Task,
 	TaskMetadata,
 	TaskStatus,
 	TaskWithMetadata,
-} from "./types/tasks";
+} from "@/data/types/tasks";
+import type { TaskUpdate } from "@/service/taskSyncService";
+import { logger } from "@/utils/logger";
 
 // Define the structure for tags used in the UI selector
 export type TaskTag = {
@@ -47,6 +49,120 @@ export const baseTasksAtom = atom<TaskWithMetadata[]>([]);
 export const resetStateAtom = atom(null, (get, set) => {
 	set(baseTasksAtom, []);
 });
+
+/**
+ * Handles REMOTE_UPDATE operation logic.
+ * Processes remote tasks and updates local state while preserving local changes.
+ */
+function handleRemoteUpdate(
+	get: Getter,
+	set: Setter,
+	change: TaskUpdate,
+	now: number,
+): void {
+	logger.trace("[changeTasksAtom] Handling REMOTE_UPDATE", {
+		taskCount: change.tasks.length,
+	});
+	const originalTasksWithMeta = get(baseTasksAtom);
+	let hasChanged = false;
+
+	const updatedTasks = [...originalTasksWithMeta]; // Start with a shallow copy
+	const remoteTaskIds = new Set(change.tasks.map((t) => t.id));
+
+	// Process updates/adds from remote
+	change.tasks.forEach((remoteTask) => {
+		let localIndex = updatedTasks.findIndex(
+			({ task }) => task.id === remoteTask.id,
+		);
+
+		if (localIndex === -1) {
+			localIndex = updatedTasks.findIndex(
+				({ task }) =>
+					task.description === remoteTask.description &&
+					task.status === remoteTask.status,
+			);
+			if (localIndex !== -1) {
+				// Found by secondary matching, update ID and treat as update
+				if (updatedTasks[localIndex].task.id !== remoteTask.id) {
+					updatedTasks[localIndex].task.id = remoteTask.id;
+					hasChanged = true; // ID change counts as a change
+				}
+				remoteTaskIds.add(remoteTask.id);
+			}
+		}
+
+		if (localIndex !== -1) {
+			// Existing task found locally
+			const localTaskWithMeta = updatedTasks[localIndex];
+			if (!localTaskWithMeta.metadata.needsSync) {
+				const previousVersion = localTaskWithMeta.task;
+				// Check if remote task is actually different before marking changed
+				// Simple check: compare rawTaskLine or a few key fields if rawTaskLine isn't reliable
+				if (JSON.stringify(previousVersion) !== JSON.stringify(remoteTask)) {
+					// Basic change detection
+					updatedTasks[localIndex] = {
+						task: remoteTask,
+						metadata: {
+							lastUpdated: now,
+							lastSynced: now,
+							needsSync: false,
+							toBeSyncedAction: null,
+							previousVersion: previousVersion,
+						},
+					};
+					hasChanged = true;
+				} else {
+					// Even if data is identical, we might need to update metadata (e.g., lastSynced)
+					if (localTaskWithMeta.metadata.lastSynced !== now) {
+						updatedTasks[localIndex] = {
+							...localTaskWithMeta,
+							metadata: {
+								...localTaskWithMeta.metadata,
+								lastSynced: now,
+								needsSync: false,
+								toBeSyncedAction: null,
+							},
+						};
+						// Not marking hasChanged = true for only metadata update might be okay,
+						// unless metadata drives UI reactivity significantly.
+						// Let's assume for now only task data changes matter for this optimization.
+					}
+				}
+			}
+		} else {
+			// New task from remote
+			updatedTasks.push({
+				task: remoteTask,
+				metadata: {
+					lastUpdated: now,
+					lastSynced: now,
+					needsSync: false,
+					toBeSyncedAction: null,
+				},
+			});
+			hasChanged = true;
+		}
+	});
+
+	// Process deletions: Filter out local tasks not in remote *and* not needing sync
+	const finalTasks = updatedTasks.filter((taskWithMeta) => {
+		const isInRemote = remoteTaskIds.has(taskWithMeta.task.id);
+		const needsSync = taskWithMeta.metadata.needsSync;
+		return isInRemote || needsSync;
+	});
+
+	// Only update the atom if the length changed or if an add/update occurred
+	if (hasChanged || finalTasks.length !== originalTasksWithMeta.length) {
+		logger.trace("[changeTasksAtom] Setting new state for REMOTE_UPDATE", {
+			count: finalTasks.length,
+		});
+		set(baseTasksAtom, finalTasks);
+	} else {
+		logger.trace(
+			"[changeTasksAtom] Skipping state update for REMOTE_UPDATE - no effective change",
+		);
+	}
+}
 
 /**
  * This atom manages the state of all tasks in the application.
@@ -165,112 +281,7 @@ export const updateTaskAtom = atom(
 			}
 
 			case storeOperation.REMOTE_UPDATE: {
-				logger.trace("[changeTasksAtom] Handling REMOTE_UPDATE", {
-					taskCount: change.tasks.length,
-				});
-				const originalTasksWithMeta = get(baseTasksAtom);
-				const now = change.timestamp || Date.now();
-				let hasChanged = false;
-
-				const updatedTasks = [...originalTasksWithMeta]; // Start with a shallow copy
-				const remoteTaskIds = new Set(change.tasks.map((t) => t.id));
-
-				// Process updates/adds from remote
-				change.tasks.forEach((remoteTask) => {
-					let localIndex = updatedTasks.findIndex(
-						({ task }) => task.id === remoteTask.id,
-					);
-
-					if (localIndex === -1) {
-						localIndex = updatedTasks.findIndex(
-							({ task }) =>
-								task.description === remoteTask.description &&
-								task.status === remoteTask.status,
-						);
-						if (localIndex !== -1) {
-							// Found by secondary matching, update ID and treat as update
-							if (updatedTasks[localIndex].task.id !== remoteTask.id) {
-								updatedTasks[localIndex].task.id = remoteTask.id;
-								hasChanged = true; // ID change counts as a change
-							}
-							remoteTaskIds.add(remoteTask.id);
-						}
-					}
-
-					if (localIndex !== -1) {
-						// Existing task found locally
-						const localTaskWithMeta = updatedTasks[localIndex];
-						if (!localTaskWithMeta.metadata.needsSync) {
-							const previousVersion = localTaskWithMeta.task;
-							// Check if remote task is actually different before marking changed
-							// Simple check: compare rawTaskLine or a few key fields if rawTaskLine isn't reliable
-							if (
-								JSON.stringify(previousVersion) !== JSON.stringify(remoteTask)
-							) {
-								// Basic change detection
-								updatedTasks[localIndex] = {
-									task: remoteTask,
-									metadata: {
-										lastUpdated: now,
-										lastSynced: now,
-										needsSync: false,
-										toBeSyncedAction: null,
-										previousVersion: previousVersion,
-									},
-								};
-								hasChanged = true;
-							} else {
-								// Even if data is identical, we might need to update metadata (e.g., lastSynced)
-								if (localTaskWithMeta.metadata.lastSynced !== now) {
-									updatedTasks[localIndex] = {
-										...localTaskWithMeta,
-										metadata: {
-											...localTaskWithMeta.metadata,
-											lastSynced: now,
-											needsSync: false,
-											toBeSyncedAction: null,
-										},
-									};
-									// Not marking hasChanged = true for only metadata update might be okay,
-									// unless metadata drives UI reactivity significantly.
-									// Let's assume for now only task data changes matter for this optimization.
-								}
-							}
-						}
-					} else {
-						// New task from remote
-						updatedTasks.push({
-							task: remoteTask,
-							metadata: {
-								lastUpdated: now,
-								lastSynced: now,
-								needsSync: false,
-								toBeSyncedAction: null,
-							},
-						});
-						hasChanged = true;
-					}
-				});
-
-				// Process deletions: Filter out local tasks not in remote *and* not needing sync
-				const finalTasks = updatedTasks.filter((taskWithMeta) => {
-					const isInRemote = remoteTaskIds.has(taskWithMeta.task.id);
-					const needsSync = taskWithMeta.metadata.needsSync;
-					return isInRemote || needsSync;
-				});
-
-				// Only update the atom if the length changed or if an add/update occurred
-				if (hasChanged || finalTasks.length !== originalTasksWithMeta.length) {
-					logger.trace(
-						"[changeTasksAtom] Setting new state for REMOTE_UPDATE",
-						{ count: finalTasks.length },
-					);
-					set(baseTasksAtom, finalTasks);
-				} else {
-					logger.trace(
-						"[changeTasksAtom] Skipping state update for REMOTE_UPDATE - no effective change",
-					);
-				}
+				handleRemoteUpdate(get, set, change, now);
 				break;
 			}
 
