@@ -120,23 +120,3 @@ export const HighestPriorityIcon = ({ className }: FlagIconProps) => (
 	</svg>
 );
 
-/**
- * Helper to get the appropriate flag icon component for a priority
- */
-export const getPriorityFlagIcon = (priority: TaskPriority) => {
-	switch (priority) {
-		case TaskPriority.LOWEST:
-			return LowestPriorityIcon;
-		case TaskPriority.LOW:
-			return LowPriorityIcon;
-		case TaskPriority.MEDIUM:
-			return MediumPriorityIcon;
-		case TaskPriority.HIGH:
-			return HighPriorityIcon;
-		case TaskPriority.HIGHEST:
-			return HighestPriorityIcon;
-		default:
-			return MediumPriorityIcon;
-	}
-};
-

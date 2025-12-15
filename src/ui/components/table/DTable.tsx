@@ -25,15 +25,15 @@ import {
 	groupingAtom,
 	paginationAtom,
 	sortingAtom,
-} from "../../../../data/taskAtoms";
-import { Task, TaskPriority, TaskStatus } from "../../../../data/types/tasks";
-import type { TaskUpdate } from "../../../../service/taskSyncService";
-import { dateToDateCategory } from "../../../../ui/lib/displayConfig/dateDisplayConfig";
-import { logger } from "../../../../utils/logger";
+} from "@/data/taskAtoms";
+import { Task, TaskPriority, TaskStatus } from "@/data/types/tasks";
+import type { TaskUpdate } from "@/service/taskSyncService";
+import { dateToDateCategory } from "@/ui/lib/displayConfig/dateDisplayConfig";
+import { logger } from "@/utils/logger";
 import {
 	sortTasksByPriority,
 	sortTasksByStatus,
-} from "../../../../utils/sorting/taskSortingFunctions";
+} from "@/utils/sorting/taskSortingFunctions";
 
 // Define a more specific type for column meta
 export interface DTableColumnMeta {

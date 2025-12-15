@@ -2,24 +2,24 @@ import type { Row } from "@tanstack/react-table";
 import React, { useRef } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Edit, Trash } from "lucide-react";
-import { Task, TaskStatus, TaskPriority, TaskMetadata } from "../../../data/types/tasks";
-import { Badge } from "../../base/Badge";
-import { Button } from "../../base/Button";
-import { Card } from "../../base/Card";
-import { Input } from "../../base/Input";
-import { DatePickerInput } from "../../base/DatePickerInput";
-import { PriorityStatusCheckbox } from "./typeSelects/PriorityStatusCheckbox";
+import { Task, TaskStatus, TaskPriority, TaskMetadata } from "@/data/types/tasks";
+import { Badge } from "@/ui/base/Badge";
+import { Button } from "@/ui/base/Button";
+import { Card } from "@/ui/base/Card";
+import { DescInput } from "@/ui/components/forms/fields/DescInput";
+import { DatePickerInput } from "@/ui/components/forms/fields/DatePickerInput";
+import { PriorityStatusCheckbox } from "./PriorityStatusCheckbox";
 import { SettingsButton } from "./SettingsButton";
 import { DateDisplay } from "./DateDisplay";
-import { getPriorityDisplayConfig, getPriorityDisplay } from "../../lib/displayConfig/priorityDisplayConfig";
+import { getPriorityDisplayConfig, getPriorityDisplay } from "@/ui/lib/displayConfig/priorityDisplayConfig";
 import { getStatusDisplayConfig, getStatusDisplay } from "@/ui/lib/displayConfig/statusDisplayConfig";
-import { EnumIconButton } from "../../base/EnumSelect";
-import { PriorityFlags } from "./PriorityFlags";
+import { EnumIconButton } from "@/ui/components/forms/fields/EnumSelect";
+import { PriorityFlags } from "@/ui/lib/displayConfig/priorityDisplayConfig";
 import { updateTaskMetadataAtom, availableTagsAtom } from "@/data/taskAtoms";
-import { TagInput, type Tag } from "./TagInput";
-import { cn } from "../../utils";
+import { TagInput, type Tag } from "@/ui/components/forms/fields/TagInput";
+import { cn } from "@/ui/utils";
 
-const TaskCard = ({
+const TaskListCard = ({
 	DtableRow,
 	onEditTask,
 	onUpdateTask,
@@ -174,18 +174,13 @@ const TaskCard = ({
 						</div>
 
 						{/* Description Input */}
-						<div className="flex flex-col min-w-40 flex-1">
-							<label className="text-xs text-muted-foreground mb-1 ml-1">
-								Description
-							</label>
-							<Input
-								value={editDescription}
-								onChange={setEditDescription}
-								className="w-full"
-								placeholder="Task Description..."
-								autoFocus
-							/>
-						</div>
+						<DescInput
+							value={editDescription}
+							onChange={setEditDescription}
+							showLabel={true}
+							variant="compact"
+							autoFocus
+						/>
 
 						{/* Tags Input */}
 						<div className="flex flex-col min-w-20 flex-shrink-0 max-w-100">
@@ -363,4 +358,4 @@ interface TaskRowProps {
 	onUpdateTask: (task: Task) => void;
 }
 
-export { TaskCard };
+export { TaskListCard };

@@ -1,12 +1,11 @@
 import React from "react";
-import { TaskPriority, TaskStatus } from "../../../../data/types/tasks";
-import { Button, ButtonProps } from "../../../base/Button";
-import { cn } from "../../../utils";
-import { EnumCommandList } from "@/ui/base/EnumSelect";
-import { Popover, PopoverContent, PopoverTrigger } from "../../../base/Popover";
-import { getStatusDisplay } from "../../../lib/displayConfig/statusDisplayConfig";
-import { getPriorityDisplay, getPriorityDisplayConfig } from "../../../lib/displayConfig/priorityDisplayConfig";
-import { Check } from "lucide-react";
+import { TaskPriority, TaskStatus } from "@/data/types/tasks";
+import { Button, ButtonProps } from "@/ui/base/Button";
+import { cn } from "@/ui/utils";
+import { EnumCommandList } from "@/ui/components/forms/fields/EnumSelect";
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/base/Popover";
+import { getStatusDisplay } from "@/ui/lib/displayConfig/statusDisplayConfig";
+import { getPriorityDisplay, getPriorityDisplayConfig } from "@/ui/lib/displayConfig/priorityDisplayConfig";
 
 export interface PriorityStatusCheckboxProps {
 	status: TaskStatus;

@@ -1,13 +1,13 @@
 import React from "react";
 import {Trash2, MoreVertical, Eye } from "lucide-react";
-import { Button } from "../../base/Button";
+import { Button } from "@/ui/base/Button";
 import {
 	Command,
 	CommandGroup,
 	CommandItem,
 	CommandList,
-} from "../../base/Command";
-import { Popover, PopoverContent, PopoverTrigger } from "../../base/Popover";
+} from "@/ui/base/Command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/base/Popover";
 
 export interface SettingsButtonProps {
 	onViewDetails: () => void;

@@ -9,10 +9,10 @@ import {
 	ChevronsRight,
 } from "lucide-react"
 
-import { Button } from "../../../base/Button"
-import { Command, CommandGroup, CommandItem, CommandList } from "../../../base/Command"
-import { Popover, PopoverContent, PopoverTrigger } from "../../../base/Popover"
-import { cn } from "../../../utils"
+import { Button } from "@/ui/base/Button"
+import { Command, CommandGroup, CommandItem, CommandList } from "@/ui/base/Command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/base/Popover"
+import { cn } from "@/ui/utils"
 
 interface DataTablePaginationProps<TData> {
 	table: Table<TData>

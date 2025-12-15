@@ -1,10 +1,10 @@
 import { Check, ChevronDown } from "lucide-react";
 import React from "react";
-import type { EnumDisplayConfig } from "../lib/displayConfig/displayConfigTypes";
-import { cn } from "../utils";
-import { Button, ButtonProps } from "./Button";
-import { Command, CommandGroup, CommandItem, CommandList } from "./Command";
-import { Popover, PopoverContent, PopoverTrigger } from "./Popover";
+import type { EnumDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
+import { cn } from "@/ui/utils";
+import { Button, ButtonProps } from "@/ui/base/Button";
+import { Command, CommandGroup, CommandItem, CommandList } from "@/ui/base/Command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/base/Popover";
 
 export interface EnumSelectProps<TEnum> {
 	value: TEnum | null;

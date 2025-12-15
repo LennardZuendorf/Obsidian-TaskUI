@@ -9,37 +9,36 @@ import {
 	availableTagsAtom,
 	updateTaskMetadataAtom,
 	updateTaskAtom,
-} from "../../../data/taskAtoms";
-import { TaskBuilder } from "../../../data/taskBuilder";
+} from "@/data/taskAtoms";
+import { TaskBuilder } from "@/data/taskBuilder";
 import {
 	Task,
 	TaskPriority,
 	TaskSource,
 	TaskStatus,
-} from "../../../data/types/tasks";
+} from "@/data/types/tasks";
 import {
 	getPriorityDisplay,
 	getPriorityLabels,
 	getPriorityDisplayConfig,
 	priorityEnumToString,
 	priorityStringToEnum,
-} from "../../../ui/lib/displayConfig/priorityDisplayConfig";
+} from "@/ui/lib/displayConfig/priorityDisplayConfig";
 import {
 	getStatusDisplay,
 	getStatusLabels,
 	getStatusDisplayConfig,
 	statusEnumToString,
 	statusStringToEnum,
-} from "../../../ui/lib/displayConfig/statusDisplayConfig";
-import { formatDate } from "../../../data/utils/dateUtils";
-import { logger } from "../../../utils/logger";
-import { Alert } from "../../base/Alert";
-import { Button } from "../../base/Button";
-import { Input } from "../../base/Input";
-import { DatePickerInput } from "../../base/DatePickerInput";
-import { EnumIconSelect } from "../../base/EnumSelect";
-import { cn } from "../../utils";
-import { TagInput, type Tag } from "./TagInput";
+} from "@/ui/lib/displayConfig/statusDisplayConfig";
+import { logger } from "@/utils/logger";
+import { Alert } from "@/ui/base/Alert";
+import { Button } from "@/ui/base/Button";
+import { DatePickerInput } from "./fields/DatePickerInput";
+import { DescInput } from "./fields/DescInput";
+import { EnumIconSelect } from "./fields/EnumSelect";
+import { cn } from "@/ui/utils";
+import { TagInput, type Tag } from "@/ui/components/forms/fields/TagInput";
 import { taskFormSchema, type TaskFormValues } from "./TaskFormSchema";
 
 interface TaskFormProps {
@@ -318,28 +317,23 @@ export default function FullTaskForm({
 						</div>
 
 						{/* Description Input */}
-						<div className="flex flex-col min-w-40 flex-1 basis-0">
-							<label className="text-xs text-muted-foreground mb-1 ml-1">
-								Task Description
-							</label>
-							<Controller
-								name="description"
-								control={control}
-								render={({ field }) => (
-									<Input
-										value={field.value || ""}
-										onChange={(stringValue) => field.onChange(stringValue)}
-										onBlur={field.onBlur}
-										ref={field.ref}
-										className="w-full min-w-0"
-										placeholder="What needs to be done?"
-										autoFocus
-										aria-label="Set the Task Description"
-										aria-invalid={errors.description ? "true" : "false"}
-									/>
-								)}
-							/>
-						</div>
+						<Controller
+							name="description"
+							control={control}
+							render={({ field }) => (
+								<DescInput
+									value={field.value || ""}
+									onChange={field.onChange}
+									onBlur={field.onBlur}
+									inputRef={field.ref}
+									error={errors.description?.message}
+									showLabel={true}
+									variant="compact"
+									wrapperClassName="min-w-40 flex-1 basis-0"
+									autoFocus
+								/>
+							)}
+						/>
 
 						{/* Tags Input - Full width on wrap */}
 						<div className="flex flex-col w-full min-w-0 basis-full">

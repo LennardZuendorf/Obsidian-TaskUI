@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Alert } from "../base/Alert";
-import { Button } from "../base/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "../base/Card";
+import { Alert } from "@/ui/base/Alert";
+import { Button } from "@/ui/base/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/Card";
 
 interface ErrorProps {
 	message: string;

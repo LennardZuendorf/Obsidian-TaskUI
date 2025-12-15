@@ -3,16 +3,16 @@ import { Table } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { titleCase } from "title-case";
 
-import { Button } from "../../../base/Button";
+import { Button } from "@/ui/base/Button";
 import {
 	Command,
 	CommandGroup,
 	CommandItem,
 	CommandList,
-} from "../../../base/Command";
-import { Popover, PopoverContent, PopoverTrigger } from "../../../base/Popover";
-import { getColumnDisplay } from "../../../lib/displayConfig/columnDisplayConfig"; // Adjusted path
-import { cn } from "../../../utils"; // Adjusted path
+} from "@/ui/base/Command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/base/Popover";
+import { getColumnDisplay } from "@/ui/lib/displayConfig/columnDisplayConfig";
+import { cn } from "@/ui/utils"; // Adjusted path
 
 interface DTableSortByProps<TData> {
 	table: Table<TData>;

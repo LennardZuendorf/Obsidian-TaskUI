@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Badge } from "../../base/Badge";
-import { inputVariants } from "../../base/Input";
-import { cn } from "../../utils";
+import { Badge } from "@/ui/base/Badge";
+import { inputVariants } from "@/ui/base/Input";
+import { cn } from "@/ui/utils";
 
 export type Tag = {
 	id: string;

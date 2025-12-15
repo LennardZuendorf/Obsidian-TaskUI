@@ -2,20 +2,20 @@ import { Table } from "@tanstack/react-table";
 import { Check, ChevronDown, Filter } from "lucide-react";
 import { useState } from "react";
 // Adjust path as needed
-import { TaskPriority, TaskStatus } from "../../../../data/types/tasks"; // Adjust path as needed
-import { Badge } from "../../../base/Badge";
-import { Button } from "../../../base/Button";
+import { TaskPriority, TaskStatus } from "@/data/types/tasks"; // Adjust path as needed
+import { Badge } from "@/ui/base/Badge";
+import { Button } from "@/ui/base/Button";
 import {
 	Command,
 	CommandGroup,
 	CommandItem,
 	CommandList,
-} from "../../../base/Command";
-import { Popover, PopoverContent, PopoverTrigger } from "../../../base/Popover";
-import { getColumnDisplay } from "../../../lib/displayConfig/columnDisplayConfig"; // Adjust path as needed
-import { priorityEnumToString } from "../../../lib/displayConfig/priorityDisplayConfig";
-import { statusEnumToString } from "../../../lib/displayConfig/statusDisplayConfig";
-import { cn } from "../../../utils"; // Adjust path as needed
+} from "@/ui/base/Command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/base/Popover";
+import { getColumnDisplay } from "@/ui/lib/displayConfig/columnDisplayConfig"; // Adjust path as needed
+import { priorityEnumToString } from "@/ui/lib/displayConfig/priorityDisplayConfig";
+import { statusEnumToString } from "@/ui/lib/displayConfig/statusDisplayConfig";
+import { cn } from "@/ui/utils"; // Adjust path as needed
 
 interface DTableFilterByProps<TData> {
 	table: Table<TData>;

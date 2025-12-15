@@ -1,19 +1,50 @@
-import {
-	PiCaretDoubleDownBold,
-	PiCaretDoubleUpBold,
-	PiCaretDownBold,
-	PiCaretUpBold,
-	PiMinusBold,
-} from "react-icons/pi";
-import { TaskPriority } from "../../../data/types/tasks";
-import { EnumDisplayConfig } from "../../../ui/lib/displayConfig/displayConfigTypes";
+import { TaskPriority } from "@/data/types/tasks";
+import { EnumDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
 import {
 	LowestPriorityIcon,
 	LowPriorityIcon,
 	MediumPriorityIcon,
 	HighPriorityIcon,
 	HighestPriorityIcon,
-} from "../../components/shared/PriorityFlagIcons";
+} from "@/ui/lib/visuals/PriorityFlagIcons";
+
+import React from "react";
+import { cn } from "@/ui/utils";
+
+interface PriorityFlagsProps {
+	priority: TaskPriority;
+	className?: string;
+	size?: "sm" | "md" | "lg";
+}
+
+/**
+ * PriorityFlags component that displays custom flag icons based on priority level.
+ * Dynamically renders the appropriate icon component, ensuring a valid React element is returned.
+ */
+export function PriorityFlags({ priority, className, size = "md" }: PriorityFlagsProps) {
+	const sizeClass = {
+		sm: "h-4 w-4",
+		md: "h-5 w-5",
+		lg: "h-6 w-6",
+	}[size];
+
+	const iconMap = {
+		[TaskPriority.LOWEST]: LowestPriorityIcon,
+		[TaskPriority.LOW]: LowPriorityIcon,
+		[TaskPriority.MEDIUM]: MediumPriorityIcon,
+		[TaskPriority.HIGH]: HighPriorityIcon,
+		[TaskPriority.HIGHEST]: HighestPriorityIcon,
+	} as const;
+
+	const IconComponent = iconMap[priority];
+
+	if (!IconComponent) return null;
+
+	return React.createElement(IconComponent, {
+		className: cn(sizeClass, className),
+	});
+}
+
 
 /**
  * Configuration map for task priority display properties.
@@ -138,4 +169,24 @@ export const getOrderedTaskPriorities = (): TaskPriority[] => {
 	return Object.entries(taskPriorityConfig)
 		.sort(([, a], [, b]) => (a.order ?? 0) - (b.order ?? 0))
 		.map(([key]) => key as TaskPriority);
+};
+
+/**
+ * Helper to get the appropriate flag icon component for a priority
+ */
+export const getPriorityFlagIcon = (priority: TaskPriority) => {
+	switch (priority) {
+		case TaskPriority.LOWEST:
+			return LowestPriorityIcon;
+		case TaskPriority.LOW:
+			return LowPriorityIcon;
+		case TaskPriority.MEDIUM:
+			return MediumPriorityIcon;
+		case TaskPriority.HIGH:
+			return HighPriorityIcon;
+		case TaskPriority.HIGHEST:
+			return HighestPriorityIcon;
+		default:
+			return MediumPriorityIcon;
+	}
 };

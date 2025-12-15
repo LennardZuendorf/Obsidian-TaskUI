@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { getPriorityLabels } from "../../lib/displayConfig/priorityDisplayConfig";
-import { getStatusLabels } from "../../lib/displayConfig/statusDisplayConfig";
+import { getPriorityLabels } from "@/ui/lib/displayConfig/priorityDisplayConfig";
+import { getStatusLabels } from "@/ui/lib/displayConfig/statusDisplayConfig";
 
 /**
  * Zod schema for task form validation

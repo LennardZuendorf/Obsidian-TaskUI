@@ -1,7 +1,7 @@
 import { flexRender } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import type { Task } from "../../../data/types/tasks";
-import { formatDate } from "../../../data/utils/dateUtils";
+import type { Task } from "@/data/types/tasks";
+import { formatDate } from "@/data/utils/dateUtils";
 import {
 	Table,
 	TableBody,
@@ -9,10 +9,10 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "../../base/Table";
-import { DataTablePagination } from "../custom/dtable/DTablePagination";
-import { SettingsButton } from "../shared/SettingsButton";
-import type { TabViewProps } from "../TaskView";
+} from "@/ui/base/Table";
+import { DataTablePagination } from "@/ui/components/table/DTablePagination";
+import { SettingsButton } from "@/ui/components/task/SettingsButton";
+import type { TabViewProps } from "@/ui/components/views/TaskView";
 
 export function TableView<TData extends Task>({
 	table,

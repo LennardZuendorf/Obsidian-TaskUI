@@ -1,14 +1,14 @@
 import type { Row } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
-import { DataTablePagination } from "@/ui/components/custom/dtable/DTablePagination";
+import { DataTablePagination } from "@/ui/components/table/DTablePagination";
 import { EnumDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
 import { getMatchingDisplay } from "@/ui/lib/displayConfig/utils";
 import { cn } from "@/ui/utils";
-import type { Task, TaskPriority, TaskStatus } from "../../../data/types/tasks";
-import { logger } from "../../../utils/logger";
-import { Button } from "../../base/Button";
-import { TaskCard } from "../shared/TaskCard";
-import type { TabViewProps } from "../TaskView";
+import type { Task, TaskPriority, TaskStatus } from "@/data/types/tasks";
+import { logger } from "@/utils/logger";
+import { Button } from "@/ui/base/Button";
+import { TaskListCard } from "@/ui/components/task/TaskListCard";
+import type { TabViewProps } from "@/ui/components/views/TaskView";
 
 function NoTasksMessage() {
 	return (
@@ -119,7 +119,7 @@ export function ListView<TData extends Task>({
 								key={`task-${row.id}`}
 								className={cn(grouping.length > 0 && "pl-4")}
 							>
-								<TaskCard
+								<TaskListCard
 									DtableRow={row as unknown as Row<Task>}
 									onEditTask={() => handleEditTask(row.original)}
 									onDeleteTask={() => handleDeleteTask(row.original)}

@@ -8,22 +8,22 @@ import {
 } from "lucide-react";
 import { type App, Notice } from "obsidian";
 import React from "react";
-import { storeOperation as str } from "../../data/types/operations";
-import type { Task } from "../../data/types/tasks";
-import type { TaskUpdate } from "../../service/taskSyncService";
-import { logger } from "../../utils/logger";
-import { Button } from "../base/Button";
-import { Separator } from "../base/Separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../base/Tabs";
-import { cn } from "../utils";
-import { useDTable } from "./custom/dtable/DTable";
-import { DTableFilterBy } from "./custom/dtable/DTableFilterBy";
-import { DTableGroupBy } from "./custom/dtable/DTableGroupBy";
-import { DTableSortBy } from "./custom/dtable/DTableSortBy";
-import { TaskModal } from "./shared/TaskModal";
-import { BoardView } from "./tabViews/BoardView";
-import { ListView } from "./tabViews/ListView";
-import { TableView } from "./tabViews/TableView";
+import { storeOperation as str } from "@/data/types/operations";
+import type { Task } from "@/data/types/tasks";
+import type { TaskUpdate } from "@/service/taskSyncService";
+import { logger } from "@/utils/logger";
+import { Button } from "@/ui/base/Button";
+import { Separator } from "@/ui/base/Separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/base/Tabs";
+import { cn } from "@/ui/utils";
+import { useDTable } from "@/ui/components/table/DTable";
+import { DTableFilterBy } from "./table/DTableFilterBy";
+import { DTableGroupBy } from "./table/DTableGroupBy";
+import { DTableSortBy } from "./table/DTableSortBy";
+import { TaskModal } from "./forms/TaskModal";
+import { BoardView } from "./views/BoardView";
+import { ListView } from "./views/ListView";
+import { TableView } from "./views/TableView";
 
 // Props needed by TaskView (and passed down to useDTable)
 interface TaskViewProps {
@@ -159,13 +159,6 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 						/>
 						Board
 					</TabsTrigger>
-					<TabsTrigger
-						value="calendar"
-						disabled={true} // TODO: Implement Calendar
-					>
-						<Calendar className="-ms-0.5 me-1.5 h-4 w-4" aria-hidden="true" />
-						Calendar
-					</TabsTrigger>
 				</TabsList>
 
 				{/* Shared Controls + Add Task Button */}
@@ -228,17 +221,6 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 				)}
 			>
 				<BoardView table={table} />
-			</TabsContent>
-			<TabsContent
-				value="calendar"
-				className={cn(
-					"data-[state=active]:block w-9/10 justify-center items-center",
-				)}
-			>
-				{/* Placeholder for Calendar View */}
-				<div className="p-4 text-center text-muted-foreground">
-					Calendar View Placeholder
-				</div>
 			</TabsContent>
 		</Tabs>
 	);

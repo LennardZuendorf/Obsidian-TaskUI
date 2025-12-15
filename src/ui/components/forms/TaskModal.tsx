@@ -1,7 +1,7 @@
 import { App, Modal } from "obsidian";
 import React from "react";
 import { createRoot, Root } from "react-dom/client";
-import { Task } from "../../../data/types/tasks";
+import { Task } from "@/data/types/tasks";
 import FullTaskForm from "./FullTaskForm"; // Import the updated React component
 
 export class TaskModal extends Modal {

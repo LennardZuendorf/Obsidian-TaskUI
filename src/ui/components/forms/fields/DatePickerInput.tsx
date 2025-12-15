@@ -2,16 +2,16 @@ import { CalendarIcon, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { parseDate } from "chrono-node";
 import { format, isAfter, isBefore, startOfDay } from "date-fns";
-import { DateCategory } from "../lib/dateCategoryEnum";
+import { DateCategory } from "@/ui/lib/dateCategoryEnum";
 import {
 	dateToDateCategory,
 	getDateCategoryDisplay,
-} from "../lib/displayConfig/dateDisplayConfig";
-import { cn } from "../utils";
-import { Button } from "./Button";
-import { Calendar } from "./Calendar";
-import { Input } from "./Input";
-import { Popover, PopoverContent, PopoverTrigger } from "./Popover";
+} from "@/ui/lib/displayConfig/dateDisplayConfig";
+import { cn } from "@/ui/utils";
+import { Button } from "@/ui/base/Button";
+import { Calendar } from "@/ui/base/Calendar";
+import { Input } from "@/ui/base/Input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/base/Popover";
 
 export interface DatePickerInputProps {
 	label?: string;
