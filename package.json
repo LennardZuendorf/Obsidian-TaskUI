@@ -92,7 +92,7 @@
 		"zod": "^3.24.3"
 	},
 	"lint-staged": {
-		"*.{js,ts,tsx,json}": [
+		"*.{js,ts,tsx,json,css}": [
 			"biome check --write --no-errors-on-unmatched"
 		]
 	},

@@ -1,7 +1,1 @@
-# Step 1: Run lint-staged
-echo "Running lint & format on staged files..."
 pnpm run lint-staged
-if [ $? -ne 0 ]; then
-  echo "lint-staged failed. Aborting Commit."
-  exit 1
-fi

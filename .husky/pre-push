@@ -1,6 +1,3 @@
-#!/bin/sh
-# . "$(dirname "$0")/_/husky.sh" # Uncomment this if you use husky's path mechanism
-
 echo "Preparing to test the last committed version (HEAD)..."
 
 STASH_MADE=0
