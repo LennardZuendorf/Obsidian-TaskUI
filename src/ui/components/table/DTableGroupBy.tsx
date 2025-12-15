@@ -9,7 +9,7 @@ import {
 	CommandList,
 } from "@/ui/base/Command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/base/Popover";
-import { getColumnDisplay } from "@/ui/lib/displayConfig/columnDisplayConfig"; // Adjusted path
+import { getColumnDisplay } from "@/ui/lib/config/column";
 import { cn } from "@/ui/utils"; // Adjusted path
 
 interface DTableGroupByProps<TData> {

@@ -5,7 +5,7 @@
  * for consistent display and styling of UI elements.
  */
 
-import { DateCategory } from "@/ui/lib/dateCategoryEnum";
+import { DateCategory } from "./dateCategory";
 import { TaskPriority, TaskStatus } from "@/data/types/tasks";
 
 /**
@@ -71,9 +71,10 @@ export interface StatusDisplayConfig<
 	enum: TaskStatus;
 }
 
-export interface dateDisplayConfig<
+export interface DateDisplayConfig<
 	T extends React.ElementType = React.ElementType,
 > extends EnumDisplayConfig<T> {
 	/** The date category enum value */
 	enum: DateCategory;
 }
+

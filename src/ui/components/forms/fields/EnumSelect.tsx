@@ -1,6 +1,6 @@
 import { Check, ChevronDown } from "lucide-react";
 import React from "react";
-import type { EnumDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
+import type { EnumDisplayConfig } from "@/ui/lib/config/types";
 import { cn } from "@/ui/utils";
 import { Button, ButtonProps } from "@/ui/base/Button";
 import { Command, CommandGroup, CommandItem, CommandList } from "@/ui/base/Command";

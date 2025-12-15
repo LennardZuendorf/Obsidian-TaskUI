@@ -1,6 +1,6 @@
 import { CheckCircle, Circle, PlayCircle, XCircle } from "lucide-react";
-import { StatusDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
-import { TaskStatus } from "../../../data/types/tasks";
+import { StatusDisplayConfig } from "./types";
+import { TaskStatus } from "@/data/types/tasks";
 
 /**
  * Configuration map for task status display properties.
@@ -132,3 +132,4 @@ export const getOrderedTaskStatuses = (): TaskStatus[] => {
 		.sort(([, a], [, b]) => (a.order ?? 0) - (b.order ?? 0))
 		.map(([key]) => key as TaskStatus);
 };
+

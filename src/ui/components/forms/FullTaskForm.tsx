@@ -23,14 +23,14 @@ import {
 	getPriorityDisplayConfig,
 	priorityEnumToString,
 	priorityStringToEnum,
-} from "@/ui/lib/displayConfig/priorityDisplayConfig";
+} from "@/ui/lib/config/priority";
 import {
 	getStatusDisplay,
 	getStatusLabels,
 	getStatusDisplayConfig,
 	statusEnumToString,
 	statusStringToEnum,
-} from "@/ui/lib/displayConfig/statusDisplayConfig";
+} from "@/ui/lib/config/status";
 import { logger } from "@/utils/logger";
 import { Alert } from "@/ui/base/Alert";
 import { Button } from "@/ui/base/Button";

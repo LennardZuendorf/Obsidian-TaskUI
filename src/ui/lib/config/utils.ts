@@ -1,22 +1,22 @@
 import { format } from "date-fns";
-import { DateCategory } from "@/ui/lib/dateCategoryEnum";
-import { TaskPriority, TaskStatus } from "../../../data/types/tasks";
+import { DateCategory } from "./dateCategory";
+import { TaskPriority, TaskStatus } from "@/data/types/tasks";
 import {
 	dateToDateCategory,
 	getDateCategoryDisplay,
-} from "./dateDisplayConfig";
+} from "./date";
 import {
-	dateDisplayConfig,
+	DateDisplayConfig,
 	PriorityDisplayConfig,
 	StatusDisplayConfig,
-} from "./displayConfigTypes";
-import { getPriorityDisplay } from "./priorityDisplayConfig";
-import { getStatusDisplay } from "./statusDisplayConfig";
+} from "./types";
+import { getPriorityDisplay } from "./priority";
+import { getStatusDisplay } from "./status";
 
 type DisplayConfigType =
 	| StatusDisplayConfig
 	| PriorityDisplayConfig
-	| dateDisplayConfig;
+	| DateDisplayConfig;
 type EnumType = TaskStatus | TaskPriority | DateCategory;
 
 /**
@@ -43,7 +43,7 @@ export function getMatchingDisplay(
 			icon: () => null,
 			className: "text-muted-foreground",
 			enum: DateCategory.NO_DATE,
-		} as dateDisplayConfig;
+		} as DateDisplayConfig;
 	}
 
 	if (input instanceof Date) {
@@ -81,3 +81,4 @@ export function getMatchingDisplay(
 
 	throw new Error(`No display configuration found for enum: ${input}`);
 }
+

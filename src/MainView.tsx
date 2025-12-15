@@ -17,7 +17,7 @@ import "./styles.css";
 import { ErrorView } from "./ui/components/ErrorView";
 import { LoadingScreen } from "./ui/components/LoadingScreen";
 import { TaskView } from "./ui/components/TaskView";
-import { showNotice } from "./ui/lib/notice";
+import { showNotice } from "./ui/lib/obsidian/notice";
 import { AppContext, useApp } from "./utils/context";
 import { logger } from "./utils/logger";
 

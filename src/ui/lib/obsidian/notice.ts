@@ -26,3 +26,4 @@ export function showNotice(
 
 	new Notice(fragment, noticeDuration);
 }
+

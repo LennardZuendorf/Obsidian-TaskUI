@@ -1,50 +1,12 @@
 import { TaskPriority } from "@/data/types/tasks";
-import { EnumDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
+import { EnumDisplayConfig } from "./types";
 import {
 	LowestPriorityIcon,
 	LowPriorityIcon,
 	MediumPriorityIcon,
 	HighPriorityIcon,
 	HighestPriorityIcon,
-} from "@/ui/lib/visuals/PriorityFlagIcons";
-
-import React from "react";
-import { cn } from "@/ui/utils";
-
-interface PriorityFlagsProps {
-	priority: TaskPriority;
-	className?: string;
-	size?: "sm" | "md" | "lg";
-}
-
-/**
- * PriorityFlags component that displays custom flag icons based on priority level.
- * Dynamically renders the appropriate icon component, ensuring a valid React element is returned.
- */
-export function PriorityFlags({ priority, className, size = "md" }: PriorityFlagsProps) {
-	const sizeClass = {
-		sm: "h-4 w-4",
-		md: "h-5 w-5",
-		lg: "h-6 w-6",
-	}[size];
-
-	const iconMap = {
-		[TaskPriority.LOWEST]: LowestPriorityIcon,
-		[TaskPriority.LOW]: LowPriorityIcon,
-		[TaskPriority.MEDIUM]: MediumPriorityIcon,
-		[TaskPriority.HIGH]: HighPriorityIcon,
-		[TaskPriority.HIGHEST]: HighestPriorityIcon,
-	} as const;
-
-	const IconComponent = iconMap[priority];
-
-	if (!IconComponent) return null;
-
-	return React.createElement(IconComponent, {
-		className: cn(sizeClass, className),
-	});
-}
-
+} from "@/ui/lib/components/PriorityFlags";
 
 /**
  * Configuration map for task priority display properties.
@@ -190,3 +152,4 @@ export const getPriorityFlagIcon = (priority: TaskPriority) => {
 			return MediumPriorityIcon;
 	}
 };
+

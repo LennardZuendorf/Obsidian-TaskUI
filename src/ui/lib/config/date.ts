@@ -6,8 +6,8 @@ import {
 	LuCalendarFold,
 	LuCalendarOff,
 } from "react-icons/lu";
-import { dateDisplayConfig } from "@/ui/lib/displayConfig/displayConfigTypes";
-import { DateCategory } from "../dateCategoryEnum";
+import { DateDisplayConfig } from "./types";
+import { DateCategory } from "./dateCategory";
 
 /**
  * Configuration for date-based categories used in task organization and filtering.
@@ -15,7 +15,7 @@ import { DateCategory } from "../dateCategoryEnum";
  */
 const dateCategoryConfig: Record<
 	DateCategory,
-	dateDisplayConfig<typeof LuCalendarFold>
+	DateDisplayConfig<typeof LuCalendarFold>
 > = {
 	[DateCategory.OVERDUE]: {
 		label: "Overdue",
@@ -162,9 +162,9 @@ export const dateToDateCategory = (
 /**
  * Retrieves all date category display configurations as an array.
  *
- * @returns {dateDisplayConfig<typeof LuCalendarFold>[]} Array of date category display configurations, ordered by their display order
+ * @returns {DateDisplayConfig<typeof LuCalendarFold>[]} Array of date category display configurations, ordered by their display order
  */
-export const getDateCategoryDisplayConfig = (): dateDisplayConfig<
+export const getDateCategoryDisplayConfig = (): DateDisplayConfig<
 	typeof LuCalendarFold
 >[] => {
 	return Object.values(dateCategoryConfig);
@@ -183,11 +183,11 @@ export const getDateCategoryLabels: string[] = Object.values(
  * Retrieves the display configuration for a specific date category.
  *
  * @param {DateCategory} dateCategory - The date category to get the display configuration for
- * @returns {dateDisplayConfig<typeof LuCalendarFold>} The display configuration for the specified date category
+ * @returns {DateDisplayConfig<typeof LuCalendarFold>} The display configuration for the specified date category
  */
 export const getDateCategoryDisplay = (
 	dateCategory: DateCategory,
-): dateDisplayConfig<typeof LuCalendarFold> => {
+): DateDisplayConfig<typeof LuCalendarFold> => {
 	return dateCategoryConfig[dateCategory];
 };
 
@@ -212,3 +212,4 @@ export const labelToDateCategory = (label: string): DateCategory => {
 export const dateCategoryToLabel = (dateCategory: DateCategory): string => {
 	return dateCategoryConfig[dateCategory].label;
 };
+

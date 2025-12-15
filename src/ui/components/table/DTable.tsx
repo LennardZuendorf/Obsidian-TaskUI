@@ -28,7 +28,7 @@ import {
 } from "@/data/taskAtoms";
 import { Task, TaskPriority, TaskStatus } from "@/data/types/tasks";
 import type { TaskUpdate } from "@/service/taskSyncService";
-import { dateToDateCategory } from "@/ui/lib/displayConfig/dateDisplayConfig";
+import { dateToDateCategory } from "@/ui/lib/config/date";
 import { logger } from "@/utils/logger";
 import {
 	sortTasksByPriority,

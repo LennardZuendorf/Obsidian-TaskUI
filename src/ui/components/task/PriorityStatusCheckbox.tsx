@@ -4,8 +4,8 @@ import { Button, ButtonProps } from "@/ui/base/Button";
 import { cn } from "@/ui/utils";
 import { EnumCommandList } from "@/ui/components/forms/fields/EnumSelect";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/base/Popover";
-import { getStatusDisplay } from "@/ui/lib/displayConfig/statusDisplayConfig";
-import { getPriorityDisplay, getPriorityDisplayConfig } from "@/ui/lib/displayConfig/priorityDisplayConfig";
+import { getStatusDisplay } from "@/ui/lib/config/status";
+import { getPriorityDisplay, getPriorityDisplayConfig } from "@/ui/lib/config/priority";
 
 export interface PriorityStatusCheckboxProps {
 	status: TaskStatus;

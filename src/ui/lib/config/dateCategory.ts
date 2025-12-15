@@ -13,3 +13,4 @@ export enum DateCategory {
 	FUTURE = "Future",
 	NO_DATE = "No date",
 }
+

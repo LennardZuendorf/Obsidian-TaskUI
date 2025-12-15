@@ -6,7 +6,7 @@ import {
 	TagIcon,
 	Text,
 } from "lucide-react";
-import { ColumnDisplayInfo } from "@/ui/lib/displayConfig/displayConfigTypes";
+import { ColumnDisplayInfo } from "./types";
 
 /**
  * Configuration map for column display properties.
@@ -75,3 +75,4 @@ export const getColumnDisplay = (columnId: string): ColumnDisplayInfo => {
 	const config = getColumnDisplayConfig(columnId);
 	return config;
 };
+

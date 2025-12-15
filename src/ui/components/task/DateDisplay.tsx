@@ -1,10 +1,10 @@
 import { format } from "date-fns";
 import React from "react";
-import { DateCategory } from "@/ui/lib/dateCategoryEnum";
+import { DateCategory } from "@/ui/lib/config/dateCategory";
 import {
 	dateToDateCategory,
 	getDateCategoryDisplay,
-} from "@/ui/lib/displayConfig/dateDisplayConfig";
+} from "@/ui/lib/config/date";
 import { cn } from "@/ui/utils";
 
 export interface DateDisplayProps {

@@ -12,9 +12,9 @@ import {
 	CommandList,
 } from "@/ui/base/Command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/base/Popover";
-import { getColumnDisplay } from "@/ui/lib/displayConfig/columnDisplayConfig"; // Adjust path as needed
-import { priorityEnumToString } from "@/ui/lib/displayConfig/priorityDisplayConfig";
-import { statusEnumToString } from "@/ui/lib/displayConfig/statusDisplayConfig";
+import { getColumnDisplay } from "@/ui/lib/config/column";
+import { priorityEnumToString } from "@/ui/lib/config/priority";
+import { statusEnumToString } from "@/ui/lib/config/status";
 import { cn } from "@/ui/utils"; // Adjust path as needed
 
 interface DTableFilterByProps<TData> {

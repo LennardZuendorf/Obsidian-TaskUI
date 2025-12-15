@@ -2,11 +2,11 @@ import { CalendarIcon, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { parseDate } from "chrono-node";
 import { format, isAfter, isBefore, startOfDay } from "date-fns";
-import { DateCategory } from "@/ui/lib/dateCategoryEnum";
+import { DateCategory } from "@/ui/lib/config/dateCategory";
 import {
 	dateToDateCategory,
 	getDateCategoryDisplay,
-} from "@/ui/lib/displayConfig/dateDisplayConfig";
+} from "@/ui/lib/config/date";
 import { cn } from "@/ui/utils";
 import { Button } from "@/ui/base/Button";
 import { Calendar } from "@/ui/base/Calendar";
