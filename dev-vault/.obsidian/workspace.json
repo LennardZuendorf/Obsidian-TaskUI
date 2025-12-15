@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "0304222fa8c06ab6",
+        "id": "8cad70f59fcc3432",
         "type": "tabs",
         "children": [
           {
-            "id": "8a8893c6688b6d4d",
+            "id": "7fb7dc3f79c0ba86",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -49,7 +49,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "tag:#Next",
+                "query": "tag:#testing",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -151,7 +151,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
+    "width": 237.5,
     "collapsed": true
   },
   "left-ribbon": {
@@ -166,16 +166,16 @@
       "shards-taskui-plugin:Activate Main Tab View": false
     }
   },
-  "active": "8a8893c6688b6d4d",
+  "active": "7fb7dc3f79c0ba86",
   "lastOpenFiles": [
     "Tasks.md",
-    "2025-05-03.md",
     "Untitled 1.md",
     "Test Notes.md",
+    "2025-05-03.md",
+    "2025-04-15.md",
+    "2025-03-22.md",
     "Untitled.canvas",
     "Untitled.md",
-    "2025-03-22.md",
-    "2025-04-15.md",
     "Untitled 1.canvas",
     "Welcome.md"
   ]
