@@ -1,5 +1,7 @@
 # Shards TaskUI
 
+[![Lint, Format and Build](https://github.com/LennardZuendorf/shards-md/actions/workflows/pr-ci.yaml/badge.svg)](https://github.com/LennardZuendorf/shards-md/actions/workflows/pr-ci.yaml) [![codecov](https://codecov.io/github/LennardZuendorf/shards-md/graph/badge.svg?token=6P99FW1Z1A)](https://codecov.io/github/LennardZuendorf/shards-md) 
+
 **Version**: 0.0.1  
 **Author**: Lennard Zündorf  
 **Website**: [https://zuendorf.me](https://zuendorf.me)
