@@ -489,3 +489,13 @@ export const paginationAtom = atomWithStorage<PaginationState>(
 		pageSize: 30,
 	}, // Initial state: page index 0 and page size 30
 );
+
+/**
+ * Controls which columns are collapsed in the board view.
+ * Stores TaskStatus values of collapsed columns.
+ * Persisted in local storage.
+ */
+export const collapsedColumnsAtom = atomWithStorage<TaskStatus[]>(
+	"taskui-board-collapsed-columns", // Unique storage key
+	[TaskStatus.CANCELLED], // Initial state: Cancelled column collapsed by default
+);

@@ -68,7 +68,11 @@ function TabsContent({
 	return (
 		<TabsPrimitive.Content
 			data-slot="tabs-content"
-			className={cn("flex-grow h-fit overflow-auto w-full", className)}
+			className={cn(
+				"flex-grow h-full overflow-auto w-full",
+				"data-[state=inactive]:hidden",
+				className
+			)}
 			{...props}
 		/>
 	);

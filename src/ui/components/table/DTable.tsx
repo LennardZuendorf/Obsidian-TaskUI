@@ -261,6 +261,7 @@ export function useDTable({
 	const table = useReactTable({
 		data: tasks,
 		columns: taskTableColumns,
+		getRowId: (row) => row.id, // Required for stable row IDs during drag operations
 		state: {
 			sorting,
 			globalFilter,

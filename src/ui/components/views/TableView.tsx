@@ -25,8 +25,8 @@ export function TableView<TData extends Task>({
 	const grouping = table.getState().grouping;
 
 	return (
-		<TabView>
-			<div className="flex flex-col justify-center w-full h-fit p-4">
+		<TabView id="table-view-wrapper">
+			<div id="table-container" className="flex flex-col justify-center w-full h-fit p-4">
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (

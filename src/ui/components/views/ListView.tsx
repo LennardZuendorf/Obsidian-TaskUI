@@ -66,15 +66,15 @@ export function ListView<TData extends Task>({
 
 	if (!rows?.length) {
 		return (
-			<TabView className="flex-1">
+			<TabView id="list-view-wrapper-empty" className="flex-1">
 				<NoTasksMessage />
 			</TabView>
 		);
 	}
 
 	return (
-		<TabView>
-			<div className="flex flex-col justify-center w-full h-fit gap-2 p-4">
+		<TabView id="list-view-wrapper">
+			<div id="list-tasks-container" className="flex flex-col justify-center w-full h-fit gap-2 p-4">
 				{rows.map((row: Row<TData>) => {
 					if (grouping.length > 0 && row.getIsGrouped()) {
 						const groupDisplay = getGroupDisplay(row, grouping[0]);

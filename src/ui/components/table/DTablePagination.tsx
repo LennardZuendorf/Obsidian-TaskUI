@@ -23,7 +23,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
 	const [open, setOpen] = useState(false)
 
 	return (
-		<div className="flex items-center justify-end p-8">
+		<div className="flex items-center justify-end p-1">
 			<div className="flex items-end space-x-6 lg:space-x-8">
 				<div className="flex flex-col">
 					<span className="text-xs text-muted-foreground mb-1 ml-1">Showing Max:</span>

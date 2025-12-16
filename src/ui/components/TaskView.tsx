@@ -138,7 +138,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 				activationMode="manual"
 			>
 				{/* Left Vertical Tabs Navigation */}
-				<div className="flex flex-col gap-2">
+				<div className="flex flex-col gap-1">
 
 					<div className="flex flex-col p-2">
 						<span
@@ -150,7 +150,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 						</span>
 						<TabsList
 							id="view-options-tabs"
-							className="flex flex-col gap-2 h-fit rounded-lg border-none border-0 p-2"
+							className="flex flex-col gap-2 h-fit rounded-lg border-none border-0 p-1"
 						>
 							<TabsTrigger
 								value="table"
@@ -182,8 +182,9 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 				</div>
 
 				{/* Right Content Area */}
-				<div className="flex-1 flex flex-col">
+				<div id="tabs-content-container" className="flex-1 flex flex-col">
 					<TabsContent
+						id="table-view-content"
 						value="table"
 						className={cn("flex-1 justify-center items-center")}
 					>
@@ -194,11 +195,12 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 							handleUpdateTask={handleUpdateTask}
 							handleCreateTask={createTask}
 						/>
-						<div className="flex justify-end pt-4">
+						<div className="flex justify-end">
 							<DataTablePagination table={table} />
 						</div>
 					</TabsContent>
 					<TabsContent
+						id="list-view-content"
 						value="list"
 						className={cn("flex flex-col flex-1 items-center")}
 					>
@@ -209,16 +211,23 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 							handleUpdateTask={handleUpdateTask}
 							handleCreateTask={createTask}
 						/>
-						<div className="flex justify-end pt-4">
+						<div className="flex justify-end">
 							<DataTablePagination table={table} />
 						</div>
 					</TabsContent>
 					<TabsContent
+						id="board-view-content"
 						value="board"
-						className={cn("flex-1 justify-center items-center")}
+						className={cn("flex flex-col flex-1 items-center")}
 					>
-						<BoardView table={table} />
-						<div className="flex justify-end p-4">
+						<BoardView
+							table={table}
+							handleEditTask={handleEditTask}
+							handleDeleteTask={handleDeleteTask}
+							handleUpdateTask={handleUpdateTask}
+							handleCreateTask={createTask}
+						/>
+						<div className="flex justify-end">
 							<DataTablePagination table={table} />
 						</div>
 					</TabsContent>

@@ -14,7 +14,7 @@ export const TabView: React.FC<TabViewProps> = ({ className, children, ...props 
 	return (
 		<div
 			className={cn(
-				"w-full h-fit flex flex-col bg-secondary rounded-md m-4 transition-all",
+				"w-full h-full flex flex-col bg-secondary border border-border rounded-md m-4 transition-all overflow-hidden",
 				className
 			)}
 			{...props}

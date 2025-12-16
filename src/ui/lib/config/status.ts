@@ -47,6 +47,7 @@ const statusDisplayConfig: Record<
 		icon: XCircle,
 		className: "text-destructive-foreground",
 		iconClassName: "text-destructive-foreground",
+		order: 4,
 	},
 };
 
