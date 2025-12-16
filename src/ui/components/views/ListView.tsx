@@ -82,8 +82,8 @@ export function ListView<TData extends Task>({
 							<div key={`group-${row.id}`} className="space-y-1">
 								<div
 									className={cn(
-										"flex items-center gap-2 p-3 rounded-lg cursor-pointer sticky top-0 z-10",
-										row.subRows && row.subRows.length > 0 && "bg-primary",
+										"bg-secondary border-b border-border flex items-center gap-2 p-3 rounded-0 cursor-pointer sticky top-0 z-10",
+										row.subRows && row.subRows.length > 0,
 									)}
 								>
 									<div

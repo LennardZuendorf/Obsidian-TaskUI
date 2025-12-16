@@ -134,7 +134,7 @@ export class MainView extends ItemView {
 	}
 
 	getIcon() {
-		return "list-todo";
+		return "file-check";
 	}
 
 	getDisplayText() {

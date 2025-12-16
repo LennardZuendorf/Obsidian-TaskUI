@@ -30,7 +30,7 @@ export default class ShardsTaskUIPlugin extends Plugin {
 		);
 
 		// Add Ribbon Icons to Activate the Views
-		this.addRibbonIcon("list-todo", "Open Shards Task UI", () => {
+		this.addRibbonIcon("file-check", "Open Tasks UI", () => {
 			this.activateMainTabView();
 		});
 

@@ -69,6 +69,8 @@ const TaskListCard = <TData extends Task = Task>({
 		setIsEditMode(false);
 	};
 
+	const hasDates = task.dueDate || task.scheduledDate;
+
 	if (isEditMode) {
 		return (
 			<Card className="border border-border shadow-lg w-full transition-all">
@@ -83,6 +85,80 @@ const TaskListCard = <TData extends Task = Task>({
 		);
 	}
 
+	// Single row layout when no dates
+	if (!hasDates) {
+		return (
+			<Card
+				className="group border hover:ring-1 hover:ring-hover transition-all w-full cursor-pointer"
+				onClick={() => onEditTask(task)}
+			>
+			<div className="flex items-center gap-2 px-3 py-2">
+				{/* Status */}
+				<div onClick={(e) => e.stopPropagation()}>
+					<PriorityStatusCommand
+						status={task.status}
+						priority={task.priority}
+						onStatusChange={(status) => onUpdateTask({ ...task, status })}
+						onPriorityChange={(priority) => onUpdateTask({ ...task, priority })}
+					/>
+				</div>
+
+				{/* Title + Priority Flags grouped together */}
+				<div className="flex items-center gap-2 min-w-0 flex-1">
+					<span
+						data-title
+						className={cn(
+							"text-primary-foreground flex-shrink truncate",
+							task.status === TaskStatus.DONE && "line-through opacity-60"
+						)}
+					>
+						{task.description}
+					</span>
+
+					{/* Priority Flags */}
+					<div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+						<PriorityFlags priority={task.priority} size="md" />
+					</div>
+				</div>
+
+				{/* Tags */}
+				{task.tags && task.tags.length > 0 && (
+					<div className="flex items-center gap-1 flex-shrink-0">
+						{task.tags.map((tag: string, index: number) => (
+							<Badge key={index} variant="accent" size="sm">
+								{tag}
+							</Badge>
+						))}
+					</div>
+				)}
+
+				{/* Edit button */}
+				<Button
+					variant="outline"
+					size="iconsm"
+					onClick={(e) => {
+						e.stopPropagation();
+						setIsEditMode(true);
+					}}
+					className="flex-shrink-0"
+					aria-label="Quick Edit"
+				>
+					<Edit className="h-4 w-4" />
+				</Button>
+
+				{/* More button */}
+				<div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+					<SettingsButton
+						onViewDetails={() => onEditTask(task)}
+						onDelete={() => onDeleteTask(task)}
+					/>
+				</div>
+			</div>
+			</Card>
+		);
+	}
+
+	// Multi-row layout when dates exist
 	return (
 		<Card
 			className="group border hover:ring-1 hover:ring-hover transition-all w-full cursor-pointer"

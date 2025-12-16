@@ -218,7 +218,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 						className={cn("flex-1 justify-center items-center")}
 					>
 						<BoardView table={table} />
-						<div className="flex justify-end pt-4">
+						<div className="flex justify-end p-4">
 							<DataTablePagination table={table} />
 						</div>
 					</TabsContent>
