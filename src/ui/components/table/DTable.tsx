@@ -72,10 +72,16 @@ const categoryFilterFn: FilterFn<Task> = (row, columnId, filterValue) => {
 	return category === filterValue;
 };
 
-// Initial column visibility state - initially hide categories
+// Fixed column visibility for TableView
 const initialColumnVisibility: ColumnVisibility = {
-	scheduledDateCategory: false,
-	dueDateCategory: false,
+	description: true,
+	tags: true,
+	status: true,
+	priority: true,
+	scheduledDate: true,
+	dueDate: true,
+	scheduledDateCategory: false, // Hidden
+	dueDateCategory: false, // Hidden
 };
 
 // Minimal TanStack Table column definitions for Task
