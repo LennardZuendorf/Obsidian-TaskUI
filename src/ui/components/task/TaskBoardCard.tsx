@@ -55,7 +55,7 @@ export const TaskBoardCard: React.FC<TaskBoardCardProps> = ({
 	const style = {
 		transform: CSS.Transform.toString(transform),
 		transition: transition || "transform 200ms ease",
-		opacity: isDragging ? 0.4 : 1,
+		opacity: isDragging ? 0.3 : 1,
 		cursor: isDragging ? "grabbing" : "grab",
 	};
 
@@ -65,7 +65,7 @@ export const TaskBoardCard: React.FC<TaskBoardCardProps> = ({
 			style={style}
 			className={cn(
 				"group border shadow-sm hover:shadow-md transition-all cursor-pointer mb-2",
-				isDragging && "ring-2 ring-primary shadow-lg scale-105 rotate-2"
+				isDragging && "ring-2 ring-accent shadow-lg"
 			)}
 			onClick={handleCardClick}
 			onMouseDown={() => setHasDragged(false)}

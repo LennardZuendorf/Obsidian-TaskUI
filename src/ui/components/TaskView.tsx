@@ -186,7 +186,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 					<TabsContent
 						id="table-view-content"
 						value="table"
-						className={cn("flex-1 justify-center items-center")}
+						className={cn("flex flex-col flex-1 items-center")}
 					>
 						<TableView
 							table={table}

@@ -85,8 +85,33 @@ const initialColumnVisibility: ColumnVisibility = {
 };
 
 // Minimal TanStack Table column definitions for Task
+// Order: Status, Priority, Description, Tags, Due Date, Scheduled Date
 // biome-ignore lint/suspicious/noExplicitAny: TanStack Table ColumnDef requires any for generic cell values
 const taskTableColumns: ColumnDef<Task, any>[] = [
+	{
+		accessorKey: "status",
+		header: ({ column }) => column.id,
+		cell: (info) => info.getValue(),
+		sortingFn: sortTasksByStatus,
+		filterFn: statusFilterFn,
+		enableGrouping: true,
+		enableSorting: true,
+		enableColumnFilter: true,
+		meta: { headerLabel: "Status" } as DTableColumnMeta,
+		size: 120,
+	},
+	{
+		accessorKey: "priority",
+		header: ({ column }) => column.id,
+		cell: (info) => info.getValue(),
+		sortingFn: sortTasksByPriority,
+		filterFn: priorityFilterFn,
+		enableGrouping: true,
+		enableSorting: true,
+		enableColumnFilter: true,
+		meta: { headerLabel: "Priority" } as DTableColumnMeta,
+		size: 120,
+	},
 	{
 		accessorKey: "description",
 		header: ({ column }) => column.id,
@@ -95,6 +120,7 @@ const taskTableColumns: ColumnDef<Task, any>[] = [
 		enableGrouping: false,
 		enableColumnFilter: false,
 		meta: { headerLabel: "Description" } as DTableColumnMeta,
+		size: 300,
 	},
 	{
 		accessorKey: "tags",
@@ -107,28 +133,7 @@ const taskTableColumns: ColumnDef<Task, any>[] = [
 		enableGrouping: false,
 		enableColumnFilter: false,
 		meta: { headerLabel: "Tags" } as DTableColumnMeta,
-	},
-	{
-		accessorKey: "status",
-		header: ({ column }) => column.id,
-		cell: (info) => info.getValue(),
-		sortingFn: sortTasksByStatus,
-		filterFn: statusFilterFn,
-		enableGrouping: true,
-		enableSorting: true,
-		enableColumnFilter: true,
-		meta: { headerLabel: "Status" } as DTableColumnMeta,
-	},
-	{
-		accessorKey: "priority",
-		header: ({ column }) => column.id,
-		cell: (info) => info.getValue(),
-		sortingFn: sortTasksByPriority,
-		filterFn: priorityFilterFn,
-		enableGrouping: true,
-		enableSorting: true,
-		enableColumnFilter: true,
-		meta: { headerLabel: "Priority" } as DTableColumnMeta,
+		size: 150,
 	},
 	{
 		id: "scheduledDateCategory",
@@ -147,6 +152,17 @@ const taskTableColumns: ColumnDef<Task, any>[] = [
 		enableColumnFilter: true,
 	},
 	{
+		accessorKey: "dueDate",
+		header: ({ column }) => column.id,
+		cell: (info) => info.getValue(),
+		sortingFn: "datetime",
+		enableGrouping: true,
+		enableSorting: true,
+		enableColumnFilter: false,
+		meta: { headerLabel: "Due Date" } as DTableColumnMeta,
+		size: 120,
+	},
+	{
 		accessorKey: "scheduledDate",
 		header: ({ column }) => column.id,
 		cell: (info) => info.getValue(),
@@ -154,7 +170,8 @@ const taskTableColumns: ColumnDef<Task, any>[] = [
 		enableGrouping: true,
 		enableSorting: true,
 		enableColumnFilter: false,
-		meta: { headerLabel: "Scheduled" } as DTableColumnMeta,
+		meta: { headerLabel: "Scheduled Date" } as DTableColumnMeta,
+		size: 120,
 	},
 	{
 		id: "dueDateCategory",
@@ -171,16 +188,6 @@ const taskTableColumns: ColumnDef<Task, any>[] = [
 		enableGrouping: false,
 		enableSorting: false,
 		enableColumnFilter: true,
-	},
-	{
-		accessorKey: "dueDate",
-		header: ({ column }) => column.id,
-		cell: (info) => info.getValue(),
-		sortingFn: "datetime",
-		enableGrouping: true,
-		enableSorting: true,
-		enableColumnFilter: false,
-		meta: { headerLabel: "Due" } as DTableColumnMeta,
 	},
 ];
 

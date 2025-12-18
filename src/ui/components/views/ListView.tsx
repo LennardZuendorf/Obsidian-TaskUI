@@ -8,9 +8,11 @@ import { cn } from "@/ui/utils";
 import type { Task, TaskPriority, TaskStatus } from "@/data/types/tasks";
 import { logger } from "@/utils/logger";
 import { Button } from "@/ui/base/Button";
+import { Badge } from "@/ui/base/Badge";
 import { TaskListCard } from "@/ui/components/task/TaskListCard";
 import type { TabViewProps } from "@/ui/components/TaskView";
 import { TabView } from "./TabView";
+import { ScrollArea } from "@/ui/base/ScrollArea";
 
 const NoTasksMessage = React.memo(() => {
 	return (
@@ -74,69 +76,111 @@ export function ListView<TData extends Task>({
 
 	return (
 		<TabView id="list-view-wrapper">
-			<div id="list-tasks-container" className="flex flex-col justify-center w-full h-fit gap-2 p-4">
-				{rows.map((row: Row<TData>) => {
-					if (grouping.length > 0 && row.getIsGrouped()) {
-						const groupDisplay = getGroupDisplay(row, grouping[0]);
-						return (
-							<div key={`group-${row.id}`} className="space-y-1">
-								<div
-									className={cn(
-										"bg-secondary border-b border-border flex items-center gap-2 p-3 rounded-0 cursor-pointer sticky top-0 z-10",
-										row.subRows && row.subRows.length > 0,
-									)}
-								>
-									<div
-										className="flex items-center w-full space-x-2"
-										onClick={() => row.toggleExpanded()}
+			<div className="relative flex-1">
+				<ScrollArea 
+					className="h-full" 
+					viewportStyle={{ scrollSnapType: "y proximity" }}
+				>
+					<div 
+						id="list-tasks-container" 
+						className="flex flex-col justify-center w-full h-fit gap-2 p-4"
+					>
+						{rows
+							.filter((row) => {
+								// When grouping is enabled, only render top-level rows (depth 0)
+								// to avoid rendering leaf rows that are already shown in group.subRows
+								// When no grouping, all rows are top-level
+								return grouping.length === 0 || row.depth === 0;
+							})
+							.map((row: Row<TData>) => {
+							if (grouping.length > 0 && row.getIsGrouped()) {
+								const groupDisplay = getGroupDisplay(row, grouping[0]);
+								const GroupIcon = groupDisplay.icon;
+								const isExpanded = row.getIsExpanded();
+								
+								return (
+									<div 
+										key={`group-${row.id}`}
+										className="bg-secondary rounded-md shadow-sm"
+										style={{ scrollSnapAlign: "start" }}
 									>
-										<Button
-											variant="ghost"
-											size="icon"
-											className="h-6 w-6 p-0 flex-shrink-0"
-											onClick={(e) => {
-												e.stopPropagation();
-												row.toggleExpanded();
-											}}
-										>
-											{row.getIsExpanded() ? (
-												<ChevronDown className="h-4 w-4" />
-											) : (
-												<ChevronRight className="h-4 w-4" />
+										{/* Group Header */}
+										<div
+											className={cn(
+												"flex items-center gap-2 px-4 py-3 bg-primary shadow-sm transition-all cursor-pointer hover:shadow-md sticky top-0 z-10",
+												isExpanded ? "rounded-t-md" : "rounded-md",
+												row.subRows && row.subRows.length > 0,
 											)}
-										</Button>
-										<span className="font-medium truncate">
-											<p className={groupDisplay.className}>
+											onClick={() => row.toggleExpanded()}
+										>
+											<Button
+												variant="ghost"
+												size="iconsm"
+												className="flex-shrink-0 p-0 h-4 w-4 text-primary-foreground hover:bg-primary-foreground/10"
+												onClick={(e) => {
+													e.stopPropagation();
+													row.toggleExpanded();
+												}}
+											>
+												{isExpanded ? (
+													<ChevronDown className="h-3 w-3" />
+												) : (
+													<ChevronRight className="h-3 w-3" />
+												)}
+											</Button>
+											{GroupIcon && (
+												<GroupIcon className={cn("h-4 w-4 text-primary-foreground", groupDisplay.iconClassName)} />
+											)}
+											<span className="font-semibold text-sm text-primary-foreground truncate">
 												{groupDisplay.label}
-											</p>
-										</span>
-										{row.subRows && (
-											<span className="text-muted-foreground ml-auto">
-												({row.subRows.length} {row.subRows.length>1? "items" : "item"})
 											</span>
+											{row.subRows && (
+												<Badge variant="outline" size="sm" className="ml-auto bg-primary-foreground/10 text-primary-foreground border-primary-foreground/20">
+													{row.subRows.length}
+												</Badge>
+											)}
+										</div>
+										
+										{/* Group Content */}
+										{isExpanded && row.subRows && row.subRows.length > 0 && (
+											<div className="border-primary border-s border-b border-e rounded-b-md p-2 space-y-2">
+												{row.subRows.map((subRow: Row<TData>) => (
+													<TaskListCard<TData>
+														key={`task-${subRow.id}`}
+														DtableRow={subRow}
+														onEditTask={() => handleEditTask(subRow.original)}
+														onDeleteTask={() => handleDeleteTask(subRow.original)}
+														onUpdateTask={(taskFromCard) =>
+															handleUpdateTask(taskFromCard as TData)
+														}
+													/>
+												))}
+											</div>
 										)}
 									</div>
-								</div>
-							</div>
-						);
-					} else {
-						return (
-							<div
-								key={`task-${row.id}`}
-								className={cn(grouping.length > 0 && "pl-4")}
-							>
-							<TaskListCard<TData>
-								DtableRow={row}
-								onEditTask={() => handleEditTask(row.original)}
-								onDeleteTask={() => handleDeleteTask(row.original)}
-								onUpdateTask={(taskFromCard) =>
-									handleUpdateTask(taskFromCard as TData)
-								}
-							/>
-							</div>
-						);
-					}
-				})}
+								);
+							} else {
+								return (
+									<div
+										key={`task-${row.id}`}
+										style={{ scrollSnapAlign: "start" }}
+									>
+									<TaskListCard<TData>
+										DtableRow={row}
+										onEditTask={() => handleEditTask(row.original)}
+										onDeleteTask={() => handleDeleteTask(row.original)}
+										onUpdateTask={(taskFromCard) =>
+											handleUpdateTask(taskFromCard as TData)
+										}
+									/>
+									</div>
+								);
+							}
+						})}
+					</div>
+				</ScrollArea>
+				{/* Blur fade overlay */}
+				<div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-secondary to-transparent" />
 			</div>
 		</TabView>
 	);

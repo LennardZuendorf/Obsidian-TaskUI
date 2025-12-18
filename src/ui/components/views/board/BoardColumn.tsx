@@ -21,6 +21,7 @@ export interface KanbanColumnProps<TData extends Task = Task> {
 	grouping: GroupingState;
 	isCollapsed?: boolean;
 	onToggleCollapse?: () => void;
+	isDragging?: boolean;
 }
 
 /**
@@ -39,6 +40,7 @@ export const KanbanColumn = <TData extends Task = Task>({
 	grouping,
 	isCollapsed = false,
 	onToggleCollapse,
+	isDragging = false,
 }: KanbanColumnProps<TData>) => {
 	const { setNodeRef, isOver } = useDroppable({
 		id: `column-${status}`,
@@ -73,71 +75,68 @@ export const KanbanColumn = <TData extends Task = Task>({
 		<div
 			ref={setNodeRef}
 			className={cn(
-				"flex bg-secondary rounded-lg transition-all duration-200",
+				"flex bg-secondary rounded-md transition-all duration-200 shadow-sm",
 				isCollapsed 
 					? "min-w-[48px] max-w-[48px] flex-shrink-0 flex-row" 
 					: "flex-1 min-w-[280px] max-w-[400px] flex-col",
-				isOver && "ring-2 ring-primary bg-accent/20 shadow-lg"
+				isOver && "ring-2 ring-accent"
 			)}
 		>
-			{/* Collapsed Column Layout */}
-			{isCollapsed ? (
-				<>
-					{/* Vertical line */}
-					<div className="w-0.5 bg-border my-2 ml-2 flex-shrink-0" />
-					
-					{/* Vertical content */}
-					<div className="flex flex-col items-center justify-start py-3 px-1 flex-1 gap-3 cursor-pointer hover:bg-accent/5 transition-colors"
-						onClick={onToggleCollapse}
+		{/* Collapsed Column Layout */}
+		{isCollapsed ? (
+			<div className="flex flex-col items-stretch w-full h-full bg-primary rounded-md overflow-hidden shadow-sm">
+				{/* Vertical content */}
+				<div className="flex flex-col items-center justify-start py-3 px-1 flex-1 gap-3 cursor-pointer hover:bg-primary-foreground/10 transition-all"
+					onClick={onToggleCollapse}
+				>
+					{/* Expand button */}
+					<Button
+						variant="ghost"
+						size="iconsm"
+						className="flex-shrink-0 p-0 h-5 w-5 text-primary-foreground hover:bg-primary-foreground/10"
+						onClick={(e) => {
+							e.stopPropagation();
+							onToggleCollapse?.();
+						}}
 					>
-						{/* Expand button */}
-						<Button
-							variant="ghost"
-							size="iconsm"
-							className="flex-shrink-0 p-0 h-5 w-5"
-							onClick={(e) => {
-								e.stopPropagation();
-								onToggleCollapse?.();
+						<ChevronRight className="h-3.5 w-3.5" />
+					</Button>
+					
+					{/* Status icon */}
+					<StatusIcon className={cn("h-5 w-5 flex-shrink-0 text-primary-foreground", statusDisplay.iconClassName)} />
+					
+					{/* Rotated text - writing from bottom to top */}
+					<div className="flex-1 flex items-center justify-center min-h-[120px]">
+						<span 
+							className="font-semibold text-sm text-primary-foreground whitespace-nowrap"
+							style={{ 
+								writingMode: 'vertical-rl',
+								transform: 'rotate(180deg)',
 							}}
 						>
-							<ChevronRight className="h-3.5 w-3.5" />
-						</Button>
-						
-						{/* Status icon */}
-						<StatusIcon className={cn("h-5 w-5 flex-shrink-0", statusDisplay.iconClassName)} />
-						
-						{/* Rotated text - writing from bottom to top */}
-						<div className="flex-1 flex items-center justify-center min-h-[120px]">
-							<span 
-								className="font-medium text-sm text-primary-foreground whitespace-nowrap"
-								style={{ 
-									writingMode: 'vertical-rl',
-									transform: 'rotate(180deg)',
-								}}
-							>
-								{statusDisplay.label}
-							</span>
-						</div>
-						
-						{/* Task count badge */}
-						<Badge variant="secondary" size="sm" className="flex-shrink-0">
-							{tasks.length}
-						</Badge>
+							{statusDisplay.label}
+						</span>
 					</div>
-				</>
-			) : (
+					
+					{/* Task count badge */}
+					<Badge variant="outline" size="sm" className="flex-shrink-0 bg-primary-foreground/10 text-primary-foreground border-primary-foreground/20">
+						{tasks.length}
+					</Badge>
+				</div>
+			</div>
+		) : (
 				<>
 					{/* Column Header - Expanded */}
 					<div className={cn(
-						"flex items-center gap-2 px-3 py-2.5 border-b border-border transition-colors cursor-pointer hover:bg-accent/5",
-						isOver && "bg-accent/10"
+						"flex items-center gap-2 px-4 py-3 bg-primary rounded-t-md shadow-sm transition-all cursor-pointer hover:shadow-md",
+						isOver && "shadow-lg ring-2 ring-accent/50"
 					)}
 					onClick={onToggleCollapse}
 					>
 						<Button
 							variant="ghost"
 							size="iconsm"
-							className="flex-shrink-0 p-0 h-4 w-4"
+							className="flex-shrink-0 p-0 h-4 w-4 text-primary-foreground hover:bg-primary-foreground/10"
 							onClick={(e) => {
 								e.stopPropagation();
 								onToggleCollapse?.();
@@ -145,33 +144,45 @@ export const KanbanColumn = <TData extends Task = Task>({
 						>
 							<ChevronDown className="h-3 w-3" />
 						</Button>
-						<StatusIcon className={cn("h-4 w-4", statusDisplay.iconClassName)} />
-						<span className="font-medium text-sm text-primary-foreground">
+						<StatusIcon className={cn("h-4 w-4 text-primary-foreground", statusDisplay.iconClassName)} />
+						<span className="font-semibold text-sm text-primary-foreground">
 							{statusDisplay.label}
 						</span>
-						<Badge variant="secondary" size="sm" className="ml-auto">
+						<Badge variant="outline" size="sm" className="ml-auto bg-primary-foreground/10 text-primary-foreground border-primary-foreground/20">
 							{tasks.length}
 						</Badge>
 					</div>
 				</>
 			)}
 
-			{/* Column Content - Scrollable (hidden when collapsed) */}
-			{!isCollapsed && (
-				<div className="flex-1 overflow-y-auto p-2 min-h-[200px]">
-				{tasks.length === 0 ? (
+		{/* Column Content - Scrollable (hidden when collapsed) */}
+		{!isCollapsed && (
+			<div className="flex-1 flex flex-col overflow-y-auto p-2 min-h-[200px] border border-s border-b border-e rounded-b-md">
+				{/* Drop Area - Visible during active drag at top, highlighted when hovering */}
+				{isDragging && (
 					<div className={cn(
-						"flex flex-col items-center justify-center h-32 text-muted-foreground text-sm transition-all",
-						isOver && "text-primary scale-105"
+						"mb-2 rounded-md border-2 border-dashed transition-all flex-shrink-0",
+						"flex items-center justify-center min-h-[80px]",
+						"animate-in fade-in-0 slide-in-from-top-2 duration-200",
+						isOver 
+							? "border-accent bg-accent/10 text-accent" 
+							: "border-muted-foreground/30 text-muted-foreground"
 					)}>
-						{isOver ? (
-							<>
-								<span className="font-medium">Drop here</span>
-								<span className="text-xs mt-1">to move to {statusDisplay.label}</span>
-							</>
-						) : (
-							<span>No tasks</span>
-						)}
+						<div className="flex flex-col items-center gap-1">
+							<span className={cn(
+								"text-sm font-medium transition-all",
+								isOver ? "text-accent" : "text-muted-foreground"
+							)}>
+								Drop To Move
+							</span>
+							<span className="text-xs opacity-75">to {statusDisplay.label}</span>
+						</div>
+					</div>
+				)}
+
+				{tasks.length === 0 ? (
+					<div className="flex flex-col items-center justify-center h-32 text-muted-foreground text-sm">
+						<span>No tasks</span>
 					</div>
 				) : (
 					<SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
