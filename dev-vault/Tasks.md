@@ -1,12 +1,3 @@
+
 # Tasks
-- [ ] Another Task 6 [id:: jZFvRwnZ] [priority:: medium]
-- [ ] Another Task 10 [id:: 7WJaWbsg] [priority:: medium]
-- [ ] Another Task 7 [id:: oMrduYN3] [priority:: medium]
-- [ ] Another Task 5 [id:: X6Hv0HDQ] [priority:: medium]
-- [ ] Another Task 4 [id:: zqDyGwso] [priority:: medium]
-- [ ] Another Task 3 [id:: 0ZnMEyk6] [priority:: medium]
-- [ ] Another Task 2 [id:: 3O5oA8gD] [priority:: medium]
-- [ ] Another Task [id:: H6Ib6c0P] [priority:: medium]
-- [/] Testing Tags #tag #test [id:: zAJJYHbz] [priority:: low] [due:: 2025-12-12]
-- [ ] New Task Form Modal #new #testing [id:: thL2Kvcq] [priority:: medium] [due:: 2025-12-17] [scheduled:: 2025-12-24]
-- [ ] Testing Reccurance 🔁 every 2 weeks 📅 2025-12-14
+- [ ] Testing Table [id:: 8R2giIRu] [priority:: medium]
