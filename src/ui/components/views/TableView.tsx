@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import React, { useCallback } from "react";
 import type { Task } from "@/data/types/tasks";
+import { TaskPriority, TaskStatus } from "@/data/types/tasks";
 import { Badge } from "@/ui/base/Badge";
 import { Button } from "@/ui/base/Button";
 import { logger } from "@/utils/logger";
@@ -21,9 +22,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/ui/base/Table";
+import { EnumSelect } from "@/ui/components/forms/fields/EnumSelect";
 import { SettingsButton } from "@/ui/components/task/SettingsButton";
 import type { TabViewProps } from "@/ui/components/TaskView";
 import { getColumnDisplay } from "@/ui/lib/config/column";
+import { getPriorityDisplayConfig } from "@/ui/lib/config/priority";
+import { getStatusDisplayConfig } from "@/ui/lib/config/status";
 import { getMatchingDisplay } from "@/ui/lib/config/utils";
 import { cn } from "@/ui/utils";
 import { TabView } from "./TabView";
@@ -255,8 +259,8 @@ export function TableView<TData extends Task>({
 	if (!rows?.length) {
 		return (
 			<TabView id="table-view-wrapper" className="flex-1">
-				<div className="p-3 h-full flex flex-col">
-					<div className="rounded-lg border border-border overflow-hidden bg-card">
+				<div className="p-2 h-full flex flex-col">
+					<div className="rounded-md border border-border overflow-hidden bg-card">
 						<Table>
 							<TableBody>
 								<TableRow>
@@ -277,231 +281,159 @@ export function TableView<TData extends Task>({
 
 	return (
 		<TabView id="table-view-wrapper">
-			<div className="p-3 h-full flex flex-col">
-				<div className="rounded-lg border border-border overflow-hidden bg-card flex-1 flex flex-col">
-					<Table>
-						<TableHeader className="bg-primary rounded-t-lg">
-							{table.getHeaderGroups().map((headerGroup) => (
-								<TableRow key={headerGroup.id}>
-									{headerGroup.headers.map((header) => (
-										<TableHead 
-											key={header.id} 
-											style={{ 
-												width: header.column.id === "description" ? undefined : `${header.getSize()}px`,
-												maxWidth: header.column.id === "description" ? "400px" : undefined,
-											}}
-											className={cn(
-												"text-primary-foreground border-r border-border last:border-r-0",
-												header.column.id === "description" && "min-w-[200px]"
-											)}
-										>
-											{header.isPlaceholder ? null : (
-												<SortableHeader
-													column={header.column}
-													table={table}
-													grouping={grouping}
-												/>
-											)}
-										</TableHead>
-									))}
-									{/* Extra header for options */}
-									<TableHead 
-										key="options-header" 
-										className="text-primary-foreground"
-										style={{ width: "1%" }}
-									>
-										Options
-									</TableHead>
-								</TableRow>
+			<Table className="h-fit">
+				<TableHeader className="bg-primary rounded-t-md">
+					{table.getHeaderGroups().map((headerGroup) => (
+						<TableRow key={headerGroup.id}>
+							{headerGroup.headers.map((header) => (
+								<TableHead 
+									key={header.id} 
+									style={{ 
+										width: header.column.id === "description" ? undefined : `${header.getSize()}px`,
+										maxWidth: header.column.id === "description" ? "400px" : undefined,
+									}}
+									className={cn(
+										"text-primary-foreground border-r border-border last:border-r-0",
+										header.column.id === "description" && "min-w-[200px]"
+									)}
+								>
+									{header.isPlaceholder ? null : (
+										<SortableHeader
+											column={header.column}
+											table={table}
+											grouping={grouping}
+										/>
+									)}
+								</TableHead>
 							))}
-						</TableHeader>
-					<TableBody>
-						{rows
-							.filter((row) => {
-								// When grouping is enabled, only render top-level rows (depth 0)
-								// to avoid rendering leaf rows that are already shown in expanded groups
-								// When no grouping, all rows are top-level
-								return grouping.length === 0 || row.depth === 0;
-							})
-							.map((row) => {
-							if (row.getIsGrouped()) {
-								const groupDisplay = getGroupDisplay(row, grouping[0]);
-								const IconComponent = groupDisplay.icon;
-								const isExpanded = row.getIsExpanded();
+							{/* Extra header for options */}
+							<TableHead 
+								key="options-header" 
+								className="text-primary-foreground"
+								style={{ width: "1%" }}
+							>
+								Options
+							</TableHead>
+						</TableRow>
+					))}
+				</TableHeader>
+			<TableBody>
+				{rows
+					.filter((row) => {
+						return grouping.length === 0 || row.depth === 0;
+					})
+					.map((row) => {
+					if (row.getIsGrouped()) {
+						const groupDisplay = getGroupDisplay(row, grouping[0]);
+						const IconComponent = groupDisplay.icon;
+						const isExpanded = row.getIsExpanded();
 
-								return (
-									<React.Fragment key={row.id}>
-										{/* Group Header Row */}
-										<TableRow>
-											<TableCell
-												colSpan={table.getVisibleLeafColumns().length + 1}
-												className="bg-secondary border-b border-border p-0"
+						return (
+							<React.Fragment key={row.id}>
+								{/* Group Header Row */}
+								<TableRow>
+									<TableCell
+										colSpan={table.getVisibleLeafColumns().length + 1}
+										className="p-0 border-b border-border bg-primary"
+									>
+										<div
+											className={cn(
+												"flex items-center gap-2 px-4 py-3 bg-primary transition-all cursor-pointer border-b border-border",
+												// !rounded top here!
+											)}
+											onClick={() => row.toggleExpanded()}
+										>
+											<Button
+												variant="ghost"
+												size="icon"
+												className="flex-shrink-0 p-0 h-4 w-4 text-primary-foreground hover:bg-primary-foreground/10"
+												onClick={(e) => {
+													e.stopPropagation();
+													row.toggleExpanded();
+												}}
 											>
-												<div className="flex items-center w-full gap-2 p-3">
-													<Button
-														variant="ghost"
-														size="icon"
-														className="h-6 w-6 p-0 flex-shrink-0"
-														onClick={(e) => {
-															e.stopPropagation();
-															row.toggleExpanded();
+												{isExpanded ? (
+													<ChevronDown className="h-3 w-3" />
+												) : (
+													<ChevronRight className="h-3 w-3" />
+												)}
+											</Button>
+											{IconComponent && (
+												<IconComponent className={cn("h-4 w-4 text-primary-foreground", "iconClassName" in groupDisplay ? groupDisplay.iconClassName : undefined)} />
+											)}
+											<span className="font-semibold text-sm text-primary-foreground truncate">
+												{groupDisplay.label}
+											</span>
+											{row.subRows && (
+												<span className="text-muted-foreground ml-auto">
+													({row.subRows.length} {row.subRows.length > 1 ? "items" : "item"})
+												</span>
+											)}
+										</div>
+									</TableCell>
+								</TableRow>
+								
+								{/* Expanded Group Content - Render subRows explicitly */}
+								{isExpanded && row.subRows && row.subRows.map((subRow) => (
+									<TableRow key={subRow.id}>
+									{subRow.getVisibleCells().map((cell) => {
+										// Status cells - use EnumSelect for inline editing
+										if (cell.column.id === "status") {
+											const task = subRow.original as Task;
+											const currentStatus = task.status as TaskStatus;
+
+											return (
+												<TableCell 
+													key={cell.id} 
+													className="border-r border-border last:border-r-0"
+												>
+													<EnumSelect<TaskStatus>
+														value={currentStatus}
+														onChange={(newStatus) => {
+															handleUpdateTask({
+																...task,
+																status: newStatus,
+															} as Task);
 														}}
-													>
-														{isExpanded ? (
-															<ChevronDown className="h-4 w-4" />
-														) : (
-															<ChevronRight className="h-4 w-4" />
-														)}
-													</Button>
-													<span className="font-medium truncate">
-														<p className={groupDisplay.className}>
-															{groupDisplay.label}
-														</p>
-													</span>
-													{row.subRows && (
-														<span className="text-muted-foreground ml-auto">
-															({row.subRows.length} {row.subRows.length > 1 ? "items" : "item"})
-														</span>
-													)}
-												</div>
-											</TableCell>
-										</TableRow>
-										
-										{/* Expanded Group Content - Render subRows explicitly */}
-										{isExpanded && row.subRows && row.subRows.map((subRow) => (
-											<TableRow key={subRow.id}>
-												{subRow.getVisibleCells().map((cell) => {
-													// Status/Priority cells - use badges like TaskListCard
-													if (cell.column.id === "status" || cell.column.id === "priority") {
-														const value = cell.getValue() as string;
-														const display = getMatchingDisplay(value);
-														const IconComponent = display.icon;
-
-														return (
-															<TableCell 
-																key={cell.id} 
-																className="border-r border-border last:border-r-0"
-															>
-																<Badge
-																	variant="secondary"
-																	className={cn("text-xs", display.className)}
-																	icon={IconComponent ? <IconComponent className="h-3 w-3" /> : undefined}
-																>
-																	{display.label}
-																</Badge>
-															</TableCell>
-														);
-													}
-
-													// Tags cells
-													if (cell.column.id === "tags") {
-														const tags = cell.getValue<string[] | undefined>();
-														return (
-															<TableCell 
-																key={cell.id}
-																className="border-r border-border last:border-r-0"
-															>
-																<div className="flex flex-wrap gap-1">
-																	{tags?.map((tag) => (
-																		<Badge
-																			key={tag}
-																			variant="accent"
-																			size="sm"
-																			className="text-xs"
-																		>
-																			{tag}
-																		</Badge>
-																	))}
-																</div>
-															</TableCell>
-														);
-													}
-
-													// Date cells - format as dd.MM.yyyy
-													if (
-														cell.column.id === "scheduledDate" ||
-														cell.column.id === "dueDate"
-													) {
-														const dateValue = cell.getValue<Date | string | null | undefined>();
-														let date: Date | null = null;
-														if (dateValue instanceof Date) {
-															date = dateValue;
-														} else if (typeof dateValue === "string") {
-															date = new Date(dateValue);
-														}
-														return (
-															<TableCell 
-																key={cell.id}
-																className="border-r border-border last:border-r-0"
-															>
-																{date && !isNaN(date.getTime())
-																	? format(date, "dd.MM.yyyy")
-																	: "—"}
-															</TableCell>
-														);
-													}
-
-													// Description cells - should fill available space but not too much
-													if (cell.column.id === "description") {
-														return (
-															<TableCell 
-																key={cell.id} 
-																className="truncate border-r border-border last:border-r-0 min-w-[200px]"
-																style={{ maxWidth: "400px" }}
-															>
-																{cell.getValue<string>()}
-															</TableCell>
-														);
-													}
-
-													// Default cell rendering
-													return (
-														<TableCell 
-															key={cell.id}
-															className="border-r border-border last:border-r-0"
-														>
-															{flexRender(cell.column.columnDef.cell, cell.getContext())}
-														</TableCell>
-													);
-												})}
-												{/* Extra cell for options */}
-												<TableCell key="options-cell" className="text-right" style={{ width: "1%" }}>
-													<div className="flex justify-end">
-														<SettingsButton
-															onViewDetails={() => handleEditTask(subRow.original)}
-															onDelete={() => handleDeleteTask(subRow.original)}
-														/>
-													</div>
+														options={getStatusDisplayConfig()}
+														buttonSize="sm"
+														showChevron={true}
+														className="w-full"
+														groupHeading="Status"
+														ariaLabel={`Status: ${currentStatus}. Click to change status.`}
+													/>
 												</TableCell>
-											</TableRow>
-										))}
-									</React.Fragment>
-								);
-							} else {
-								return (
-									<TableRow key={row.id}>
-										{row.getVisibleCells().map((cell) => {
-											// Status/Priority cells - use badges like TaskListCard
-											if (cell.column.id === "status" || cell.column.id === "priority") {
-												const value = cell.getValue() as string;
-												const display = getMatchingDisplay(value);
-												const IconComponent = display.icon;
+											);
+										}
 
-												return (
-													<TableCell 
-														key={cell.id} 
-														className="border-r border-border last:border-r-0"
-													>
-														<Badge
-															variant="secondary"
-															className={cn("text-xs", display.className)}
-															icon={IconComponent ? <IconComponent className="h-3 w-3" /> : undefined}
-														>
-															{display.label}
-														</Badge>
-													</TableCell>
-												);
-											}
+										// Priority cells - use EnumSelect for inline editing
+										if (cell.column.id === "priority") {
+											const task = subRow.original as Task;
+											const currentPriority = task.priority as TaskPriority;
+
+											return (
+												<TableCell 
+													key={cell.id} 
+													className="border-r border-border last:border-r-0"
+												>
+													<EnumSelect<TaskPriority>
+														value={currentPriority}
+														onChange={(newPriority) => {
+															handleUpdateTask({
+																...task,
+																priority: newPriority,
+															} as Task);
+														}}
+														options={getPriorityDisplayConfig()}
+														buttonSize="sm"
+														showChevron={true}
+														className="w-full"
+														groupHeading="Priority"
+														ariaLabel={`Priority: ${currentPriority}. Click to change priority.`}
+													/>
+												</TableCell>
+											);
+										}
 
 											// Tags cells
 											if (cell.column.id === "tags") {
@@ -511,7 +443,7 @@ export function TableView<TData extends Task>({
 														key={cell.id}
 														className="border-r border-border last:border-r-0"
 													>
-														<div className="flex flex-wrap gap-1">
+														<div className="flex flex-wrap gap-2">
 															{tags?.map((tag) => (
 																<Badge
 																	key={tag}
@@ -542,7 +474,7 @@ export function TableView<TData extends Task>({
 												return (
 													<TableCell 
 														key={cell.id}
-														className="border-r border-border last:border-r-0"
+														className="border-r border-border last:border-r-0 break-words"
 													>
 														{date && !isNaN(date.getTime())
 															? format(date, "dd.MM.yyyy")
@@ -556,7 +488,7 @@ export function TableView<TData extends Task>({
 												return (
 													<TableCell 
 														key={cell.id} 
-														className="truncate border-r border-border last:border-r-0 min-w-[200px]"
+														className="border-r border-border last:border-r-0 min-w-[200px] break-words"
 														style={{ maxWidth: "400px" }}
 													>
 														{cell.getValue<string>()}
@@ -568,7 +500,7 @@ export function TableView<TData extends Task>({
 											return (
 												<TableCell 
 													key={cell.id}
-													className="border-r border-border last:border-r-0"
+													className="border-r border-border last:border-r-0 break-words"
 												>
 													{flexRender(cell.column.columnDef.cell, cell.getContext())}
 												</TableCell>
@@ -576,21 +508,165 @@ export function TableView<TData extends Task>({
 										})}
 										{/* Extra cell for options */}
 										<TableCell key="options-cell" className="text-right" style={{ width: "1%" }}>
-											<div className="flex justify-end">
-												<SettingsButton
-													onViewDetails={() => handleEditTask(row.original)}
-													onDelete={() => handleDeleteTask(row.original)}
-												/>
-											</div>
+											<SettingsButton
+												variant="full"
+												buttonVariant="outline"
+												className="w-full"
+												onViewDetails={() => handleEditTask(subRow.original)}
+												onDelete={() => handleDeleteTask(subRow.original)}
+											/>
 										</TableCell>
 									</TableRow>
-								);
-							}
-						})}
-					</TableBody>
-					</Table>
-				</div>
-			</div>
+								))}
+							</React.Fragment>
+						);
+					} else {
+						return (
+							<TableRow key={row.id}>
+							{row.getVisibleCells().map((cell) => {
+								// Status cells - use EnumSelect for inline editing
+								if (cell.column.id === "status") {
+									const task = row.original as Task;
+									const currentStatus = task.status as TaskStatus;
+
+									return (
+										<TableCell 
+											key={cell.id} 
+											className="border-r border-border last:border-r-0"
+										>
+											<EnumSelect<TaskStatus>
+												value={currentStatus}
+												onChange={(newStatus) => {
+													handleUpdateTask({
+														...task,
+														status: newStatus,
+													} as Task);
+												}}
+												options={getStatusDisplayConfig()}
+												buttonSize="sm"
+												buttonVariant="outline"
+												showChevron={true}
+												className="w-full"
+											/>
+										</TableCell>
+									);
+								}
+
+								// Priority cells - use EnumSelect for inline editing
+								if (cell.column.id === "priority") {
+									const task = row.original as Task;
+									const currentPriority = task.priority as TaskPriority;
+
+									return (
+										<TableCell 
+											key={cell.id} 
+											className="border-r border-border last:border-r-0"
+										>
+											<EnumSelect<TaskPriority>
+												value={currentPriority}
+												onChange={(newPriority) => {
+													handleUpdateTask({
+														...task,
+														priority: newPriority,
+													} as Task);
+												}}
+												options={getPriorityDisplayConfig()}
+												buttonSize="sm"
+												buttonVariant="outline"
+												showChevron={true}
+												className="w-full"
+											/>
+										</TableCell>
+									);
+								}
+
+									// Tags cells
+									if (cell.column.id === "tags") {
+										const tags = cell.getValue<string[] | undefined>();
+										return (
+											<TableCell 
+												key={cell.id}
+												className="border-r border-border last:border-r-0"
+											>
+												<div className="flex flex-wrap gap-2">
+													{tags?.map((tag) => (
+														<Badge
+															key={tag}
+															variant="accent"
+															size="sm"
+															className="text-xs"
+														>
+															{tag}
+														</Badge>
+													))}
+												</div>
+											</TableCell>
+										);
+									}
+
+									// Date cells - format as dd.MM.yyyy
+									if (
+										cell.column.id === "scheduledDate" ||
+										cell.column.id === "dueDate"
+									) {
+										const dateValue = cell.getValue<Date | string | null | undefined>();
+										let date: Date | null = null;
+										if (dateValue instanceof Date) {
+											date = dateValue;
+										} else if (typeof dateValue === "string") {
+											date = new Date(dateValue);
+										}
+										return (
+											<TableCell 
+												key={cell.id}
+												className="border-r border-border last:border-r-0 break-words"
+											>
+												{date && !isNaN(date.getTime())
+													? format(date, "dd.MM.yyyy")
+													: "—"}
+											</TableCell>
+										);
+									}
+
+									// Description cells - should fill available space but not too much
+									if (cell.column.id === "description") {
+										return (
+											<TableCell 
+												key={cell.id} 
+												className="border-r border-border last:border-r-0 min-w-[200px] break-words"
+												style={{ maxWidth: "400px" }}
+											>
+												{cell.getValue<string>()}
+											</TableCell>
+										);
+									}
+
+									// Default cell rendering
+									return (
+										<TableCell 
+											key={cell.id}
+											className="border-r border-border last:border-r-0 break-words"
+										>
+											{flexRender(cell.column.columnDef.cell, cell.getContext())}
+										</TableCell>
+									);
+								})}
+								{/* Extra cell for options */}
+								<TableCell key="options-cell" className="text-right" style={{ width: "1%" }}>
+									<SettingsButton
+										variant="full"
+										buttonVariant="outline"
+										className="w-full"
+										onViewDetails={() => handleEditTask(row.original)}
+										onDelete={() => handleDeleteTask(row.original)}
+									/>
+								</TableCell>
+							</TableRow>
+						);
+					}
+				})}
+			</TableBody>
+		</Table>	
 		</TabView>
 	);
 }
