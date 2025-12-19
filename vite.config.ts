@@ -15,9 +15,9 @@ export default defineConfig({
 						closeBundle() {
 							const devVaultPath = path.resolve(
 								__dirname,
-								"dev-vault/.obsidian/plugins/taskui-plugin",
+								"dev-vault/.obsidian/plugins/shards",
 							);
-							const buildPath = path.resolve(__dirname, "build/taskui-plugin");
+							const buildPath = path.resolve(__dirname, "build/shards-plugin");
 
 							// Copy manifest to build directory
 							copyFileSync(
@@ -58,7 +58,7 @@ export default defineConfig({
 					{
 						name: "copy-manifest",
 						closeBundle() {
-							const buildPath = path.resolve(__dirname, "build/taskui-plugin");
+							const buildPath = path.resolve(__dirname, "build/shards-plugin");
 							copyFileSync(
 								"manifest.json",
 								path.join(buildPath, "manifest.json"),
@@ -75,7 +75,7 @@ export default defineConfig({
 	build: {
 		lib: {
 			entry: path.resolve(__dirname, "src/main.ts"),
-			name: "ShardsTaskUI",
+			name: "Shards",
 			fileName: () => "main.js",
 			formats: ["cjs"],
 		},
@@ -105,7 +105,7 @@ export default defineConfig({
 				},
 			},
 		},
-		outDir: "build/taskui-plugin",
+		outDir: "build/shards-plugin",
 		emptyOutDir: false,
 		sourcemap: process.env.NODE_ENV === "development" ? "inline" : false,
 		minify: process.env.NODE_ENV === "production",

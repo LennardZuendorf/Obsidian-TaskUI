@@ -423,12 +423,12 @@ if (process.env.NODE_ENV !== "production") {
  * Persisted in local storage.
  */
 export const sortingAtom = atomWithStorage<SortingState>(
-	"taskui-view-sorting", // Unique storage key
+	"shards-view-sorting", // Unique storage key
 	[], // Initial state: no sorting
 );
 
 export const filtersAtom = atomWithStorage<ColumnFiltersState>(
-	"taskui-view-filter", // Unique storage key
+	"shards-view-filter", // Unique storage key
 	[], // Initial state: no filters
 );
 
@@ -437,12 +437,12 @@ export const filtersAtom = atomWithStorage<ColumnFiltersState>(
  * Persisted in local storage.
  */
 export const groupingAtom = atomWithStorage<GroupingState>(
-	"taskui-view-grouping", // Unique storage key
+	"shards-view-grouping", // Unique storage key
 	[], // Initial state: no grouping
 );
 
 export const groupSortingAtom = atomWithStorage<SortingState>(
-	"taskui-view-group-sorting", // Unique storage key
+	"shards-view-group-sorting", // Unique storage key
 	[], // Initial state: no sorting
 );
 
@@ -451,7 +451,7 @@ export const groupSortingAtom = atomWithStorage<SortingState>(
  * Persisted in local storage.
  */
 export const expandedAtom = atomWithStorage<ExpandedState>(
-	"taskui-view-expanded", // Unique storage key
+	"shards-view-expanded", // Unique storage key
 	{
 		"status:in-progress": true,
 		"status:todo": true,
@@ -483,7 +483,7 @@ export const expandedAtom = atomWithStorage<ExpandedState>(
 // Pagination State (Added)
 // Default to page index 0 and page size 30
 export const paginationAtom = atomWithStorage<PaginationState>(
-	"taskui-view-pagination", // Unique storage key
+	"shards-view-pagination", // Unique storage key
 	{
 		pageIndex: 0,
 		pageSize: 30,
@@ -496,6 +496,6 @@ export const paginationAtom = atomWithStorage<PaginationState>(
  * Persisted in local storage.
  */
 export const collapsedColumnsAtom = atomWithStorage<TaskStatus[]>(
-	"taskui-board-collapsed-columns", // Unique storage key
+	"shards-board-collapsed-columns", // Unique storage key
 	[TaskStatus.CANCELLED], // Initial state: Cancelled column collapsed by default
 );

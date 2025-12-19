@@ -84,7 +84,7 @@ const AppController: React.FC = () => {
 			if (!app) throw new Error("App context is not available");
 			const service = new CrudService(app);
 			setCrudService(service);
-			logger.debug("TaskUI: Loaded app and CRUD service successfully.");
+			logger.debug("Shards: Loaded app and CRUD service successfully.");
 		} catch (err) {
 			const errorMessage = getErrorMessage(err);
 			setError(errorMessage);
@@ -138,7 +138,7 @@ export class MainView extends ItemView {
 	}
 
 	getDisplayText() {
-		return "Shards Task UI";
+		return "Shards Task View";
 	}
 
 	async onOpen() {
@@ -201,7 +201,7 @@ export class MainView extends ItemView {
 		} catch (error) {
 			const errorMessage = getErrorMessage(error);
 			logger.error(`Error in onOpen: ${errorMessage}`);
-			this.containerEl.children[1].innerHTML = `<div class="error-notice">Failed to initialize TaskUI view: ${errorMessage}</div>`;
+			this.containerEl.children[1].innerHTML = `<div class="error-notice">Failed to initialize Shards view: ${errorMessage}</div>`;
 		}
 	}
 

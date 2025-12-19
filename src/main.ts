@@ -8,7 +8,7 @@ import {
 import { MainView, VIEW_TYPE_MAIN } from "./MainView";
 import { logger } from "./utils/logger";
 
-export default class ShardsTaskUIPlugin extends Plugin {
+export default class ShardsPlugin extends Plugin {
 	settings: appSettings;
 
 	async loadSettings() {
@@ -30,7 +30,7 @@ export default class ShardsTaskUIPlugin extends Plugin {
 		);
 
 		// Add Ribbon Icons to Activate the Views
-		this.addRibbonIcon("file-check", "Open Tasks UI", () => {
+		this.addRibbonIcon("file-check", "Open Shards", () => {
 			this.activateMainTabView();
 		});
 
