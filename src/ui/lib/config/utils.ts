@@ -55,17 +55,22 @@ export function getMatchingDisplay(
 	}
 
 	if (typeof input === "string") {
-		// Try each config type
-		const statusConfig = getStatusDisplay(input as TaskStatus);
-		if (statusConfig) return statusConfig as DisplayConfigType;
+		// Check if the string is a valid enum value before trying to get display config
+		// This prevents priority values from being incorrectly matched as status values
+		// Priority is checked first to ensure correct matching when grouping by priority
+		if (Object.values(TaskPriority).includes(input as TaskPriority)) {
+			return getPriorityDisplay(input as TaskPriority) as DisplayConfigType;
+		}
+		if (Object.values(TaskStatus).includes(input as TaskStatus)) {
+			return getStatusDisplay(input as TaskStatus) as DisplayConfigType;
+		}
+		if (Object.values(DateCategory).includes(input as DateCategory)) {
+			return getDateCategoryDisplay(input as DateCategory) as DisplayConfigType;
+		}
 
-		const priorityConfig = getPriorityDisplay(input as TaskPriority);
-		if (priorityConfig) return priorityConfig as DisplayConfigType;
-
-		const dateConfig = getDateCategoryDisplay(input as DateCategory);
-		if (dateConfig) return dateConfig as DisplayConfigType;
-
-		throw new Error(`No display configuration found for label: ${input}`);
+		// If not a valid enum value, throw an error
+		// Note: This function expects enum values, not labels
+		throw new Error(`No display configuration found for enum value: ${input}`);
 	}
 
 	// Handle enum input
