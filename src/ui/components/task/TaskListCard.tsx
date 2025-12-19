@@ -161,7 +161,7 @@ const TaskListCard = <TData extends Task = Task>({
 	// Multi-row layout when dates exist
 	return (
 		<Card
-			className="group border hover:ring-1 hover:ring-hover transition-all w-full cursor-pointer"
+			className="group border hover:ring-1 hover:ring-hover transition-all w-full cursor-pointer shadow-none"
 			onClick={() => onEditTask(task)}
 		>
 			<div className="flex flex-col gap-2 px-3 py-2">

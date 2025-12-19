@@ -76,38 +76,37 @@ export function ListView<TData extends Task>({
 
 	return (
 		<TabView id="list-view-wrapper">
-			<div className="relative flex-1">
-				<ScrollArea 
-					className="h-full" 
+			<div className="relative flex flex-col h-full justify-between">
+				<ScrollArea
+					id="list-tasks-container"
+					className="flex-1 h-fit"
+					viewportClassName="w-full"
 					viewportStyle={{ scrollSnapType: "y proximity" }}
 				>
-					<div 
-						id="list-tasks-container" 
-						className="flex flex-col justify-center w-full h-fit gap-2 p-4"
-					>
-						{rows
-							.filter((row) => {
-								// When grouping is enabled, only render top-level rows (depth 0)
-								// to avoid rendering leaf rows that are already shown in group.subRows
-								// When no grouping, all rows are top-level
-								return grouping.length === 0 || row.depth === 0;
-							})
-							.map((row: Row<TData>) => {
+					<div className="flex flex-col gap-2 w-full">
+					{rows
+						.filter((row) => {
+							// When grouping is enabled, only render top-level rows (depth 0)
+							// to avoid rendering leaf rows that are already shown in group.subRows
+							// When no grouping, all rows are top-level
+							return grouping.length === 0 || row.depth === 0;
+						})
+						.map((row: Row<TData>) => {
 							if (grouping.length > 0 && row.getIsGrouped()) {
 								const groupDisplay = getGroupDisplay(row, grouping[0]);
 								const GroupIcon = groupDisplay.icon;
 								const isExpanded = row.getIsExpanded();
-								
+
 								return (
-									<div 
+									<div
 										key={`group-${row.id}`}
-										className="bg-secondary rounded-md shadow-sm"
+										className="bg-secondary rounded-md w-full"
 										style={{ scrollSnapAlign: "start" }}
 									>
 										{/* Group Header */}
 										<div
 											className={cn(
-												"flex items-center gap-2 px-4 py-3 bg-primary shadow-sm transition-all cursor-pointer hover:shadow-md sticky top-0 z-10",
+												"flex items-center gap-2 px-4 py-3 bg-primary transition-all cursor-pointer sticky top-0 z-10",
 												isExpanded ? "rounded-t-md" : "rounded-md",
 												row.subRows && row.subRows.length > 0,
 											)}
@@ -140,7 +139,7 @@ export function ListView<TData extends Task>({
 												</Badge>
 											)}
 										</div>
-										
+
 										{/* Group Content */}
 										{isExpanded && row.subRows && row.subRows.length > 0 && (
 											<div className="border-primary border-s border-b border-e rounded-b-md p-2 space-y-2">
@@ -163,16 +162,17 @@ export function ListView<TData extends Task>({
 								return (
 									<div
 										key={`task-${row.id}`}
+										className="w-full"
 										style={{ scrollSnapAlign: "start" }}
 									>
-									<TaskListCard<TData>
-										DtableRow={row}
-										onEditTask={() => handleEditTask(row.original)}
-										onDeleteTask={() => handleDeleteTask(row.original)}
-										onUpdateTask={(taskFromCard) =>
-											handleUpdateTask(taskFromCard as TData)
-										}
-									/>
+										<TaskListCard<TData>
+											DtableRow={row}
+											onEditTask={() => handleEditTask(row.original)}
+											onDeleteTask={() => handleDeleteTask(row.original)}
+											onUpdateTask={(taskFromCard) =>
+												handleUpdateTask(taskFromCard as TData)
+											}
+										/>
 									</div>
 								);
 							}

@@ -13,6 +13,7 @@ export interface EnumSelectProps<TEnum> {
 	disabled?: boolean;
 	className?: string;
 	buttonSize?: ButtonProps["size"];
+	buttonVariant?: ButtonProps["variant"];
 	showLabel?: boolean;
 	showInnerLabel?: boolean;
 	showChevron?: boolean;
@@ -93,6 +94,7 @@ export function EnumSelect<TEnum>({
 	disabled,
 	className,
 	buttonSize = "default",
+	buttonVariant = "default",
 	showLabel = false,
 	showInnerLabel = true,
 	showChevron = true,
@@ -125,6 +127,7 @@ export function EnumSelect<TEnum>({
 				<PopoverTrigger asChild>
 					<Button
 						type="button"
+						variant={buttonVariant}
 						size={buttonSize}
 						disabled={disabled}
 						onPointerDown={(e) => e.stopPropagation()}

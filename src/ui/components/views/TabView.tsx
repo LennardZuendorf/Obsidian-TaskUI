@@ -19,7 +19,9 @@ export const TabView: React.FC<TabViewProps> = ({ className, children, ...props 
 			)}
 			{...props}
 		>
-			{children}
+			<div className="p-2 h-full w-full">
+				{children}
+			</div>
 		</div>
 	);
 };

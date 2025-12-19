@@ -157,7 +157,7 @@ export const KanbanColumn = <TData extends Task = Task>({
 
 		{/* Column Content - Scrollable (hidden when collapsed) */}
 		{!isCollapsed && (
-			<div className="flex-1 flex flex-col overflow-y-auto p-2 min-h-[200px] border border-s border-b border-e rounded-b-md">
+			<div className="flex-1 flex flex-col overflow-y-auto p-2 min-h-[200px] border border-s border-b border-e border-primary rounded-b-md">
 				{/* Drop Area - Visible during active drag at top, highlighted when hovering */}
 				{isDragging && (
 					<div className={cn(
