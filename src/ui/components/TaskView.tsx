@@ -1,9 +1,8 @@
 import { Table as TanstackTable } from "@tanstack/react-table";
 import {
-	Calendar,
+	Table,
 	KanbanSquare,
-	LayoutGrid,
-	ListCollapseIcon,
+	ListChecks,
 	Plus,
 } from "lucide-react";
 import { type App, Notice } from "obsidian";
@@ -157,7 +156,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 								aria-label="Switch to Table view"
 								title="Table view"
 							>
-								<LayoutGrid className="h-5 w-5" aria-hidden="true" />
+								<Table className="h-5 w-5" aria-hidden="true" />
 								<span className="sr-only">Table</span>
 							</TabsTrigger>
 							<TabsTrigger
@@ -165,7 +164,7 @@ export function TaskView({ app, changeTasks }: TaskViewProps) {
 								aria-label="Switch to List view"
 								title="List view"
 							>
-								<ListCollapseIcon className="h-5 w-5" aria-hidden="true" />
+								<ListChecks className="h-5 w-5" aria-hidden="true" />
 								<span className="sr-only">List</span>
 							</TabsTrigger>
 							<TabsTrigger

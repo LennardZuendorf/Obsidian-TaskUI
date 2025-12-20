@@ -75,11 +75,11 @@ export const KanbanColumn = <TData extends Task = Task>({
 		<div
 			ref={setNodeRef}
 			className={cn(
-				"flex bg-secondary rounded-md transition-all duration-200 shadow-sm",
+				"flex bg-secondary rounded-md transition-all duration-200 shadow-sm outline-none",
 				isCollapsed 
 					? "min-w-[48px] max-w-[48px] flex-shrink-0 flex-row" 
 					: "flex-1 min-w-[280px] max-w-[400px] flex-col",
-				isOver && "ring-2 ring-accent"
+				isOver && "border-2 border-accent"
 			)}
 		>
 		{/* Collapsed Column Layout */}
@@ -128,8 +128,8 @@ export const KanbanColumn = <TData extends Task = Task>({
 				<>
 					{/* Column Header - Expanded */}
 					<div className={cn(
-						"flex items-center gap-2 px-4 py-3 bg-primary rounded-t-md shadow-sm transition-all cursor-pointer hover:shadow-md",
-						isOver && "shadow-lg ring-2 ring-accent/50"
+						"flex items-center gap-2 px-4 py-3 bg-primary rounded-t-md transition-all cursor-pointer outline-none",
+						isOver && "shadow-lg"
 					)}
 					onClick={onToggleCollapse}
 					>
@@ -157,7 +157,7 @@ export const KanbanColumn = <TData extends Task = Task>({
 
 		{/* Column Content - Scrollable (hidden when collapsed) */}
 		{!isCollapsed && (
-			<div className="flex-1 flex flex-col overflow-y-auto p-2 min-h-[200px] border border-s border-b border-e border-primary rounded-b-md">
+			<div className="flex-1 flex flex-col overflow-y-auto p-2 min-h-[200px] rounded-b-md">
 				{/* Drop Area - Visible during active drag at top, highlighted when hovering */}
 				{isDragging && (
 					<div className={cn(

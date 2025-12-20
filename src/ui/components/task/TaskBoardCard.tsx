@@ -64,7 +64,7 @@ export const TaskBoardCard: React.FC<TaskBoardCardProps> = ({
 			ref={setNodeRef}
 			style={style}
 			className={cn(
-				"group border shadow-sm hover:shadow-md transition-all cursor-pointer mb-2",
+				"group border transition-all cursor-pointer mb-2 shadow-md",
 				isDragging && "ring-2 ring-accent shadow-lg"
 			)}
 			onClick={handleCardClick}

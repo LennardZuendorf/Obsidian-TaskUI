@@ -191,7 +191,7 @@ export function BoardView<TData extends Task>({
 				onDragEnd={handleDragEnd}
 				onDragCancel={handleDragCancel}
 			>
-				<div id="board-columns-container" className="flex gap-4 p-2 overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+				<div id="board-columns-container" className="flex gap-4 overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
 					{getOrderedTaskStatuses().map((status) => (
 						<KanbanColumn
 							key={status}
