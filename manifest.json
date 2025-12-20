@@ -1,10 +1,10 @@
 {
-	"id": "shards-taskui",
-	"name": "Shards TaskUI",
-	"version": "0.0.1",
-	"minAppVersion": "0.0.1",
-	"description": "Shards TaskUI enables visual management of tasks based on the popular tasks plugin for obsidian.",
+	"id": "shards-plugin",
+	"name": "Shards",
+	"version": "0.2.1",
+	"minAppVersion": "1.10.0",
+	"description": "Shards enables comprehensive visual task management inside your vault, powered by dataview and compatible with the tasks plugin.",
 	"author": "Lennard Zündorf",
-	"authorUrl": "https://zuendorf.me",
+	"authorUrl": "https://shards.ignitr.dev",
 	"isDesktopOnly": true
 }

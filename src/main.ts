@@ -1,18 +1,28 @@
-// Description: Main Plugin File for the Obsidian Plugin
-import { Plugin, WorkspaceLeaf, Notice } from "obsidian";
+import "./styles.css";
+import { use } from "@ophidian/core";
+import { Plugin, WorkspaceLeaf } from "obsidian";
+import { AppSettingsTab } from "./config/settings";
 import { MainView, VIEW_TYPE_MAIN } from "./MainView";
+import { SettingsService } from "./service/SettingsService";
 import { logger } from "./utils/logger";
-import { checkPlugins } from "./utils/checkPlugin";
 
-export default class ShardsTaskUIPlugin extends Plugin {
+export default class ShardsPlugin extends Plugin {
+	// @ts-expect-error - Ophidian type compatibility issue with Obsidian versions
+	use = use.plugin(this);
+	settingsService = this.use(SettingsService);
+
 	async onload() {
+		// Settings are automatically loaded via SettingsService
+
 		// Register the Main Tab View
-		this.registerView(VIEW_TYPE_MAIN, (leaf) => new MainView(leaf));
+		this.registerView(VIEW_TYPE_MAIN, (leaf) => new MainView(leaf, this));
 
 		// Add Ribbon Icons to Activate the Views
-		this.addRibbonIcon("layout", "Activate Main Tab View", () => {
+		this.addRibbonIcon("file-check", "Open Shards", () => {
 			this.activateMainTabView();
 		});
+
+		this.addSettingTab(new AppSettingsTab(this.app, this));
 	}
 
 	async onunload() {
@@ -22,38 +32,25 @@ export default class ShardsTaskUIPlugin extends Plugin {
 	// Method to activate the Main Tab View
 	async activateMainTabView() {
 		const { workspace } = this.app;
-		const requiredPluginIds = ["obsidian-tasks-plugin", "dataview"];
 
-		logger.info("Shards: Activating Main Tab View");
-		const { allPluginsEnabled, missingPlugins } =
-			checkPlugins(requiredPluginIds);
+		logger.trace("Shards: Activating Main Tab View");
+		let leaf: WorkspaceLeaf | null = null;
+		const leaves = workspace.getLeavesOfType(VIEW_TYPE_MAIN);
 
-		if (allPluginsEnabled) {
-			let leaf: WorkspaceLeaf | null = null;
-			const leaves = workspace.getLeavesOfType(VIEW_TYPE_MAIN);
-
-			if (leaves.length > 0) {
-				leaf = leaves[0];
-				await workspace.revealLeaf(leaf);
-				logger.info("Shards: Switched to existing main tab leaf.");
-			} else {
-				leaf = workspace.getLeaf(false);
-
-				if (leaf) {
-					await leaf.setViewState({
-						type: VIEW_TYPE_MAIN,
-						active: true,
-					});
-				}
-				logger.info("Shards: Created new main tab leaf.");
-			}
+		if (leaves.length > 0) {
+			leaf = leaves[0];
+			await workspace.revealLeaf(leaf);
+			logger.trace("Shards: Switched to existing main tab leaf.");
 		} else {
-			new Notice(
-				`The following required plugins are missing or not enabled: ${missingPlugins.join(", ")}\n\nYou won't be able to use Shards without it!`,
-			);
-			logger.warn(
-				"Shards: Some required plugins are missing or not enabled.",
-			);
+			leaf = workspace.getLeaf(false);
+
+			if (leaf) {
+				await leaf.setViewState({
+					type: VIEW_TYPE_MAIN,
+					active: true,
+				});
+			}
+			logger.trace("Shards: Created new main tab leaf.");
 		}
 	}
 }

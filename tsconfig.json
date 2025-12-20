@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
+	  "baseUrl": ".",
 	  "paths": {
-		  "@/*": ["./src/"]
+		  "@/*": ["./src/*"]
 	  },
-    "baseUrl": ".",
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
@@ -26,5 +26,5 @@
   },
   "include": [
     "**/*.ts"
-, "vite.config.mjs"  ]
+, "vite.config.mjs", "src/data/types/taskVisuals.tsx"  ]
 }
