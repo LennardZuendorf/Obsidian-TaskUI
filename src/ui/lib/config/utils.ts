@@ -20,19 +20,22 @@ type DisplayConfigType =
 type EnumType = TaskStatus | TaskPriority | DateCategory;
 
 /**
- * Gets the display configuration for a given label or enum value.
- * This function can handle status, priority, or date category configurations.
+ * Gets the display configuration for a given label, enum value, or Date.
+ * This function can handle status, priority, date category configurations, or Date objects.
  *
- * @param input - Either a string label or an enum value
+ * @param input - Either a string label, enum value, Date object, or null/undefined
  * @returns The corresponding display configuration object
  * @throws Error if no matching configuration is found
  *
  * @example
  * // Using a label
- * const config = getDisplayConfig("To Do");
+ * const config = getMatchingDisplay("To Do");
  *
  * // Using an enum
- * const config = getDisplayConfig(TaskStatus.TODO);
+ * const config = getMatchingDisplay(TaskStatus.TODO);
+ *
+ * // Using a Date
+ * const config = getMatchingDisplay(new Date());
  */
 export function getMatchingDisplay(
 	input: string | EnumType | Date | null | undefined,
@@ -47,11 +50,13 @@ export function getMatchingDisplay(
 	}
 
 	if (input instanceof Date) {
-		const displayConfig = getDateCategoryDisplay(
+		const baseConfig = getDateCategoryDisplay(
 			dateToDateCategory(input),
 		) as DisplayConfigType;
-		displayConfig.label = format(input, "EEE, do 'of' MMMM yyyy");
-		return displayConfig;
+		return {
+			...baseConfig,
+			label: format(input, "EEE, do 'of' MMMM yyyy"),
+		};
 	}
 
 	if (typeof input === "string") {

@@ -69,7 +69,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
 						const rawIndex = table.getState().pagination.pageIndex
 						const rawPageCount = table.getPageCount()
 						const pageIndexDisplay = Number.isFinite(rawIndex) ? rawIndex + 1 : 1
-						const pageCountDisplay = Number.isFinite(rawPageCount) ? rawPageCount : 1
+						const pageCountDisplay = Number.isFinite(rawPageCount) && rawPageCount > 0 ? rawPageCount : 1
 						return (
 							<span className="text-xs text-muted-foreground mb-1 ml-1">
 								Page {pageIndexDisplay} of {pageCountDisplay}

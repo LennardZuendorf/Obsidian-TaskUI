@@ -43,7 +43,10 @@ function SortableHeader<TData extends Task>({
 	grouping: string[];
 }) {
 	const displayInfo = getColumnDisplay(column.id);
-	const IconComponent = displayInfo.icon;
+	if (!displayInfo) {
+		return null;
+	}
+	const IconComponent = displayInfo?.icon;
 	const sorting = table.getState().sorting;
 	const activeGroupId = grouping[0];
 
@@ -400,7 +403,6 @@ export function TableView<TData extends Task>({
 														showChevron={true}
 														className="w-full"
 														groupHeading="Status"
-														ariaLabel={`Status: ${currentStatus}. Click to change status.`}
 													/>
 												</TableCell>
 											);
@@ -429,7 +431,6 @@ export function TableView<TData extends Task>({
 														showChevron={true}
 														className="w-full"
 														groupHeading="Priority"
-														ariaLabel={`Priority: ${currentPriority}. Click to change priority.`}
 													/>
 												</TableCell>
 											);

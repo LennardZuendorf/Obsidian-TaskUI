@@ -50,14 +50,6 @@ function getInputDisplayText(date: Date): string {
 }
 
 /**
- * Formats a date for display in the label when editing.
- * Shows a compact date format.
- */
-function formatDateForLabel(date: Date): string {
-	return format(date, "d MMM yy");
-}
-
-/**
  * Gets the display text for the label preview (when not editing).
  * Uses the same logic as DateDisplay component for consistency.
  */
@@ -274,14 +266,20 @@ export function DatePickerInput({
 						align="end"
 						onOpenAutoFocus={(e) => e.preventDefault()}
 					>
-						<Calendar
-							mode="single"
-							selected={value || undefined}
-							month={month}
-							onMonthChange={setMonth}
-							onSelect={handleCalendarSelect}
-							disabled={{ before: new Date(new Date().setHours(0, 0, 0, 0)) }}
-						/>
+					<Calendar
+						mode="single"
+						selected={value || undefined}
+						month={month}
+						onMonthChange={setMonth}
+						onSelect={handleCalendarSelect}
+						disabled={
+							validation === "future"
+								? { before: new Date(new Date().setHours(0, 0, 0, 0)) }
+								: validation === "past"
+									? { after: new Date(new Date().setHours(23, 59, 59, 999)) }
+									: undefined
+						}
+					/>
 					</PopoverContent>
 				</Popover>
 			</div>

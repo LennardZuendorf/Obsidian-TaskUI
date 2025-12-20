@@ -63,8 +63,6 @@ export function PriorityStatusCommand({
 		setIsPriorityPopoverOpen(true);
 	};
 
-	const [isOpen, setIsOpen] = React.useState(false);
-
 	return (
 		<Popover open={isPriorityPopoverOpen} onOpenChange={setIsPriorityPopoverOpen}>
 			<PopoverTrigger asChild>
@@ -75,7 +73,7 @@ export function PriorityStatusCommand({
 					onClick={handleClick}
 					onContextMenu={handleContextMenu}
 					className={cn("flex-shrink-0", className)}
-					aria-label={`Status: ${statusDisplay.label}, Priority: ${priorityDisplay.label} \n Click to for Status \n Right-Click for Priority`}
+					aria-label={`Status: ${statusDisplay.label}. Priority: ${priorityDisplay.label}. Left click to change status, right click to change priority.`}
 				>
 					<StatusIcon className={cn("h-4 w-4", priorityClassName)} />
 				</Button>
@@ -86,7 +84,7 @@ export function PriorityStatusCommand({
 						onChange={onPriorityChange}
 						options={getPriorityDisplayConfig()}
 						groupHeading={"Select Priority"}
-						onSelect={() => setIsOpen(false)}
+						onSelect={() => setIsPriorityPopoverOpen(false)}
 					/>
 			</PopoverContent>
 		</Popover>

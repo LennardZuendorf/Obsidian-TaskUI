@@ -24,7 +24,7 @@ import { ColumnDisplayInfo } from "./types";
  * @property {ColumnDisplayInfo} dueDateCategory - Configuration for the due date category column (DateCategory enum type)
  */
 
-const columnDisplayConfig: Record<string, ColumnDisplayInfo> = {
+const columnDisplayConfig = {
 	description: {
 		type: "string",
 		label: "Description",
@@ -65,15 +65,20 @@ const columnDisplayConfig: Record<string, ColumnDisplayInfo> = {
 		label: "Due",
 		icon: CalendarClock,
 	},
-};
+} as const;
 
-export const getColumnDisplayConfig = (columnId: string): ColumnDisplayInfo => {
+export type ColumnId = keyof typeof columnDisplayConfig;
+
+export const getColumnDisplayConfig = (
+	columnId: ColumnId,
+): ColumnDisplayInfo => {
 	return columnDisplayConfig[columnId];
 };
 
-export const getColumnDisplay = (columnId: string): ColumnDisplayInfo => {
-	const config = getColumnDisplayConfig(columnId);
-	return config;
+export const getColumnDisplay = (
+	columnId: string,
+): ColumnDisplayInfo | undefined => {
+	return columnDisplayConfig[columnId as ColumnId];
 };
 
 

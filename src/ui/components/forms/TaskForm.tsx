@@ -174,7 +174,7 @@ export function TaskForm({
 		);
 		reset(defaultValues);
 		setEditTags(stringArrayToTags(defaultValues.tags || []));
-	}, [initialTask?.id, reset, statusLabels, priorityLabels]);
+	}, [initialTask, reset, statusLabels, priorityLabels]);
 
 	// Update metadata when form is active
 	useEffect(() => {
@@ -551,6 +551,7 @@ export function TaskForm({
 										setActiveTagIndex={setActiveTagIndex}
 										placeholder="Add Tags..."
 										className="w-full min-w-0"
+										onBlur={field.onBlur}
 									/>
 								)}
 							/>

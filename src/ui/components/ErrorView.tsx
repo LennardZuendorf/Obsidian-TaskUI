@@ -19,11 +19,7 @@ interface ErrorProps {
  * @param {() => void} [props.onRetry] - An optional callback function to be called when the retry button is clicked.
  * @returns {JSX.Element} A JSX element representing the error view.
  */
-export const ErrorView: React.FC<ErrorProps> = ({
-	message,
-	details,
-	onRetry,
-}: ErrorProps): JSX.Element => {
+export const ErrorView: React.FC<ErrorProps> = ({ message, details, onRetry }) => {
 	return (
 		<div className="flex items-center justify-center min-h-screen bg-background">
 			<Card className="max-w-md w-full">

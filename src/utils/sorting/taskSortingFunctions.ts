@@ -14,7 +14,7 @@ export type SortingFn<TData> = (
 export const sortTasksByPriority: SortingFn<Task> = (
 	rowA: Row<Task>,
 	rowB: Row<Task>,
-	columnId: string,
+	_columnId: string,
 ): number => {
 	// Handle undefined original data
 	if (!rowA.original && !rowB.original) return 0;
@@ -52,7 +52,7 @@ export const sortTasksByPriority: SortingFn<Task> = (
 export const sortTasksByStatus: SortingFn<Task> = (
 	rowA: Row<Task>,
 	rowB: Row<Task>,
-	columnId: string,
+	_columnId: string,
 ): number => {
 	// Handle undefined original data
 	if (!rowA.original && !rowB.original) return 0;
@@ -87,102 +87,53 @@ export const sortTasksByStatus: SortingFn<Task> = (
 };
 
 /**
- * Custom sorting function for date fields in the task table.
+ * Factory function to create date sorting functions for task table.
  * Compares two dates and returns a number indicating their relative order.
  *
- * @param rowA - The first row to compare
- * @param rowB - The second row to compare
- * @param columnId - The ID of the column being sorted
- * @returns
- *   - Negative number if dateA is before dateB
- *   - Positive number if dateA is after dateB
- *   - 0 if dates are equal or either date is null/undefined
+ * @param fieldName - The date field name to sort by ("dueDate" or "scheduledDate")
+ * @returns A sorting function
  */
-export const sortTasksByDueDate: SortingFn<Task> = (
-	rowA: Row<Task>,
-	rowB: Row<Task>,
-	columnId: string,
-): number => {
-	// Handle undefined original data
-	if (!rowA.original && !rowB.original) return 0;
-	if (!rowA.original) return 1;
-	if (!rowB.original) return -1;
+const createDateSorter =
+	(fieldName: "dueDate" | "scheduledDate"): SortingFn<Task> =>
+	(rowA, rowB, _columnId) => {
+		// Handle undefined original data
+		if (!rowA.original && !rowB.original) return 0;
+		if (!rowA.original) return 1;
+		if (!rowB.original) return -1;
 
-	const valA = rowA.original.dueDate;
-	const valB = rowB.original.dueDate;
+		const valA = rowA.original[fieldName];
+		const valB = rowB.original[fieldName];
 
-	// Handle null or undefined values:
-	// If one is null/undefined and the other isn't, sort nulls/undefined to the end or beginning.
-	// Here, we sort them as "lesser" or "equal" if both are null.
-	if (valA == null && valB == null) return 0;
-	if (valA == null) return 1; // valA is null, valB is not, so B comes first (-1 if valA first)
-	if (valB == null) return -1; // valB is null, valA is not, so A comes first (1 if valB first)
+		// Handle null or undefined values:
+		// If one is null/undefined and the other isn't, sort nulls/undefined to the end or beginning.
+		// Here, we sort them as "lesser" or "equal" if both are null.
+		if (valA == null && valB == null) return 0;
+		if (valA == null) return 1; // valA is null, valB is not, so B comes first
+		if (valB == null) return -1; // valB is null, valA is not, so A comes first
 
-	const dateA = new Date(valA as string | number | Date);
-	const dateB = new Date(valB as string | number | Date);
+		const dateA = new Date(valA as string | number | Date);
+		const dateB = new Date(valB as string | number | Date);
 
-	// Check for invalid dates after conversion
-	if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
-	if (isNaN(dateA.getTime())) return 1; // Invalid dates go last
-	if (isNaN(dateB.getTime())) return -1; // Invalid dates go last
+		// Check for invalid dates after conversion
+		if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
+		if (isNaN(dateA.getTime())) return 1; // Invalid dates go last
+		if (isNaN(dateB.getTime())) return -1; // Invalid dates go last
 
-	return dateA.getTime() - dateB.getTime();
-};
+		return dateA.getTime() - dateB.getTime();
+	};
 
-/**
- * Custom sorting function for date fields in the task table.
- * Compares two dates and returns a number indicating their relative order.
- *
- * @param rowA - The first row to compare
- * @param rowB - The second row to compare
- * @param columnId - The ID of the column being sorted
- * @returns
- *   - Negative number if dateA is before dateB
- *   - Positive number if dateA is after dateB
- *   - 0 if dates are equal or either date is null/undefined
- */
-export const sortTasksByScheduledDate: SortingFn<Task> = (
-	rowA: Row<Task>,
-	rowB: Row<Task>,
-	columnId: string,
-): number => {
-	// Handle undefined original data
-	if (!rowA.original && !rowB.original) return 0;
-	if (!rowA.original) return 1;
-	if (!rowB.original) return -1;
+export const sortTasksByDueDate = createDateSorter("dueDate");
+export const sortTasksByScheduledDate = createDateSorter("scheduledDate");
 
-	const valA = rowA.original.scheduledDate;
-	const valB = rowB.original.scheduledDate;
-
-	// Handle null or undefined values:
-	// If one is null/undefined and the other isn't, sort nulls/undefined to the end or beginning.
-	// Here, we sort them as "lesser" or "equal" if both are null.
-	if (valA == null && valB == null) return 0;
-	if (valA == null) return 1; // valA is null, valB is not, so B comes first (-1 if valA first)
-	if (valB == null) return -1; // valB is null, valA is not, so A comes first (1 if valB first)
-
-	const dateA = new Date(valA as string | number | Date);
-	const dateB = new Date(valB as string | number | Date);
-
-	// Check for invalid dates after conversion
-	if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
-	if (isNaN(dateA.getTime())) return 1; // Invalid dates go last
-	if (isNaN(dateB.getTime())) return -1; // Invalid dates go last
-
-	return dateA.getTime() - dateB.getTime();
+const sortingFnMap: Record<string, SortingFn<Task>> = {
+	scheduledDate: sortTasksByScheduledDate,
+	dueDate: sortTasksByDueDate,
+	priority: sortTasksByPriority,
+	status: sortTasksByStatus,
 };
 
 export const getMatchingTasksSortingFn = (
 	columnId: string,
 ): SortingFn<Task> | undefined => {
-	if (columnId === "scheduledDate") {
-		return sortTasksByScheduledDate;
-	} else if (columnId === "dueDate") {
-		return sortTasksByDueDate;
-	} else if (columnId === "priority") {
-		return sortTasksByPriority;
-	} else if (columnId === "status") {
-		return sortTasksByStatus;
-	}
-	return undefined;
+	return sortingFnMap[columnId];
 };

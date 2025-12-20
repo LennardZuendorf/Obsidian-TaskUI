@@ -19,7 +19,7 @@ export type CalendarProps = DayPickerProps & {
 	yearRange?: number;
 
 	/**
-	 * Wether to show the year switcher in the caption.
+	 * Whether to show the year switcher in the caption.
 	 * @default true
 	 */
 	showYearSwitcher?: boolean;
@@ -299,7 +299,6 @@ function Nav({
 	})();
 
 	const handlePreviousClick = React.useCallback(() => {
-		if (!previousMonth) return;
 		if (navView === "years") {
 			setDisplayYears((prev) => ({
 				from: prev.from - (prev.to - prev.from + 1),
@@ -307,19 +306,19 @@ function Nav({
 			}));
 			onPrevClick?.(
 				new Date(
-					displayYears.from - (displayYears.to - displayYears.from),
+					displayYears.from - (displayYears.to - displayYears.from + 1),
 					0,
 					1,
 				),
 			);
 			return;
 		}
+		if (!previousMonth) return;
 		goToMonth(previousMonth);
 		onPrevClick?.(previousMonth);
-	}, [previousMonth, goToMonth]);
+	}, [previousMonth, goToMonth, navView, setDisplayYears, displayYears, onPrevClick]);
 
 	const handleNextClick = React.useCallback(() => {
-		if (!nextMonth) return;
 		if (navView === "years") {
 			setDisplayYears((prev) => ({
 				from: prev.from + (prev.to - prev.from + 1),
@@ -334,6 +333,7 @@ function Nav({
 			);
 			return;
 		}
+		if (!nextMonth) return;
 		goToMonth(nextMonth);
 		onNextClick?.(nextMonth);
 	}, [

@@ -3,12 +3,12 @@ import * as React from "react";
 import { cn } from "../utils";
 
 const inputVariants = cva(
-	"flex items-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+	"flex items-center rounded-md transition-colors focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50",
 	{
 		variants: {
 			variant: {
 				default: "h-12 border border-input bg-secondary px-3 py-1 shadow-sm",
-				bare: "h-12 border-0 shadow-none bg-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:text-primary text-primary",
+				bare: "h-12 border-0 shadow-none bg-transparent px-0 focus-within:ring-0 focus-within:ring-offset-0 has-[:disabled]:text-primary text-primary",
 			},
 		},
 		defaultVariants: {
@@ -75,10 +75,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 				<input
 					type={type}
 					className={cn(
-						"!text-primary-foreground !bg-transparent !border-none !ring-0 !shadow-none !focus:ring-0 !focus:shadow-none !focus:border-none flex-1 min-w-0 outline-none !placeholder:text-muted-foreground",
+						"!text-primary-foreground !bg-transparent !border-none !ring-0 !shadow-none flex-1 min-w-0 outline-none focus-visible:outline-none !placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
 					)}
 					ref={inputRef}
-					value={value ?? ""} // Ensure value is controlled
+					value={value !== undefined ? value : undefined} // Support both controlled and uncontrolled
 					onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
 						onChange?.(e.target.value)
 					}

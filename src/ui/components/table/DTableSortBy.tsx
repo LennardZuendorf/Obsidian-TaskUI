@@ -112,9 +112,8 @@ export function DTableSortBy<TData>({ table }: DTableSortByProps<TData>) {
 								</>
 							);
 						})()}
-						{/* Show chevron if no sort is displayed or if a sort is displayed but it's not the only one (group sort might be hidden) */}
-						{(!displaySortEntry ||
-							(displaySortEntry && sorting.length === 0)) && (
+						{/* Show chevron when no user-defined sort is active */}
+						{sorting.length === 0 && (
 							<ChevronDown className="h-4 w-4 opacity-50 ml-auto" />
 						)}
 					</Button>
