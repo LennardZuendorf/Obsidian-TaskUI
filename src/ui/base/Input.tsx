@@ -24,7 +24,7 @@ export interface InputProps
 		>,
 		VariantProps<typeof inputVariants> {
 	icon?: React.ReactNode;
-	value?: string | number | readonly string[];
+	value?: string | number;
 	onChange?: (value: string) => void;
 	onError?: (error: string) => void;
 	onSubmit?: (value: string) => void;
@@ -82,8 +82,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 					onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
 						onChange?.(e.target.value)
 					}
-					onKeyDown={handleKeyDown} // Added for onSubmit
 					{...props}
+					onKeyDown={handleKeyDown} // Added for onSubmit - must be after props spread
 				/>
 			</div>
 		);

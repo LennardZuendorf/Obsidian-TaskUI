@@ -1,4 +1,4 @@
-import { TaskMetadata } from "./tasks"; // Adjust import path
+import { TaskMetadata } from "./tasks";
 
 export enum storeOperation {
 	ADD = "add",

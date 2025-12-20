@@ -92,7 +92,8 @@ function validateDate(
 	const dateToCheck = startOfDay(date);
 	
 	if (validation === "future") {
-		return isAfter(dateToCheck, today);
+		// Include today in "future" dates (common for scheduling)
+		return !isBefore(dateToCheck, today);
 	}
 	
 	if (validation === "past") {

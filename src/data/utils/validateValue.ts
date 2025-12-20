@@ -10,8 +10,11 @@ export function validateValue<T>(value: any, allowedValues: readonly T[]): T {
 	if (allowedValues.includes(value)) {
 		return value as T; // Return the value if it's valid
 	} else {
-		throw new Error(
-			`Invalid value: ${value}. Allowed values are: ${allowedValues.join(", ")}`,
-		);
+		// Sanitize error message to avoid exposing sensitive data
+		const isDevelopment = import.meta.env.MODE === "development";
+		const errorMessage = isDevelopment
+			? `Invalid value: ${value}. Allowed values are: ${allowedValues.join(", ")}`
+			: "Invalid value provided";
+		throw new Error(errorMessage);
 	}
 }

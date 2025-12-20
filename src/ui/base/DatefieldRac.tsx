@@ -56,7 +56,6 @@ function DateSegment({ className, ...props }: DateSegmentProps) {
 				),
 			)}
 			{...props}
-			data-invalid
 		/>
 	);
 }

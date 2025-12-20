@@ -53,14 +53,17 @@ function Badge({
 			{icon && <span className="flex-shrink-0">{icon}</span>}
 			<span className="flex-grow">{children}</span>
 			{onRemove && (
-				<X
-					className="h-3 w-3 ml-1 cursor-pointer opacity-70 hover:opacity-100"
+				<button
+					type="button"
+					className="flex-shrink-0 ml-1 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 rounded-sm"
 					onClick={(e) => {
 						e.stopPropagation();
 						onRemove();
 					}}
 					aria-label={removeAriaLabel}
-				/>
+				>
+					<X className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100" />
+				</button>
 			)}
 		</div>
 	);
