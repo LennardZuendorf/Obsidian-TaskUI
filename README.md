@@ -3,7 +3,7 @@
 [![Lint, Format and Build](https://github.com/LennardZuendorf/shards-md/actions/workflows/pr-ci.yaml/badge.svg)](https://github.com/LennardZuendorf/shards-md/actions/workflows/pr-ci.yaml)
 
 **Author**: Lennard Zündorf  
-**License**: MIT
+**License**: Apache 2.0
 
 ## ⚠️ Alpha Status
 
