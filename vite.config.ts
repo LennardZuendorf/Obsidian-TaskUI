@@ -1,116 +1,105 @@
 import react from "@vitejs/plugin-react";
 import builtins from "builtin-modules";
-import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "fs";
+import { execSync } from "child_process";
 import path from "path";
 import { defineConfig } from "vite";
 
-export default defineConfig({
-	plugins: [
-		react(),
-		// Only include the copy plugin when ENABLE_DEV_VAULT_COPY is set
-		...(process.env.ENABLE_DEV_VAULT_COPY === "true"
-			? [
-					{
-						name: "copy-to-obsidian-vault",
-						closeBundle() {
-							const devVaultPath = path.resolve(
-								__dirname,
-								"dev-vault/.obsidian/plugins/shards",
-							);
-							const buildPath = path.resolve(__dirname, "build/shards-plugin");
+export default defineConfig(({ mode }) => {
+	const isDevMode = mode === "development";
+	const buildDir = isDevMode ? "build/shards-dev" : "build/shards";
 
-							// Copy manifest to build directory
-							copyFileSync(
-								"manifest.json",
-								path.join(buildPath, "manifest.json"),
-							);
+	return {
+		plugins: [
+			react(),
+			// File copy and version bump plugin
+			{
+				name: "copy-and-version",
+				closeBundle() {
+					// Always copy files first
+					try {
+						execSync(`tsx ./build/copy-files.ts ${mode}`, {
+							stdio: "inherit",
+							cwd: __dirname,
+						});
+					} catch (error) {
+						console.error("File copy failed:", error);
+						throw error;
+					}
 
-							// Copy to dev vault if it exists
-							if (existsSync(path.resolve(__dirname, "dev-vault"))) {
-								// Ensure the plugin directory exists
-								if (!existsSync(devVaultPath)) {
-									mkdirSync(devVaultPath, { recursive: true });
-								}
+					// In production mode, also bump version
+					if (!isDevMode) {
+						const versionType = process.env.VERSION_TYPE || "patch";
+						const flag =
+							versionType === "major"
+								? "--major"
+								: versionType === "minor"
+									? "--minor"
+									: "--patch";
 
-								// Copy files
-								const filesToCopy = ["main.js", "styles.css", "manifest.json"];
-								filesToCopy.forEach((file) => {
-									const src = path.join(buildPath, file);
-									const dest = path.join(devVaultPath, file);
-									if (existsSync(src)) {
-										copyFileSync(src, dest);
-										console.log(`✓ Copied ${file} to dev vault`);
-									}
-								});
+						try {
+							execSync(`tsx ./build/version-bump.ts ${flag}`, {
+								stdio: "inherit",
+								cwd: __dirname,
+							});
 
-								// Create .hotreload file for hot-reload plugin
-								const hotreloadFile = path.join(devVaultPath, ".hotreload");
-								if (!existsSync(hotreloadFile)) {
-									writeFileSync(hotreloadFile, "");
-									console.log("✓ Created .hotreload file");
-								}
-							}
-						},
-					},
-				]
-			: [
-					// Always copy manifest to build directory, even without dev vault copy
-					{
-						name: "copy-manifest",
-						closeBundle() {
-							const buildPath = path.resolve(__dirname, "build/shards-plugin");
-							copyFileSync(
-								"manifest.json",
-								path.join(buildPath, "manifest.json"),
-							);
-						},
-					},
-				]),
-	],
-	resolve: {
-		alias: {
-			"@": path.resolve(__dirname, "./src"),
-		},
-	},
-	build: {
-		lib: {
-			entry: path.resolve(__dirname, "src/main.ts"),
-			name: "Shards",
-			fileName: () => "main.js",
-			formats: ["cjs"],
-		},
-		rollupOptions: {
-			external: [
-				"obsidian",
-				"electron",
-				"@codemirror/autocomplete",
-				"@codemirror/collab",
-				"@codemirror/commands",
-				"@codemirror/language",
-				"@codemirror/lint",
-				"@codemirror/search",
-				"@codemirror/state",
-				"@codemirror/view",
-				"@lezer/common",
-				"@lezer/highlight",
-				"@lezer/lr",
-				...builtins,
-			],
-			output: {
-				entryFileNames: "main.js",
-				assetFileNames: (assetInfo) => {
-					// Rename any CSS file to styles.css
-					if (assetInfo.name?.endsWith(".css")) return "styles.css";
-					return assetInfo.name || "asset";
+							// Copy updated manifest after version bump
+							execSync(`tsx ./build/copy-files.ts ${mode}`, {
+								stdio: "inherit",
+								cwd: __dirname,
+							});
+						} catch (error) {
+							console.error("Version bump failed:", error);
+							throw error;
+						}
+					}
 				},
 			},
+		],
+		resolve: {
+			alias: {
+				"@": path.resolve(__dirname, "./src"),
+			},
 		},
-		outDir: "build/shards-plugin",
-		emptyOutDir: false,
-		sourcemap: process.env.NODE_ENV === "development" ? "inline" : false,
-		minify: process.env.NODE_ENV === "production",
-	},
-	css: {
-		postcss: "./postcss.config.cjs",
-	},
+		build: {
+			lib: {
+				entry: path.resolve(__dirname, "src/main.ts"),
+				name: "Shards",
+				fileName: () => "main.js",
+				formats: ["cjs"],
+			},
+			rollupOptions: {
+				external: [
+					"obsidian",
+					"electron",
+					"@codemirror/autocomplete",
+					"@codemirror/collab",
+					"@codemirror/commands",
+					"@codemirror/language",
+					"@codemirror/lint",
+					"@codemirror/search",
+					"@codemirror/state",
+					"@codemirror/view",
+					"@lezer/common",
+					"@lezer/highlight",
+					"@lezer/lr",
+					...builtins,
+				],
+				output: {
+					entryFileNames: "main.js",
+					assetFileNames: (assetInfo) => {
+						// Rename any CSS file to styles.css
+						if (assetInfo.name?.endsWith(".css")) return "styles.css";
+						return assetInfo.name || "asset";
+					},
+				},
+			},
+			outDir: buildDir,
+			emptyOutDir: false,
+			sourcemap: isDevMode ? "inline" : false,
+			minify: !isDevMode,
+		},
+		css: {
+			postcss: "./postcss.config.cjs",
+		},
+	};
 });

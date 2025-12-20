@@ -1,14 +1,18 @@
 {
 	"name": "shards",
-	"version": "0.2",
+	"version": "0.2.1",
 	"description": "Shards helps users visually manage tasks in Obsidian.",
 	"main": "main.js",
 	"scripts": {
 		"check": "biome check --write ./src",
-		"version": "node ./build/version-bump.mjs",
-		"dev": "ENABLE_DEV_VAULT_COPY=true vite build --watch --mode development",
-		"build": "npm run check && vite build --mode production",
-		"build-release": "npm run build && npm run version",
+		"dev": "vite build --watch --mode development",
+		"build": "pnpm run check && vite build --mode development",
+		"build:release": "pnpm run check && vite build --mode production",
+		"build:release:major": "VERSION_TYPE=major pnpm run build:release",
+		"build:release:minor": "VERSION_TYPE=minor pnpm run build:release",
+		"version:major": "tsx ./build/version-bump.ts --major",
+		"version:minor": "tsx ./build/version-bump.ts --minor",
+		"version:patch": "tsx ./build/version-bump.ts --patch",
 		"lint-staged": "lint-staged",
 		"prepare": "husky"
 	},
@@ -37,6 +41,7 @@
 		"postcss": "^8.4.47",
 		"tailwindcss": "^3.4.14",
 		"tslib": "2.4.0",
+		"tsx": "^4.19.2",
 		"typescript": "4.8.4",
 		"vite": "^7.2.7"
 	},

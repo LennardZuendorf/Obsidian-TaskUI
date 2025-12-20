@@ -1,41 +1,13 @@
-# vscode
-.vscode
+# vscode, intellij, cursor
 .history
-
-# Intellij
 *.iml
 .idea
-
-./main.js
-./styles.css
-./main.css
-
-# npm
-node_modules
-
-# Don't include the compiled main.js file in the repo.
-# They should be uploaded to GitHub releases instead.
-main.js
-
-# Exclude sourcemaps
-*.map
-
-# obsidian
-data.json
-
-# Exclude macOS Finder (System Explorer) View States
-.DS_Store
-/main.css
-/styles.css
-/styles.js
-/build/taskui-plugin-dev/main.css
-/build/taskui-plugin-dev/main.js
-/build/taskui-plugin-dev/styles.css
-/build/taskui-plugin-dev/styles.js
-
-/build/taskui-plugin/
-/dev-vault/.obsidian/plugins/
-
-# cursor
 .cursor/mcp.json
-.cursor/memory/current_state.md
+
+# npm and system files
+node_modules
+.DS_Store
+
+# obsidian vault & build file
+/dev-vault/
+/build/shards-dev
