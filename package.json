@@ -1,6 +1,6 @@
 {
 	"name": "shards",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"description": "Shards helps users visually manage tasks in Obsidian.",
 	"main": "main.js",
 	"scripts": {
@@ -23,9 +23,8 @@
 		"React",
 		"TailwindCSS"
 	],
-	"homepage": "https://shards.ignitr.dev",
 	"author": "Lennard Zündorf",
-	"license": "MIT",
+	"license": "Apache-2.0",
 	"devDependencies": {
 		"@biomejs/biome": "2.3.8",
 		"@types/node": "^16.18.114",
