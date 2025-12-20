@@ -3,7 +3,6 @@ import { observe } from "jotai-effect";
 import { App, ItemView, Notice, WorkspaceLeaf } from "obsidian";
 import React, { useEffect, useState } from "react";
 import { createRoot, Root } from "react-dom/client";
-import { appSettings, SettingsContext } from "@/config/settings";
 import {
 	baseTasksAtom,
 	unsyncedTasksAtom,
@@ -21,6 +20,7 @@ import { showNotice } from "@/ui/lib/obsidian/notice";
 import { AppContext, useApp } from "@/utils/context";
 import { getErrorMessage } from "@/utils/errorUtils";
 import { logger } from "@/utils/logger";
+import type ShardsPlugin from "./main";
 
 export const VIEW_TYPE_MAIN = "react-view";
 
@@ -120,13 +120,13 @@ const AppController: React.FC = () => {
 
 export class MainView extends ItemView {
 	root: Root | null = null;
-	settings: appSettings;
+	plugin: ShardsPlugin;
 	private taskSync: TaskSyncService | null = null;
 	private cleanup: (() => void) | null = null;
 
-	constructor(leaf: WorkspaceLeaf, settings: appSettings) {
+	constructor(leaf: WorkspaceLeaf, plugin: ShardsPlugin) {
 		super(leaf);
-		this.settings = settings;
+		this.plugin = plugin;
 	}
 
 	getViewType() {
@@ -190,9 +190,7 @@ export class MainView extends ItemView {
 			this.root.render(
 				<React.StrictMode>
 					<AppContext.Provider value={this.app}>
-						<SettingsContext.Provider value={this.settings}>
-							<AppController />
-						</SettingsContext.Provider>
+						<AppController />
 					</AppContext.Provider>
 				</React.StrictMode>,
 			);

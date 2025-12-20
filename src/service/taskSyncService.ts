@@ -1,6 +1,7 @@
 import { getDefaultStore } from "jotai";
 import { App } from "obsidian";
 import { InternalApiService } from "@/api/internalApiService";
+import { settingsAtom } from "@/data/settingsAtom";
 import {
 	baseTasksAtom,
 	unsyncedTasksAtom,
@@ -144,9 +145,11 @@ export class TaskSyncService {
 						"[TaskSyncService.handleLocalChange] Calling internalApiService.createTask",
 						{ task },
 					);
+					// Get current settings to use defaultHeading
+					const settings = this.store.get(settingsAtom);
 					const result = await this.internalApiService.createTask(
 						task,
-						"# Tasks",
+						settings.defaultHeading,
 					);
 					if (result.status && result.task) {
 						const metadataUpdates = {

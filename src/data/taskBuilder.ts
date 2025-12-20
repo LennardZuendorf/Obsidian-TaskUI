@@ -7,7 +7,7 @@ export class TaskBuilder {
 	private readonly mapper: TaskMapper;
 	private partialTask: Partial<Task> = {
 		id: newId({ length: 8 }),
-		path: "Tasks.md",
+		// path is set explicitly when creating tasks, not using hardcoded default
 		source: TaskSource.OBSIDIAN,
 		status: TaskStatus.TODO,
 	};

@@ -1,7 +1,9 @@
 import { format } from "date-fns";
+import { getDefaultStore } from "jotai";
 import { dvTaskType } from "../api/internalApi/dataviewApi";
 import { defaultSettings } from "../config/settings";
 import { logger } from "../utils/logger";
+import { settingsAtom } from "./settingsAtom";
 import { TaskBuilder } from "./taskBuilder";
 import { Task, TaskPriority, TaskSource, TaskStatus } from "./types/tasks";
 import { parseDate } from "./utils/dateUtils";
@@ -86,13 +88,17 @@ export class TaskMapper {
 		const dueMatch = lineString.match("\\[due:: ([^\\]]+)\\]");
 		const completionMatch = lineString.match("\\[completion:: ([^\\]]+)\\]");
 
+		// Get current settings for default path
+		const store = getDefaultStore();
+		const settings = store.get(settingsAtom);
+
 		let taskBase: Partial<Task> | undefined = undefined;
 
 		if (idMatch) {
 			const id = idMatch[1];
 			taskBase = {
 				id: id,
-				path: "Tasks.md",
+				path: settings.defaultPath,
 				source: TaskSource.OBSIDIAN,
 			};
 		}
@@ -105,7 +111,7 @@ export class TaskMapper {
 					: TaskPriority.MEDIUM,
 			)
 			.setStatus(this.mapStatusEnum(statusChar))
-			.setPath(defaultSettings.defaultPath)
+			.setPath(settings.defaultPath)
 			.setSource(TaskSource.OBSIDIAN)
 			.setRecurs(recursMatch ? recursMatch[1] : null)
 			.setCreatedDate(parseDate(createdMatch ? createdMatch[1] : null))

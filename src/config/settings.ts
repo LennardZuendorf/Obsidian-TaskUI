@@ -1,33 +1,21 @@
-import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, Setting } from "obsidian";
+import type ShardsPlugin from "@/main";
+import type { appSettings } from "./defaultSettings";
 
-export type appSettings = {
-	defaultPath: string;
-	defaultHeading: string;
-	todoistApiKey?: string;
-};
-
-export const defaultSettings: appSettings = {
-	defaultPath: "Tasks.md",
-	defaultHeading: "# Tasks",
-};
-
-// Interface describing the main plugin class with settings and save method
-interface PluginWithSettings extends Plugin {
-	settings: appSettings;
-	saveSettings(): Promise<void>;
-}
+export type { appSettings } from "./defaultSettings";
+export { defaultSettings } from "./defaultSettings";
 
 export class AppSettingsTab extends PluginSettingTab {
-	plugin: PluginWithSettings; // Use the extended interface
+	plugin: ShardsPlugin;
 
-	constructor(app: App, plugin: PluginWithSettings) {
-		// Use the extended interface
+	constructor(app: App, plugin: ShardsPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
 
 	display(): void {
 		const { containerEl } = this;
+		const settingsService = this.plugin.settingsService;
 
 		// Clear previous elements
 		containerEl.empty();
@@ -39,10 +27,11 @@ export class AppSettingsTab extends PluginSettingTab {
 			.addText((text) =>
 				text
 					.setPlaceholder("/default/path")
-					.setValue(this.plugin.settings.defaultPath)
+					.setValue(settingsService.current.defaultPath)
 					.onChange(async (value) => {
-						this.plugin.settings.defaultPath = value.trim();
-						await this.plugin.saveSettings();
+						await settingsService.update((settings) => {
+							settings.defaultPath = value.trim();
+						});
 					}),
 			);
 
@@ -53,28 +42,33 @@ export class AppSettingsTab extends PluginSettingTab {
 			.addText((text) =>
 				text
 					.setPlaceholder("My Default Heading")
-					.setValue(this.plugin.settings.defaultHeading)
+					.setValue(settingsService.current.defaultHeading)
 					.onChange(async (value) => {
-						this.plugin.settings.defaultHeading = value.trim();
-						await this.plugin.saveSettings();
+						await settingsService.update((settings) => {
+							settings.defaultHeading = value.trim();
+						});
 					}),
 			);
 	}
 }
 
+import { useAtomValue } from "jotai";
 import { createContext, useContext } from "react";
+import { settingsAtom } from "@/data/settingsAtom";
 
 /**
- * Context to provide the Obsidian App to all components. This is necessary so the obsidian API can be used in the components easily.
+ * Context to provide settings to React components (for backward compatibility).
+ * Modern components should use useSettings() hook instead.
  */
 export const SettingsContext = createContext<appSettings | undefined>(
 	undefined,
 );
 
 /**
- * Hook to get the Obsidian App from the context.
- * @returns The Obsidian App
+ * Hook to get settings using Jotai atom.
+ * Automatically reactive - components re-render when settings change.
+ * @returns Current settings
  */
-export const useSettings = (): appSettings | undefined => {
-	return useContext(SettingsContext);
+export const useSettings = (): appSettings => {
+	return useAtomValue(settingsAtom);
 };

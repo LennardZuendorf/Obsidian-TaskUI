@@ -4,7 +4,7 @@ import { Trash } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { format } from "date-fns";
-import { defaultSettings, useSettings } from "../../../config/settings";
+import { useSettings } from "../../../config/settings";
 import {
 	availableTagsAtom,
 	updateTaskMetadataAtom,
@@ -198,10 +198,7 @@ export function TaskForm({
 	// Display values
 	const statusDisplay = getStatusDisplay(selectedStatusEnum);
 	const priorityDisplay = getPriorityDisplay(selectedPriorityEnum);
-	const displayPath =
-		initialTask?.path ||
-		settings?.defaultPath ||
-		defaultSettings.defaultPath;
+	const displayPath = initialTask?.path || settings.defaultPath;
 
 	// Handlers
 	const submitForm = (data: TaskFormValues) => {
@@ -219,9 +216,7 @@ export function TaskForm({
 			} else {
 				builder = TaskBuilder.create();
 				builder.setSource(TaskSource.SHARDS);
-				const defaultPath =
-					settings?.defaultPath || defaultSettings.defaultPath;
-				builder.setPath(defaultPath);
+				builder.setPath(settings.defaultPath);
 			}
 
 			builder.setDescription(data.description);

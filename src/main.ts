@@ -1,33 +1,21 @@
 import "./styles.css";
+import { use } from "@ophidian/core";
 import { Plugin, WorkspaceLeaf } from "obsidian";
-import {
-	AppSettingsTab,
-	appSettings,
-	defaultSettings,
-} from "./config/settings";
+import { AppSettingsTab } from "./config/settings";
 import { MainView, VIEW_TYPE_MAIN } from "./MainView";
+import { SettingsService } from "./service/SettingsService";
 import { logger } from "./utils/logger";
 
 export default class ShardsPlugin extends Plugin {
-	settings: appSettings;
-
-	async loadSettings() {
-		this.settings = Object.assign({}, defaultSettings, await this.loadData());
-	}
-
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
+	// @ts-expect-error - Ophidian type compatibility issue with Obsidian versions
+	use = use.plugin(this);
+	settingsService = this.use(SettingsService);
 
 	async onload() {
-		// @ts-ignore
-		await this.loadSettings();
+		// Settings are automatically loaded via SettingsService
 
 		// Register the Main Tab View
-		this.registerView(
-			VIEW_TYPE_MAIN,
-			(leaf) => new MainView(leaf, this.settings),
-		);
+		this.registerView(VIEW_TYPE_MAIN, (leaf) => new MainView(leaf, this));
 
 		// Add Ribbon Icons to Activate the Views
 		this.addRibbonIcon("file-check", "Open Shards", () => {
