@@ -1,7 +1,7 @@
 import { getDefaultStore, useAtom } from "jotai";
 import { observe } from "jotai-effect";
 import { App, ItemView, Notice, WorkspaceLeaf } from "obsidian";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { createRoot, Root } from "react-dom/client";
 import {
 	baseTasksAtom,
@@ -31,7 +31,7 @@ const AppController: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [crudService, setCrudService] = useState<CrudService | null>(null);
 
-	async function reloadTasks() {
+	const reloadTasks = useCallback(async () => {
 		try {
 			if (!crudService) {
 				throw new Error("CRUD service is not initialized");
@@ -57,7 +57,7 @@ const AppController: React.FC = () => {
 		} else {
 			showNotice(`<span>Error loading tasks: ${error}</span>`, false, 5);
 		}
-	}
+	}, [crudService, updateTaskState, setError, setIsLoading, error]);
 
 	useEffect(() => {
 		const handleTasksUpdate = (event: CustomEvent) => {
@@ -101,7 +101,7 @@ const AppController: React.FC = () => {
 
 			return () => clearTimeout(timer);
 		}
-	}, [crudService]);
+	}, [crudService, reloadTasks]);
 
 	if (error) {
 		return (
@@ -184,7 +184,13 @@ export class MainView extends ItemView {
 				}, 500); // 500ms debounce
 			}, getDefaultStore());
 
-			this.cleanup = unobserve;
+			this.cleanup = () => {
+				if (syncTimeout) {
+					clearTimeout(syncTimeout);
+					syncTimeout = null;
+				}
+				unobserve();
+			};
 
 			this.root = createRoot(this.containerEl.children[1]);
 			this.root.render(
@@ -204,20 +210,25 @@ export class MainView extends ItemView {
 	}
 
 	async onClose() {
-		if (this.cleanup) {
-			this.cleanup();
-		}
-		if (this.taskSync) {
-			this.taskSync.cleanup();
-		}
-		this.taskSync = null;
-		this.root?.unmount();
+		this.performCleanup();
 	}
 
 	async onunload() {
+		this.performCleanup();
+	}
+
+	private performCleanup() {
 		if (this.cleanup) {
 			this.cleanup();
+			this.cleanup = null;
 		}
-		this.root?.unmount();
+		if (this.taskSync) {
+			this.taskSync.cleanup();
+			this.taskSync = null;
+		}
+		if (this.root) {
+			this.root.unmount();
+			this.root = null;
+		}
 	}
 }

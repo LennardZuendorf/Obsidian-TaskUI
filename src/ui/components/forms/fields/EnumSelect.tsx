@@ -336,7 +336,11 @@ export function EnumIconSelect<TEnum>({
 					)}
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-[200px] p-0" align="start">
+			<PopoverContent 
+				className="w-[200px] p-0" 
+				align="start"
+				onOpenAutoFocus={(e) => e.preventDefault()}
+			>
 				<EnumCommandList
 					value={value}
 					onChange={onChange}

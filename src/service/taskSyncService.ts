@@ -65,22 +65,20 @@ export class TaskSyncService {
 			return;
 		}
 
-		try {
-			// Validate tasks before updating state
-			validateTasks(update.tasks);
-
-			logger.trace("TaskSyncService: Updating state", update);
-			this.store.set(updateTaskAtom, update);
-			logger.trace("TaskSyncService: State updated successfully");
-		} catch (error) {
+		// Validate tasks before updating state
+		const validationResult = validateTasks(update.tasks);
+		if (!validationResult.isValid) {
 			logger.error(
-				`TaskSyncService: Invalid task data detected: ${error.message}`,
+				`TaskSyncService: Invalid task data detected: ${validationResult.message}`,
 			);
-			// Optionally, you could emit an event or handle the error in some way
 			throw new Error(
-				`Cannot update state with invalid task data: ${error.message}`,
+				`Cannot update state with invalid task data: ${validationResult.message}`,
 			);
 		}
+
+		logger.trace("TaskSyncService: Updating state", update);
+		this.store.set(updateTaskAtom, update);
+		logger.trace("TaskSyncService: State updated successfully");
 	}
 
 	/**
@@ -97,12 +95,19 @@ export class TaskSyncService {
 			{ count: remoteTasks.length },
 		);
 
-		try {
-			validateTasks(remoteTasks);
-			logger.debug(
-				"[TaskSyncService.remoteUpdateHandler] Validated remote tasks successfully.",
+		const validationResult = validateTasks(remoteTasks);
+		if (!validationResult.isValid) {
+			logger.error(
+				`[TaskSyncService.remoteUpdateHandler] Invalid remote tasks: ${validationResult.message}`,
 			);
+			return; // Skip processing invalid tasks
+		}
 
+		logger.debug(
+			"[TaskSyncService.remoteUpdateHandler] Validated remote tasks successfully.",
+		);
+
+		try {
 			const update = createRemoteUpdate(remoteTasks);
 			logger.trace(
 				"[TaskSyncService.remoteUpdateHandler] Prepared REMOTE_UPDATE payload",
@@ -308,6 +313,7 @@ export class TaskSyncService {
 	public cleanup() {
 		this.isActive = false;
 		this.internalApiService.off("tasksFetched", this.boundRemoteHandler);
+		this.internalApiService.cleanup();
 		logger.trace("TaskSyncService: Cleaned up and deactivated");
 	}
 }

@@ -16,6 +16,7 @@ export class InternalApiService implements ApiService {
 	private readonly dvApi: DataviewApiProvider;
 	private readonly taskMapper: TaskMapper;
 	private readonly eventEmitter: EventEmitter;
+	private intervalId: NodeJS.Timeout | null = null;
 
 	constructor(app: App) {
 		this.mdApi = new ObsidianApiProvider(app);
@@ -51,13 +52,14 @@ export class InternalApiService implements ApiService {
 				);
 			}
 
-			try {
-				validateTasks(tasks);
-				return { status: true, tasks };
-			} catch (error) {
-				logger.error(`Invalid tasks after mapping: ${error.message}`);
+			const validationResult = validateTasks(tasks);
+			if (!validationResult.isValid) {
+				logger.error(
+					`Invalid tasks after mapping: ${validationResult.message}`,
+				);
 				return { status: false };
 			}
+			return { status: true, tasks };
 		} catch (error) {
 			logger.error(error.message);
 			return { status: false };
@@ -113,13 +115,14 @@ export class InternalApiService implements ApiService {
 				rawTaskLine: finalLineToWrite,
 			};
 
-			try {
-				validateTasks([returnedTask]);
-				return { status: true, task: returnedTask };
-			} catch (error) {
-				logger.error(`Invalid task after merge/update: ${error.message}`);
+			const validationResult = validateTasks([returnedTask]);
+			if (!validationResult.isValid) {
+				logger.error(
+					`Invalid task after merge/update: ${validationResult.message}`,
+				);
 				return { status: false };
 			}
+			return { status: true, task: returnedTask };
 		} catch (error) {
 			logger.error(`Error in InternalApiService.editTask: ${error.message}`);
 			return { status: false };
@@ -173,10 +176,11 @@ export class InternalApiService implements ApiService {
 		});
 		try {
 			const lineToWrite = task.rawTaskLine;
-			try {
-				validateTasks([task]);
-			} catch (error) {
-				logger.error(`Invalid task provided to createTask: ${error.message}`);
+			const validationResult = validateTasks([task]);
+			if (!validationResult.isValid) {
+				logger.error(
+					`Invalid task provided to createTask: ${validationResult.message}`,
+				);
 				return { status: false };
 			}
 
@@ -222,7 +226,7 @@ export class InternalApiService implements ApiService {
 	}
 
 	private async initiatePeriodicTaskFetch() {
-		setInterval(async () => {
+		this.intervalId = setInterval(async () => {
 			logger.trace("[InternalApiService] Initiating periodic task fetch");
 			const allDvTasks = await this.dvApi.getAllTasks();
 			if (allDvTasks) {
@@ -236,13 +240,19 @@ export class InternalApiService implements ApiService {
 					logger.trace("[InternalApiService] Mapped tasks", {
 						count: mappedTasks.length,
 					});
-					validateTasks(mappedTasks);
+					const validationResult = validateTasks(mappedTasks);
+					if (!validationResult.isValid) {
+						logger.error(
+							`Invalid tasks in periodic fetch: ${validationResult.message}`,
+						);
+						return;
+					}
 					logger.trace("[InternalApiService] Emitting tasksFetched event", {
 						count: mappedTasks.length,
 					});
 					this.eventEmitter.emit("tasksFetched", mappedTasks);
 				} catch (error) {
-					logger.error(`Invalid tasks in periodic fetch: ${error.message}`);
+					logger.error(`Error in periodic fetch: ${error.message}`);
 				}
 			} else {
 				logger.trace(
@@ -271,13 +281,20 @@ export class InternalApiService implements ApiService {
 		data: InternalApiEvents[K],
 	): void {
 		if (event === "tasksFetched") {
-			try {
-				validateTasks(data);
-			} catch (error) {
-				logger.error(`Cannot emit invalid tasks: ${error.message}`);
+			const validationResult = validateTasks(data);
+			if (!validationResult.isValid) {
+				logger.error(`Cannot emit invalid tasks: ${validationResult.message}`);
 				return;
 			}
 		}
 		this.eventEmitter.emit(event, data);
+	}
+
+	public cleanup(): void {
+		if (this.intervalId) {
+			clearInterval(this.intervalId);
+			this.intervalId = null;
+			logger.trace("[InternalApiService] Periodic task fetch interval cleared");
+		}
 	}
 }

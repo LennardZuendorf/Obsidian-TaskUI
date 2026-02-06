@@ -7,6 +7,12 @@ const TaskMetadataSchema = z.object({
 	lastUpdated: z.number().optional(),
 	lastSynced: z.number().optional(),
 	needsSync: z.boolean().optional(),
+	toBeSyncedAction: z.enum(["add", "edit", "delete"]).nullable().optional(),
+	previousVersion: z.lazy(() => TaskSchema).optional(),
+	isEditing: z.boolean().optional(),
+	retryCount: z.number().min(0).optional(),
+	syncFailed: z.boolean().optional(),
+	errorMessage: z.string().optional(),
 });
 
 // Combined schema for TaskWithMetadata

@@ -73,7 +73,10 @@ const TaskListCard = <TData extends Task = Task>({
 
 	if (isEditMode) {
 		return (
-			<Card className="border border-border w-full transition-all shadow-md">
+			<Card 
+				className="border-2 w-full transition-all shadow-md"
+				style={{ borderColor: 'var(--background-primary)' }}
+			>
 				<TaskForm
 					variant="inline"
 					initialTask={task}
@@ -89,7 +92,8 @@ const TaskListCard = <TData extends Task = Task>({
 	if (!hasDates) {
 		return (
 			<Card
-				className="group border hover:ring-1 hover:ring-hover transition-all w-full cursor-pointer shadow-md"
+				className="group border-2 hover:ring-1 hover:ring-hover transition-all w-full cursor-pointer shadow-md"
+				style={{ borderColor: 'var(--background-primary)' }}
 				onClick={() => onEditTask(task)}
 			>
 			<div className="flex items-center gap-2 px-3 py-2">
@@ -161,7 +165,8 @@ const TaskListCard = <TData extends Task = Task>({
 	// Multi-row layout when dates exist
 	return (
 		<Card
-			className="group border hover:ring-1 hover:ring-hover transition-all w-full cursor-pointer"
+			className="group border-2 hover:ring-1 hover:ring-hover transition-all w-full cursor-pointer"
+			style={{ borderColor: 'var(--background-primary)' }}
 			onClick={() => onEditTask(task)}
 		>
 			<div className="flex flex-col gap-2 px-3 py-2">
