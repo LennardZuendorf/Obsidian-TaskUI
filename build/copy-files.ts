@@ -12,7 +12,7 @@ const projectRoot = path.resolve(__dirname, "..");
  */
 function copyFiles(mode: "development" | "production"): void {
 	const isDevMode = mode === "development";
-	const buildDir = isDevMode ? "build/shards-dev" : "build/shards";
+	const buildDir = isDevMode ? "build/taskui-dev" : "build/taskui";
 	const buildPath = path.resolve(projectRoot, buildDir);
 
 	// Copy manifest to build directory
@@ -30,7 +30,7 @@ function copyFiles(mode: "development" | "production"): void {
 	if (isDevMode) {
 		const devVaultPath = path.resolve(
 			projectRoot,
-			"dev-vault/.obsidian/plugins/shards",
+			"dev-vault/.obsidian/plugins/taskui",
 		);
 
 		if (existsSync(path.resolve(projectRoot, "dev-vault"))) {

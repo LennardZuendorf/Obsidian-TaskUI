@@ -20,7 +20,7 @@ import { showNotice } from "@/ui/lib/obsidian/notice";
 import { AppContext, useApp } from "@/utils/context";
 import { getErrorMessage } from "@/utils/errorUtils";
 import { logger } from "@/utils/logger";
-import type ShardsPlugin from "./main";
+import type TaskUIPlugin from "./main";
 
 export const VIEW_TYPE_MAIN = "react-view";
 
@@ -84,7 +84,7 @@ const AppController: React.FC = () => {
 			if (!app) throw new Error("App context is not available");
 			const service = new CrudService(app);
 			setCrudService(service);
-			logger.debug("Shards: Loaded app and CRUD service successfully.");
+			logger.debug("TaskUI: Loaded app and CRUD service successfully.");
 		} catch (err) {
 			const errorMessage = getErrorMessage(err);
 			setError(errorMessage);
@@ -120,11 +120,11 @@ const AppController: React.FC = () => {
 
 export class MainView extends ItemView {
 	root: Root | null = null;
-	plugin: ShardsPlugin;
+	plugin: TaskUIPlugin;
 	private taskSync: TaskSyncService | null = null;
 	private cleanup: (() => void) | null = null;
 
-	constructor(leaf: WorkspaceLeaf, plugin: ShardsPlugin) {
+	constructor(leaf: WorkspaceLeaf, plugin: TaskUIPlugin) {
 		super(leaf);
 		this.plugin = plugin;
 	}
@@ -138,7 +138,7 @@ export class MainView extends ItemView {
 	}
 
 	getDisplayText() {
-		return "Shards Task View";
+		return "TaskUI Task View";
 	}
 
 	async onOpen() {
@@ -205,7 +205,7 @@ export class MainView extends ItemView {
 		} catch (error) {
 			const errorMessage = getErrorMessage(error);
 			logger.error(`Error in onOpen: ${errorMessage}`);
-			this.containerEl.children[1].innerHTML = `<div class="error-notice">Failed to initialize Shards view: ${errorMessage}</div>`;
+			this.containerEl.children[1].innerHTML = `<div class="error-notice">Failed to initialize TaskUI view: ${errorMessage}</div>`;
 		}
 	}
 

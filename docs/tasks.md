@@ -61,7 +61,7 @@ This document tracks all open tasks, current issues/bugs, and planned refactorin
 
 -   [ ] **Projects & UI Revamp:** Introduce a concept of "Projects" and undertake a significant UI overhaul, potentially inspired by apps like Todoist.
 -   [ ] **Todoist API Sync:** Implement synchronization with the Todoist API.
--   [ ] **Cloud Sync (Shards Webapp):** Develop and integrate cloud synchronization with a dedicated Shards web application.
+-   [ ] **Cloud Sync (TaskUI Webapp):** Develop and integrate cloud synchronization with a dedicated TaskUI web application.
 -   [ ] **External Calendar Integration:** Allow integration with external calendar services (e.g., Google Calendar, Outlook Calendar).
 -   [ ] **Advanced Query Language/Filtering:** Implement a powerful query language or advanced filtering logic, similar to the Obsidian Tasks plugin.
 

@@ -1,14 +1,14 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import type ShardsPlugin from "@/main";
+import type TaskUIPlugin from "@/main";
 import type { appSettings } from "./defaultSettings";
 
 export type { appSettings } from "./defaultSettings";
 export { defaultSettings } from "./defaultSettings";
 
 export class AppSettingsTab extends PluginSettingTab {
-	plugin: ShardsPlugin;
+	plugin: TaskUIPlugin;
 
-	constructor(app: App, plugin: ShardsPlugin) {
+	constructor(app: App, plugin: TaskUIPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}

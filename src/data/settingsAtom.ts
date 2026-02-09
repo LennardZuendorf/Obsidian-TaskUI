@@ -8,6 +8,6 @@ import { appSettings, defaultSettings } from "@/config/defaultSettings";
  * - Synced with Ophidian's reactive settings via SettingsService
  */
 export const settingsAtom = atomWithStorage<appSettings>(
-	"shards-settings",
+	"taskui-settings",
 	defaultSettings,
 );

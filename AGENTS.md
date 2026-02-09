@@ -1,7 +1,7 @@
 # AGENTS.MD - LLM Engineering Guide
 
 **Last Updated:** 2026-02-06
-**Repository:** shards-md v0.2.2
+**Repository:** taskui v0.2.2
 **Project Type:** Obsidian Plugin (Desktop-only)
 
 ## Core Operating Principles
@@ -128,7 +128,7 @@ pnpm check             # Biome lint + format
 **Plugin Lifecycle:**
 ```typescript
 // main.ts structure
-export default class ShardsPlugin extends Plugin {
+export default class TaskUIPlugin extends Plugin {
   settings: PluginSettings;
 
   async onload() {
@@ -136,17 +136,17 @@ export default class ShardsPlugin extends Plugin {
     await this.loadSettings();
 
     // 2. Register views
-    this.registerView(VIEW_TYPE_SHARDS, (leaf) => new ShardsView(leaf, this));
+    this.registerView(VIEW_TYPE_TASKUI, (leaf) => new TaskUIView(leaf, this));
 
     // 3. Add ribbon icon
-    this.addRibbonIcon('file-check', 'Shards Task View', () => {
+    this.addRibbonIcon('file-check', 'TaskUI Task View', () => {
       this.activateView();
     });
 
     // 4. Register commands
     this.addCommand({
-      id: 'open-shards-view',
-      name: 'Open Shards Task View',
+      id: 'open-taskui-view',
+      name: 'Open TaskUI Task View',
       callback: () => this.activateView()
     });
   }
@@ -161,18 +161,18 @@ export default class ShardsPlugin extends Plugin {
 ```typescript
 // Register custom view type
 this.registerView(
-  VIEW_TYPE_SHARDS,
-  (leaf) => new ShardsView(leaf, this.plugin)
+  VIEW_TYPE_TASKUI,
+  (leaf) => new TaskUIView(leaf, this.plugin)
 );
 
 // Activate view programmatically
 async activateView() {
   const { workspace } = this.app;
 
-  let leaf = workspace.getLeavesOfType(VIEW_TYPE_SHARDS)[0];
+  let leaf = workspace.getLeavesOfType(VIEW_TYPE_TASKUI)[0];
   if (!leaf) {
     leaf = workspace.getRightLeaf(false);
-    await leaf.setViewState({ type: VIEW_TYPE_SHARDS });
+    await leaf.setViewState({ type: VIEW_TYPE_TASKUI });
   }
 
   workspace.revealLeaf(leaf);
@@ -690,7 +690,7 @@ pnpm dev  # Start watch mode
 
 # In dev-vault:
 # 1. Create test tasks in markdown files
-# 2. Open Shards view
+# 2. Open TaskUI view
 # 3. Verify sync works
 # 4. Test CRUD operations
 # 5. Check markdown files updated correctly

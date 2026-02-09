@@ -1,7 +1,7 @@
 {
-	"name": "shards",
+	"name": "taskui",
 	"version": "0.2.2",
-	"description": "Shards helps users visually manage tasks in Obsidian.",
+	"description": "TaskUI helps users visually manage tasks in Obsidian.",
 	"main": "main.js",
 	"scripts": {
 		"check": "biome check --write ./src",

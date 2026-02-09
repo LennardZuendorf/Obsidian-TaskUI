@@ -1,6 +1,6 @@
-# Shards
+# TaskUI
 
-[![Lint, Format and Build](https://github.com/LennardZuendorf/shards-md/actions/workflows/pr-ci.yaml/badge.svg)](https://github.com/LennardZuendorf/shards-md/actions/workflows/pr-ci.yaml)
+[![Lint, Format and Build](https://github.com/LennardZuendorf/taskui/actions/workflows/pr-ci.yaml/badge.svg)](https://github.com/LennardZuendorf/taskui/actions/workflows/pr-ci.yaml)
 
 **Author**: Lennard Zündorf  
 **License**: Apache 2.0
@@ -9,16 +9,16 @@
 
 
 > [!WARNING]
->**Shards is currently in Alpha (v0.2)**. This means:
+>**TaskUI is currently in Alpha (v0.2)**. This means:
 > - The plugin is functional but may have bugs or incomplete features, and breaking changes may occur between versions.
 > - Some features are still under active development
 > While interoperable with the Tasks Plugin, currently only the DataView mode is supported (which saves task details as *[[priority::high]]*, etc.).
 
 ## Overview
 
-**Shards** is a modern task management plugin for Obsidian that provides a comprehensive visual interface for managing tasks within your markdown vault. It seamlessly integrates with the **Tasks** plugin and **DataView**, enabling you to create, edit, and organize tasks through an intuitive UI while keeping all data stored in your markdown files.
+**TaskUI** is a modern task management plugin for Obsidian that provides a comprehensive visual interface for managing tasks within your markdown vault. It seamlessly integrates with the **Tasks** plugin and **DataView**, enabling you to create, edit, and organize tasks through an intuitive UI while keeping all data stored in your markdown files.
 
-Shards maintains bidirectional synchronization between the visual interface and your markdown files, ensuring data integrity and allowing you to work with tasks either through the UI or directly in your markdown files.
+TaskUI maintains bidirectional synchronization between the visual interface and your markdown files, ensuring data integrity and allowing you to work with tasks either through the UI or directly in your markdown files.
 
 ## Features
 
@@ -59,18 +59,18 @@ Shards maintains bidirectional synchronization between the visual interface and 
 
 ### Manual Installation
 
-Since Shards is currently in Alpha and not yet available in the Obsidian Community Plugins browser, you'll need to install it manually:
+Since TaskUI is currently in Alpha and not yet available in the Obsidian Community Plugins browser, you'll need to install it manually:
 
-1. **Download the latest release** from the [Releases page](https://github.com/LennardZuendorf/shards-md/releases)
+1. **Download the latest release** from the [Releases page](https://github.com/LennardZuendorf/taskui/releases)
 2. **Extract the files** from the downloaded archive
 3. **Copy the plugin folder** to your Obsidian vault:
    - Navigate to your vault's `.obsidian/plugins/` directory
-   - Create a `shards` folder if it doesn't exist
+   - Create a `taskui` folder if it doesn't exist
    - Copy the plugin files into this folder
 4. **Enable the plugin**:
    - Open Obsidian
    - Go to **Settings > Community Plugins**
-   - Find **Shards** in the list
+   - Find **TaskUI** in the list
    - Toggle it on
 
 ### Building from Source
@@ -79,8 +79,8 @@ If you want to build from source:
 
 ```bash
 # Clone the repository
-git clone https://github.com/LennardZuendorf/shards-md.git
-cd shards-md
+git clone https://github.com/LennardZuendorf/taskui.git
+cd taskui
 
 # Install dependencies (requires pnpm)
 pnpm install
@@ -89,15 +89,15 @@ pnpm install
 pnpm run build
 
 # The built files will be in the build/ directory
-# Copy the contents to your .obsidian/plugins/shards/ folder
+# Copy the contents to your .obsidian/plugins/taskui/ folder
 ```
 
 ## Usage
 
-### Opening Shards
+### Opening TaskUI
 
-1. **Ribbon Icon**: Click the file-check icon in the left ribbon to open the Shards view
-2. **Command Palette**: Use the command palette to open "Shards Task View"
+1. **Ribbon Icon**: Click the file-check icon in the left ribbon to open the TaskUI view
+2. **Command Palette**: Use the command palette to open "TaskUI Task View"
 
 ## Development
 
@@ -126,7 +126,7 @@ pnpm run check
 ### Project Structure
 
 ```
-shards-md/
+taskui/
 ├── src/
 │   ├── api/              # API services and types
 │   ├── config/           # Plugin settings
@@ -158,7 +158,7 @@ See
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/LennardZuendorf/shards-md/issues)
+- **Issues**: [GitHub Issues](https://github.com/LennardZuendorf/taskui/issues)
 
 ## License
 

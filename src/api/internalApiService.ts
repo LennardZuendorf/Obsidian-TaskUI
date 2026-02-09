@@ -25,7 +25,7 @@ export class InternalApiService implements ApiService {
 		this.eventEmitter = new EventEmitter();
 		this.initiatePeriodicTaskFetch().then((r) =>
 			logger.trace(
-				"Shards: Periodic task fetch initiated for internal source.",
+				"TaskUI: Periodic task fetch initiated for internal source.",
 			),
 		);
 	}
