@@ -216,10 +216,11 @@ export const tasksAtom = atom(
         }));
         break;
 
-      case storeOperation.DELETE:
+      case storeOperation.DELETE: {
         const idsToDelete = new Set(update.tasks.map(t => t.id));
         set(baseTasksAtom, current.filter(t => !idsToDelete.has(t.id)));
         break;
+      }
 
       case storeOperation.REPLACE:
         set(baseTasksAtom, update.tasks);
@@ -339,7 +340,11 @@ class InternalApiService {
     const mappedTasks = TaskMapper.fromDataview(rawTasks);
 
     // Validate with Zod
-    return validateTasks(mappedTasks);
+    const result = validateTasks(mappedTasks);
+    if (!result.isValid || !result.data) {
+      throw new Error('Task validation failed');
+    }
+    return result.data;
   }
 
   async updateTask(task: Task): Promise<void> {
@@ -383,10 +388,17 @@ class TaskSyncService {
 
   async syncToVault(task: Task) {
     // Validate before syncing
-    const validated = TaskSchema.parse(task);
+    const result = TaskSchema.safeParse(task);
+    if (!result.success) {
+      logger.error('Task validation failed', {
+        errors: result.error.errors,
+        task
+      });
+      return;
+    }
 
     // Update markdown file
-    await this.apiService.updateTask(validated);
+    await this.apiService.updateTask(result.data);
 
     // Trigger re-sync to confirm
     await this.syncFromVault();
