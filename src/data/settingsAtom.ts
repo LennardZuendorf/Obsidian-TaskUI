@@ -1,5 +1,9 @@
 import { atomWithStorage } from "jotai/utils";
-import { appSettings, defaultSettings } from "@/config/defaultSettings";
+import {
+	appSettings,
+	appSettingsSchema,
+	defaultSettings,
+} from "@/config/defaultSettings";
 
 /**
  * Migrate old settings key to new key (one-time migration)
@@ -15,19 +19,32 @@ function migrateSettings() {
 		const newSettings = localStorage.getItem(newKey);
 
 		if (oldSettings && !newSettings) {
-			// Parse and validate old settings
-			const parsed = JSON.parse(oldSettings) as Partial<appSettings>;
+			// Parse JSON
+			const parsed = JSON.parse(oldSettings);
 
-			// Merge with defaults to ensure all required fields exist
-			const merged: appSettings = { ...defaultSettings, ...parsed };
+			// Validate with Zod schema
+			const validated = appSettingsSchema.partial().safeParse(parsed);
 
-			// Write to new key
-			localStorage.setItem(newKey, JSON.stringify(merged));
+			if (validated.success) {
+				// Merge validated settings with defaults
+				const merged: appSettings = { ...defaultSettings, ...validated.data };
 
-			// Remove old key to avoid re-running migration
-			localStorage.removeItem(oldKey);
+				// Write to new key
+				localStorage.setItem(newKey, JSON.stringify(merged));
 
-			console.log("Settings migrated from shards-settings to taskui-settings");
+				// Remove old key to avoid re-running migration
+				localStorage.removeItem(oldKey);
+
+				console.log(
+					"Settings migrated from shards-settings to taskui-settings",
+				);
+			} else {
+				console.error(
+					"Settings validation failed during migration:",
+					validated.error.errors,
+				);
+				console.log("Falling back to default settings");
+			}
 		}
 	} catch (error) {
 		console.error("Failed to migrate settings:", error);

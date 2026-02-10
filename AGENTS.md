@@ -58,11 +58,11 @@ shadcn/ui pattern  // Component architecture
 Jotai 2.12         // Atomic state management
 Zod 3.24           // Runtime schema validation
 TanStack Table 8   // Data grid primitives
-TanStack Form 1    // Form state management
+TanStack Form 1    // Form state management (optional/experimental)
 
 // Interactions
 dnd-kit 6          // Drag and drop (Kanban board)
-React Hook Form 7  // Form handling
+React Hook Form 7  // Form handling (preferred - use this for consistency)
 React Day Picker 9 // Date selection
 
 // Utilities
@@ -293,19 +293,20 @@ export type Task = z.infer<typeof TaskSchema>;
 **Validation Pattern:**
 ```typescript
 // Validate raw data from Dataview
-function validateTasks(rawTasks: unknown): Task[] {
-  try {
-    const TaskArraySchema = z.array(TaskSchema);
-    return TaskArraySchema.parse(rawTasks);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      logger.error('Task validation failed', {
-        errors: error.errors,
-        data: rawTasks
-      });
-    }
-    throw error;
+function validateTasks(rawTasks: unknown): { isValid: boolean; data?: Task[]; errors?: ZodIssue[] } {
+  const TaskArraySchema = z.array(TaskSchema);
+  const result = TaskArraySchema.safeParse(rawTasks);
+
+  if (result.success) {
+    return { isValid: true, data: result.data };
   }
+
+  logger.error('Task validation failed', {
+    errors: result.error.errors,
+    data: rawTasks
+  });
+
+  return { isValid: false, errors: result.error.errors };
 }
 
 // Safe partial validation for updates

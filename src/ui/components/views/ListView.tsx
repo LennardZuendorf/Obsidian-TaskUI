@@ -142,7 +142,7 @@ export function ListView<TData extends Task>({
 
 										{/* Group Content */}
 										{isExpanded && row.subRows && row.subRows.length > 0 && (
-											<div className="border-1 border-border border-s border-b border-e rounded-b-md p-2">
+											<div className="border-border border-s border-b border-e rounded-b-md p-2">
 												{row.subRows.map((subRow: Row<TData>) => (
 													<TaskListCard<TData>
 														key={`task-${subRow.id}`}

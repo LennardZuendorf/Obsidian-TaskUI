@@ -1,6 +1,6 @@
 # TaskUI
 
-[![Lint, Format and Build](https://github.com/LennardZuendorf/taskui/actions/workflows/pr-ci.yaml/badge.svg)](https://github.com/LennardZuendorf/taskui/actions/workflows/pr-ci.yaml)
+[![Lint, Format and Build](https://github.com/LennardZuendorf/Obsidian-TaskUI/actions/workflows/pr-ci.yaml/badge.svg)](https://github.com/LennardZuendorf/Obsidian-TaskUI/actions/workflows/pr-ci.yaml)
 
 **Author**: Lennard Zündorf  
 **License**: Apache 2.0
@@ -61,7 +61,7 @@ TaskUI maintains bidirectional synchronization between the visual interface and 
 
 Since TaskUI is currently in Alpha and not yet available in the Obsidian Community Plugins browser, you'll need to install it manually:
 
-1. **Download the latest release** from the [Releases page](https://github.com/LennardZuendorf/taskui/releases)
+1. **Download the latest release** from the [Releases page](https://github.com/LennardZuendorf/Obsidian-TaskUI/releases)
 2. **Extract the files** from the downloaded archive
 3. **Copy the plugin folder** to your Obsidian vault:
    - Navigate to your vault's `.obsidian/plugins/` directory
@@ -79,8 +79,8 @@ If you want to build from source:
 
 ```bash
 # Clone the repository
-git clone https://github.com/LennardZuendorf/taskui.git
-cd taskui
+git clone https://github.com/LennardZuendorf/Obsidian-TaskUI.git
+cd Obsidian-TaskUI
 
 # Install dependencies (requires pnpm)
 pnpm install
@@ -158,7 +158,7 @@ See
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/LennardZuendorf/taskui/issues)
+- **Issues**: [GitHub Issues](https://github.com/LennardZuendorf/Obsidian-TaskUI/issues)
 
 ## License
 
