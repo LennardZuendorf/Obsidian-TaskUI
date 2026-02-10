@@ -6,7 +6,7 @@ import { MainView, VIEW_TYPE_MAIN } from "./MainView";
 import { SettingsService } from "./service/SettingsService";
 import { logger } from "./utils/logger";
 
-export default class ShardsPlugin extends Plugin {
+export default class TaskUIPlugin extends Plugin {
 	// @ts-expect-error - Ophidian type compatibility issue with Obsidian versions
 	use = use.plugin(this);
 	settingsService = this.use(SettingsService);
@@ -18,7 +18,7 @@ export default class ShardsPlugin extends Plugin {
 		this.registerView(VIEW_TYPE_MAIN, (leaf) => new MainView(leaf, this));
 
 		// Add Ribbon Icons to Activate the Views
-		this.addRibbonIcon("file-check", "Open Shards", () => {
+		this.addRibbonIcon("file-check", "Open TaskUI", () => {
 			this.activateMainTabView();
 		});
 
@@ -33,14 +33,14 @@ export default class ShardsPlugin extends Plugin {
 	async activateMainTabView() {
 		const { workspace } = this.app;
 
-		logger.trace("Shards: Activating Main Tab View");
+		logger.trace("TaskUI: Activating Main Tab View");
 		let leaf: WorkspaceLeaf | null = null;
 		const leaves = workspace.getLeavesOfType(VIEW_TYPE_MAIN);
 
 		if (leaves.length > 0) {
 			leaf = leaves[0];
 			await workspace.revealLeaf(leaf);
-			logger.trace("Shards: Switched to existing main tab leaf.");
+			logger.trace("TaskUI: Switched to existing main tab leaf.");
 		} else {
 			leaf = workspace.getLeaf(false);
 
@@ -50,7 +50,7 @@ export default class ShardsPlugin extends Plugin {
 					active: true,
 				});
 			}
-			logger.trace("Shards: Created new main tab leaf.");
+			logger.trace("TaskUI: Created new main tab leaf.");
 		}
 	}
 }

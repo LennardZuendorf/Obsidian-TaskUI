@@ -62,7 +62,7 @@ manifest.version = newVersion;
 writeFileSync(manifestPath, JSON.stringify(manifest, null, "\t"));
 
 // Update build folder manifest.json (both possible build directories)
-const buildDirs = ["build/shards", "build/shards-dev"];
+const buildDirs = ["build/taskui", "build/taskui-dev"];
 buildDirs.forEach((buildDir) => {
 	const buildManifestPath = path.join(projectRoot, buildDir, "manifest.json");
 	if (existsSync(buildManifestPath)) {

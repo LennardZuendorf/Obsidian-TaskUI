@@ -215,7 +215,7 @@ export function TaskForm({
 				builder = TaskBuilder.create(initialTask);
 			} else {
 				builder = TaskBuilder.create();
-				builder.setSource(TaskSource.SHARDS);
+				builder.setSource(TaskSource.TASKUI);
 				builder.setPath(settings.defaultPath);
 			}
 

@@ -65,22 +65,20 @@ export class TaskSyncService {
 			return;
 		}
 
-		try {
-			// Validate tasks before updating state
-			validateTasks(update.tasks);
-
-			logger.trace("TaskSyncService: Updating state", update);
-			this.store.set(updateTaskAtom, update);
-			logger.trace("TaskSyncService: State updated successfully");
-		} catch (error) {
+		// Validate tasks before updating state
+		const validationResult = validateTasks(update.tasks);
+		if (!validationResult.isValid) {
 			logger.error(
-				`TaskSyncService: Invalid task data detected: ${error.message}`,
+				`TaskSyncService: Invalid task data detected: ${validationResult.message}`,
 			);
-			// Optionally, you could emit an event or handle the error in some way
 			throw new Error(
-				`Cannot update state with invalid task data: ${error.message}`,
+				`Cannot update state with invalid task data: ${validationResult.message}`,
 			);
 		}
+
+		logger.trace("TaskSyncService: Updating state", update);
+		this.store.set(updateTaskAtom, update);
+		logger.trace("TaskSyncService: State updated successfully");
 	}
 
 	/**
@@ -97,18 +95,14 @@ export class TaskSyncService {
 			{ count: remoteTasks.length },
 		);
 
+		// Note: Validation happens in updateState() - no need to validate twice
 		try {
-			validateTasks(remoteTasks);
-			logger.debug(
-				"[TaskSyncService.remoteUpdateHandler] Validated remote tasks successfully.",
-			);
-
 			const update = createRemoteUpdate(remoteTasks);
 			logger.trace(
 				"[TaskSyncService.remoteUpdateHandler] Prepared REMOTE_UPDATE payload",
 				{ update },
 			);
-			this.updateState(update); // This now calls the atom setter
+			this.updateState(update); // Validates and updates state
 			logger.debug(
 				"[TaskSyncService.remoteUpdateHandler] Remote update processed via updateState.",
 			);
@@ -308,6 +302,7 @@ export class TaskSyncService {
 	public cleanup() {
 		this.isActive = false;
 		this.internalApiService.off("tasksFetched", this.boundRemoteHandler);
+		this.internalApiService.cleanup();
 		logger.trace("TaskSyncService: Cleaned up and deactivated");
 	}
 }

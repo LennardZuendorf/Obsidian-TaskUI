@@ -10,4 +10,4 @@ node_modules
 
 # obsidian vault & build file
 /dev-vault/
-/build/shards-dev
+/build/taskui-dev
