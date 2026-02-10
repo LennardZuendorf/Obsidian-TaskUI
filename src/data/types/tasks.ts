@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 /**
- * Enum for task source, which can be either "obsidian" or "shards-app".
+ * Enum for task source, which can be either "obsidian" or "taskui".
  */
 export enum TaskSource {
 	OBSIDIAN = "obsidian",
-	SHARDS = "shards",
+	TASKUI = "taskui",
 }
 
 /**

@@ -57,6 +57,7 @@ export const TaskBoardCard: React.FC<TaskBoardCardProps> = ({
 		transition: transition || "transform 200ms ease",
 		opacity: isDragging ? 0.3 : 1,
 		cursor: isDragging ? "grabbing" : "grab",
+		borderColor: 'var(--background-primary)',
 	};
 
 	return (
@@ -64,7 +65,7 @@ export const TaskBoardCard: React.FC<TaskBoardCardProps> = ({
 			ref={setNodeRef}
 			style={style}
 			className={cn(
-				"group border transition-all cursor-pointer mb-2 shadow-md",
+				"group border-2 transition-all cursor-pointer mb-2 shadow-md",
 				isDragging && "ring-2 ring-accent shadow-lg"
 			)}
 			onClick={handleCardClick}

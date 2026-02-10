@@ -6,7 +6,7 @@ import { defineConfig } from "vite";
 
 export default defineConfig(({ mode }) => {
 	const isDevMode = mode === "development";
-	const buildDir = isDevMode ? "build/shards-dev" : "build/shards";
+	const buildDir = isDevMode ? "build/taskui-dev" : "build/taskui";
 
 	return {
 		plugins: [
@@ -63,7 +63,7 @@ export default defineConfig(({ mode }) => {
 		build: {
 			lib: {
 				entry: path.resolve(__dirname, "src/main.ts"),
-				name: "Shards",
+				name: "TaskUI",
 				fileName: () => "main.js",
 				formats: ["cjs"],
 			},

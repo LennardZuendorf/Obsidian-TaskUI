@@ -4,11 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "8c0ef80fcbe8403d",
+        "id": "ba35ff8c8edaf8ac",
         "type": "tabs",
         "children": [
           {
-            "id": "82e87614b0dc0bfa",
+            "id": "3f5fafd36d822a1b",
+            "type": "leaf",
+            "state": {
+              "type": "react-view",
+              "state": {},
+              "icon": "file-check",
+              "title": "TaskUI Task View"
+            }
+          },
+          {
+            "id": "82b7f4b733e91e9b",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -167,13 +177,13 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "shards-plugin:Open Shards": false
+      "taskui-plugin:Open TaskUI": false
     }
   },
-  "active": "82e87614b0dc0bfa",
+  "active": "3f5fafd36d822a1b",
   "lastOpenFiles": [
-    "Project Testing.md",
     "Tasks.md",
+    "Project Testing.md",
     "2025-04-15.md",
     "Untitled 1.md",
     "Test Notes.md",
