@@ -151,13 +151,13 @@ const taskAtom = atom(
 ### Error Handling Strategy
 
 ```typescript
-try {
-	validateTasks(mappedTasks);
-	// Process valid data
-} catch (error) {
-	logger.error(`Validation error: ${error.message}`);
+const validationResult = validateTasks(mappedTasks);
+if (!validationResult.isValid) {
+	logger.error(`Validation error: ${validationResult.message}`);
 	// Handle error appropriately
+	return;
 }
+// Process valid data
 ```
 
 ## Testing Strategy

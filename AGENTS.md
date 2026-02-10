@@ -1,7 +1,7 @@
 # AGENTS.MD - LLM Engineering Guide
 
-**Last Updated:** 2026-02-06
-**Repository:** taskui v0.2.2
+**Last Updated:** 2026-02-10
+**Repository:** taskui v0.3 (snapshot)
 **Project Type:** Obsidian Plugin (Desktop-only)
 
 ## Core Operating Principles
@@ -171,7 +171,16 @@ async activateView() {
 
   let leaf = workspace.getLeavesOfType(VIEW_TYPE_TASKUI)[0];
   if (!leaf) {
-    leaf = workspace.getRightLeaf(false);
+    const rightLeaf = workspace.getRightLeaf(false);
+    if (!rightLeaf) {
+      // Fallback: create new leaf if getRightLeaf returns null
+      leaf = workspace.getRightLeaf(true);
+      if (!leaf) {
+        throw new Error('Failed to create leaf for TaskUI view');
+      }
+    } else {
+      leaf = rightLeaf;
+    }
     await leaf.setViewState({ type: VIEW_TYPE_TASKUI });
   }
 
@@ -664,10 +673,13 @@ const sortedTasks = useMemo(
   [tasks, sortConfig]
 );
 
-// Component re-render prevention
+// Component re-render prevention with shallow comparison
 const TaskCard = memo(({ task }: { task: Task }) => {
   return <div>...</div>;
-}, (prev, next) => prev.task.id === next.task.id);
+});
+// Note: Uses default shallow comparison of props.
+// For custom comparison, compare all relevant task fields:
+// (prev, next) => prev.task === next.task || shallowEqual(prev.task, next.task)
 ```
 
 ## Testing Strategy

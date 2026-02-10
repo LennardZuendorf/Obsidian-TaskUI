@@ -95,25 +95,14 @@ export class TaskSyncService {
 			{ count: remoteTasks.length },
 		);
 
-		const validationResult = validateTasks(remoteTasks);
-		if (!validationResult.isValid) {
-			logger.error(
-				`[TaskSyncService.remoteUpdateHandler] Invalid remote tasks: ${validationResult.message}`,
-			);
-			return; // Skip processing invalid tasks
-		}
-
-		logger.debug(
-			"[TaskSyncService.remoteUpdateHandler] Validated remote tasks successfully.",
-		);
-
+		// Note: Validation happens in updateState() - no need to validate twice
 		try {
 			const update = createRemoteUpdate(remoteTasks);
 			logger.trace(
 				"[TaskSyncService.remoteUpdateHandler] Prepared REMOTE_UPDATE payload",
 				{ update },
 			);
-			this.updateState(update); // This now calls the atom setter
+			this.updateState(update); // Validates and updates state
 			logger.debug(
 				"[TaskSyncService.remoteUpdateHandler] Remote update processed via updateState.",
 			);

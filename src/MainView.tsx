@@ -53,9 +53,9 @@ const AppController: React.FC = () => {
 		}
 
 		if (!error) {
-			showNotice("<span>Tasks loaded successfully!</span>");
+			showNotice("Tasks loaded successfully!");
 		} else {
-			showNotice(`<span>Error loading tasks: ${error}</span>`, false, 5);
+			showNotice(`Error loading tasks: ${error}`, false, 5);
 		}
 	}, [crudService, updateTaskState, setError, setIsLoading, error]);
 
@@ -205,7 +205,11 @@ export class MainView extends ItemView {
 		} catch (error) {
 			const errorMessage = getErrorMessage(error);
 			logger.error(`Error in onOpen: ${errorMessage}`);
-			this.containerEl.children[1].innerHTML = `<div class="error-notice">Failed to initialize TaskUI view: ${errorMessage}</div>`;
+			const errorDiv = document.createElement("div");
+			errorDiv.className = "error-notice";
+			errorDiv.textContent = `Failed to initialize TaskUI view: ${errorMessage}`;
+			this.containerEl.children[1].empty();
+			this.containerEl.children[1].appendChild(errorDiv);
 		}
 	}
 

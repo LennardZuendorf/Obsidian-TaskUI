@@ -9,7 +9,7 @@
 
 
 > [!WARNING]
->**TaskUI is currently in Alpha (v0.2)**. This means:
+>**TaskUI is currently in Alpha (v0.3)**. This means:
 > - The plugin is functional but may have bugs or incomplete features, and breaking changes may occur between versions.
 > - Some features are still under active development
 > While interoperable with the Tasks Plugin, currently only the DataView mode is supported (which saves task details as *[[priority::high]]*, etc.).
@@ -162,4 +162,4 @@ See
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the Apache 2.0 License.
